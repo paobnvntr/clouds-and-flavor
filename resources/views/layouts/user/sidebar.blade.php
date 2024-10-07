@@ -9,7 +9,7 @@
             <!--end::Brand Image-->
 
             <!--begin::Brand Text-->
-            <span class="brand-text fw-light">Admin CNFVAPE</span>
+            <span class="brand-text fw-light">CNFVAPE</span>
             <!--end::Brand Text-->
         </a>
         <!--end::Brand Link-->
@@ -39,62 +39,40 @@
                 </li> --}}
 
                 <li class="nav-item">
-                    <a href="{{ url('admin/dashboard') }}" class="nav-link active">
+                    <a href="{{ url('/dashboard') }}" class="nav-link active">
                         <i class="nav-icon bi bi-circle"></i>
-                        <p>Dashboard</p>
+                        <p>Home</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{url('admin/category')}}" class="nav-link">
+                    <a href="{{ url('/products') }}" class="nav-link">
                         <i class="nav-icon bi bi-clipboard"></i>
-                        <p>Categories</p>
+                        <p>Prodcuts</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{url('admin/product')}}" class="nav-link">
+                    <a href="{{ url('/my-cart') }}" class="nav-link">
                         <i class="nav-icon bi bi-clipboard"></i>
-                        <p>Products</p>
+                        <p>My Cart</p>
                     </a>
-                </li>
-
-
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-clipboard-fill"></i>
-                        <p>
-                            Orders
-                            <span class="nav-badge badge text-bg-secondary me-3">6</span> <i
-                                class="nav-arrow bi bi-chevron-right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item"> 
-                            <a href="#" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                <p>All Orders</p>
-                            </a>
-                        </li>
-                        <li class="nav-item"> 
-                            <a href="#" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                <p>Pending Orders</p>
-                            </a>
-                        </li>
-                        <li class="nav-item"> 
-                            <a href="#" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                <p>Completed Orders</p>
-                            </a>
-                        </li>
-
-                    </ul>
                 </li>
 
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-palette"></i>
-                        <p>Sample</p>
+                    <a href="{{ url('/my-order') }}" class="nav-link">
+                        <i class="nav-icon bi bi-clipboard"></i>
+                        <p>My Order</p>
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    <a href="{{ url('/profile') }}" class="nav-link">
+                        <i class="nav-icon bi bi-clipboard"></i>
+                        <p>My Profile</p>
+                    </a>
+                </li>
+
 
 
                 <li class="nav-header">LABELS</li>
