@@ -44,4 +44,20 @@ class AuthenticatedSessionController extends Controller
 
         return redirect('/');
     }
+
+
+    protected function redirectBasedOnRole(int $role): RedirectResponse
+    {
+        if ($role === 2) {
+            // Admin role
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        } elseif ($role === 1) {
+            // Employee role
+            return redirect()->intended(route('staff.dashboard', absolute: false));
+        } else {
+            // Normal user role
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
+    }
+
 }
