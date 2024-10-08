@@ -39,21 +39,21 @@
                 </li> --}}
 
                 <li class="nav-item">
-                    <a href="{{ url('admin/dashboard') }}" class="nav-link active">
+                    <a href="{{ url('admin/dashboard') }}" class="nav-link">
                         <i class="nav-icon bi bi-circle"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{url('admin/category')}}" class="nav-link">
+                    <a href="{{ url('admin/category') }}" class="nav-link">
                         <i class="nav-icon bi bi-clipboard"></i>
                         <p>Categories</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{url('admin/product')}}" class="nav-link">
+                    <a href="{{ url('admin/product') }}" class="nav-link">
                         <i class="nav-icon bi bi-clipboard"></i>
                         <p>Products</p>
                     </a>
@@ -70,18 +70,18 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <li class="nav-item"> 
-                            <a href="#" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                        <li class="nav-item">
+                            <a href="{{url('admin/all-order')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                 <p>All Orders</p>
                             </a>
                         </li>
-                        <li class="nav-item"> 
-                            <a href="#" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                        <li class="nav-item">
+                            <a href="{{url('admin/pending-order')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                 <p>Pending Orders</p>
                             </a>
                         </li>
-                        <li class="nav-item"> 
-                            <a href="#" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                        <li class="nav-item">
+                            <a href="{{url('admin/completed-order')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                 <p>Completed Orders</p>
                             </a>
                         </li>
@@ -91,11 +91,27 @@
 
                 <li class="nav-item">
                     <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-palette"></i>
-                        <p>Sample</p>
+                        <i class="nav-icon bi bi-clipboard-fill"></i>
+                        <p>
+                            List
+                            <span class="nav-badge badge text-bg-secondary me-3">6</span> <i
+                                class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
                     </a>
-                </li>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{url('admin/staff-list')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                <p>Staff</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{url('admin/user-list')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                <p>User</p>
+                            </a>
+                        </li>
 
+                    </ul>
+                </li>
 
                 <li class="nav-header">LABELS</li>
                 <li class="nav-item">

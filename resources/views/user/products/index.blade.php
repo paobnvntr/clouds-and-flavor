@@ -94,7 +94,9 @@
                                         <p class="card-text text-end">₱{{ number_format($product->price, 2) }}</p>
                                         <hr>
                                         <p class="card-text">{{ Str::limit($product->description, 100) }}</p>
-                                        <p class="card-text"><strong>Stock: <span id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong></p>
+                                        <p class="card-text"><strong>Stock: <span
+                                                    id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
+                                        </p>
                                         <!-- Display stock information -->
                                         <form id="add-to-cart-form-{{ $product->id }}">
                                             @csrf

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController;
 
 use App\Http\Middleware\RoleMiddleware;
@@ -47,6 +48,32 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/product/edit/{product}', 'edit')->name('admin.products.edit');
         Route::patch('admin/product/update/{product}', 'update')->name('admin.products.update');
         Route::delete('admin/product/delete/{product}', 'destroy')->name('admin.products.destroy');
+    });
+
+    Route::controller(AdminOrderController::class)->group(function () {
+        Route::get('admin/all-order', 'index')->name('admin.orders.index');
+        Route::get('admin/pending-order', 'pendingOrder')->name('admin.orders.pending');
+        Route::get('admin/completed-order', 'completedOrder')->name('admin.orders.completed');
+
+    });
+
+
+    Route::controller(AdminController::class)->group(function () {
+        //User routes
+        Route::get('admin/user-list', 'userList')->name('admin.user.index');
+        Route::get('admin/user/create', 'userCreate')->name('admin.user.create');
+        Route::post('admin/user/store', 'userStore')->name('admin.user.store');
+        Route::get('admin/user/edit/{id}', 'userEdit')->name('admin.user.edit');
+        Route::patch('admin/user/update/{id}', 'userUpdate')->name('admin.user.update');
+        Route::delete('admin/user/delete/{id}', 'userDestroy')->name('admin.user.destroy');
+
+        //Staff routes
+        Route::get('admin/staff-list', 'staffList')->name('admin.staff.index');
+        Route::get('admin/staff/create', 'staffCreate')->name('admin.staff.create');
+        Route::post('admin/staff/store', 'staffStore')->name('admin.staff.store');
+        Route::get('admin/staff/edit/{id}', 'staffEdit')->name('admin.staff.edit');
+        Route::patch('admin/staff/update/{id}', 'staffUpdate')->name('admin.staff.update');
+        Route::delete('admin/staff/delete/{id}', 'staffDestroy')->name('admin.staff.destroy');
     });
 
 });
