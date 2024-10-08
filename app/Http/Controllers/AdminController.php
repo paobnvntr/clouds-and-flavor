@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -10,7 +11,13 @@ class AdminController extends Controller
 {
     public function index()
     {
-        return view('admin.dashboard');
+        $totalUsers = User::where('role', 0)->count();
+        $pendingOrdersCount = Order::where('status', 'pending')->count();
+        $totalEarnings = Order::sum('total_price');
+        $formattedEarnings = number_format($totalEarnings, 2);
+        $totalOrders = Order::where('status', 'completed')->count();
+
+        return view('admin.dashboard', compact('pendingOrdersCount', 'formattedEarnings', 'totalUsers', 'totalOrders'));
     }
 
 
@@ -47,7 +54,7 @@ class AdminController extends Controller
             'address' => $request->address,
             'phone_number' => $request->phone_number,
             'password' => bcrypt($request->password),
-            'role' => 0, 
+            'role' => 0,
         ]);
 
         // Redirect with success message
@@ -142,7 +149,7 @@ class AdminController extends Controller
             'address' => $request->address,
             'phone_number' => $request->phone_number,
             'password' => bcrypt($request->password),
-            'role' => 1, 
+            'role' => 1,
         ]);
 
         // Redirect with success message
@@ -200,5 +207,21 @@ class AdminController extends Controller
 
         // Redirect with success message
         return redirect()->route('admin.staff.index')->with('success', 'Staff deleted successfully!');
+    }
+
+    public function showTotalEarnings(Request $request)
+    {
+        // Default values for date filtering
+        $startDate = $request->input('start_date', now()->startOfMonth());
+        $endDate = $request->input('end_date', now()->endOfMonth());
+
+        // Calculate total earnings for the specified date range
+        $totalEarnings = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->sum('total_price');
+
+        // Format the earnings
+        $formattedEarnings = number_format($totalEarnings, 2); // Format with commas
+
+        return view('admin.total_earnings', compact('formattedEarnings', 'startDate', 'endDate'));
     }
 }
