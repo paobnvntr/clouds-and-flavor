@@ -39,6 +39,7 @@
                                     <th>Total Price</th>
                                     <th>Status</th>
                                     <th>Payment Method</th>
+                                    <th>Date & Time</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -48,9 +49,10 @@
                                         <td>{{ $order->id }}</td>
                                         <td>{{ $order->user->name ?? 'N/A' }}</td>
                                         <td>{{ $order->orderItems->sum('quantity') }}</td>
-                                        <td>{{ $order->total_price }}</td>
+                                        <td>₱{{ number_format($order->total_price, 2) }}</td>
                                         <td>{{ $order->status }}</td>
                                         <td>{{ $order->payment_method ?? 'N/A' }}</td>
+                                        <td>{{ $order->created_at->format('Y-m-d H:i:s') }}
                                         <td>
                                             <button class="btn btn-info" data-bs-toggle="modal"
                                                 data-bs-target="#orderModal{{ $order->id }}">
@@ -71,6 +73,8 @@
                                                         aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
+                                                    <p><strong>{{ $order->created_at->format('Y-m-d H:i:s') ?? 'N/A' }}</strong>
+                                                    </p>
                                                     <p><strong>Status:</strong>
                                                         {{ $order->status ?? 'N/A' }}
                                                     </p>
