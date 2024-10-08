@@ -103,9 +103,9 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             // Define the path where the image should be stored
             $imagePath = 'assets/product_image/';
-            $imageName = time() . '_' . $request->file('image')->getClientOriginalName(); 
-            $request->file('image')->move(public_path($imagePath), $imageName); 
-            $product->image = $imagePath . $imageName; 
+            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
+            $request->file('image')->move(public_path($imagePath), $imageName);
+            $product->image = $imagePath . $imageName;
         }
         // If no new image is uploaded, retain the existing image in the database
         // No need to assign $product->image here
@@ -122,5 +122,22 @@ class ProductController extends Controller
     {
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
+    }
+
+    public function updateStock(Request $request)
+    {
+        // Validate incoming data
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'stock' => 'required|integer|min:0',
+        ]);
+
+        // Find the product and update the stock
+        $product = Product::findOrFail($request->product_id);
+        $product->stock = $request->stock;
+        $product->save();
+
+        // Return a success response
+        return response()->json(['message' => 'Stock updated successfully']);
     }
 }

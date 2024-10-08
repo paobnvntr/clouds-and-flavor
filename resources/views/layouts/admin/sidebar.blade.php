@@ -111,7 +111,7 @@
                         </li>
 
                     </ul>
-                </li>
+                </li>              
 
                 <li class="nav-header">LABELS</li>
                 <li class="nav-item">

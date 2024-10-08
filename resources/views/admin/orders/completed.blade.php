@@ -30,7 +30,7 @@
                             </div>
                         @endif
 
-                        <table class="table table-bordered">
+                        <table id="datatablesSimple" class="table table-hover">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -39,6 +39,7 @@
                                     <th>Total Price</th>
                                     <th>Status</th>
                                     <th>Payment Method</th>
+                                    <th>Date & Time</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>

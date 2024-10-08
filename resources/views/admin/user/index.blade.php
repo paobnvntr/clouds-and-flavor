@@ -55,7 +55,7 @@
                     <div class="col-sm-12 mb-3">
                         <a href="{{ route('admin.user.create') }}" class="btn btn-primary">Add User</a>
                     </div>
-                    <table id="datatablesSimple" class="display">
+                    <table id="datatablesSimple" class="table table-hover">
                         <thead>
                             <tr>
                                 <th>ID</th>

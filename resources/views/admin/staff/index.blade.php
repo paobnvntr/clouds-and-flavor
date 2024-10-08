@@ -43,7 +43,7 @@
                         <a href="{{ route('admin.staff.create') }}" class="btn btn-primary">Add Staff</a>
                     </div>
 
-                    <table id="datatablesSimple" class="display">
+                    <table id="datatablesSimple" class="table table-hover">
                         <thead>
                             <tr>
                                 <th>ID</th>

@@ -48,13 +48,14 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/product/edit/{product}', 'edit')->name('admin.products.edit');
         Route::patch('admin/product/update/{product}', 'update')->name('admin.products.update');
         Route::delete('admin/product/delete/{product}', 'destroy')->name('admin.products.destroy');
+        Route::post('admin/products/update-stock', 'updateStock')->name('admin.products.update_stock');
     });
 
     Route::controller(AdminOrderController::class)->group(function () {
         Route::get('admin/all-order', 'index')->name('admin.orders.index');
         Route::get('admin/pending-order', 'pendingOrder')->name('admin.orders.pending');
         Route::get('admin/completed-order', 'completedOrder')->name('admin.orders.completed');
-
+        
     });
 
 
@@ -74,6 +75,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/staff/edit/{id}', 'staffEdit')->name('admin.staff.edit');
         Route::patch('admin/staff/update/{id}', 'staffUpdate')->name('admin.staff.update');
         Route::delete('admin/staff/delete/{id}', 'staffDestroy')->name('admin.staff.destroy');
+
+        Route::get('admin/total-earnings', 'showTotalEarnings')->name('admin.total_earnings');
     });
 
 });
