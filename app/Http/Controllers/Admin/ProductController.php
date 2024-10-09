@@ -85,6 +85,8 @@ class ProductController extends Controller
             'product_name' => 'required|string|max:255',
             'price' => 'required|numeric',
             'description' => 'required|string',
+            'sale_price' => 'nullable|numeric',
+            'on_sale' => 'boolean',
             'stock' => 'required|integer',
             'status' => 'required|in:0,1',
             'category_id' => 'required|exists:categories,id',
@@ -95,6 +97,8 @@ class ProductController extends Controller
         $product->product_name = $request->product_name;
         $product->price = $request->price;
         $product->description = $request->description;
+        $product->sale_price = $request->sale_price;
+        $product->on_sale = $request->on_sale? true:false;
         $product->stock = $request->stock;
         $product->status = $request->status;
         $product->category_id = $request->category_id;

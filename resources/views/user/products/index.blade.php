@@ -4,155 +4,284 @@
 
 @section('content')
 
-    <!--begin::App Main-->
-    <main class="app-main">
-        <!--begin::App Content Header-->
-        <div class="app-content-header">
-            <!--begin::Container-->
-            <div class="container-fluid">
-                <!-- Flash message for success -->
-                @if (session('success'))
-                    <div class="alert alert-success" id="flash-message-content">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                <script>
-                    // Function to hide alert after 5 seconds
-                    setTimeout(function() {
-                        const alerts = document.querySelectorAll('.alert');
-                        alerts.forEach(alert => {
-                            alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
-                            alert.style.opacity = 0; // Fade out the alert
-                            setTimeout(() => alert.remove(), 500); // Remove after fade out
-                        });
-                    }, 3000); // 5000 milliseconds = 5 seconds
-                </script>
-                <!--begin::Row-->
-                <div class="row">
-                    <div class="col-sm-6">
-                        <h3 class="mb-0">Products</h3>
-                    </div>
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">
-                                Products
-                            </li>
-                        </ol>
+    <!-- Hero Section Begin -->
+    <section class="hero hero-normal">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="hero__categories">
+                        <div class="hero__categories__all">
+                            <i class="fa fa-bars"></i>
+                            <span>All departments</span>
+                        </div>
+                        <ul>
+                            <li><a href="#">Fresh Meat</a></li>
+                            <li><a href="#">Vegetables</a></li>
+                            <li><a href="#">Fruit & Nut Gifts</a></li>
+                            <li><a href="#">Fresh Berries</a></li>
+                            <li><a href="#">Ocean Foods</a></li>
+                            <li><a href="#">Butter & Eggs</a></li>
+                            <li><a href="#">Fastfood</a></li>
+                            <li><a href="#">Fresh Onion</a></li>
+                            <li><a href="#">Papayaya & Crisps</a></li>
+                            <li><a href="#">Oatmeal</a></li>
+                            <li><a href="#">Fresh Bananas</a></li>
+                        </ul>
                     </div>
                 </div>
-                <!--end::Row-->
-            </div>
-            <!--end::Container-->
-        </div>
-        <!--end::App Content Header-->
-
-        <!--begin::App Content-->
-        <div class="app-content">
-            <!--begin::Container-->
-            <div class="container-fluid">
-
-                <!--begin::Row-->
-                <div class="row">
-                    <!--begin::Col-->
-                    <div class="col-lg-12 text-center">
-                        <h2>Filter by Category</h2>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button type="button" class="btn btn-primary"
-                                onclick="window.location='{{ route('user.products.index') }}'">
-                                All
-                            </button>
-                            @foreach ($categories as $category)
-                                @if ($category->status == 0)
-                                    <button type="button" class="btn btn-primary"
-                                        onclick="window.location='{{ route('user.products-by-category', ['category' => $category->id]) }}'">
-                                        {{ $category->name }}
-                                    </button>
-                                @endif
-                            @endforeach
+                <div class="col-lg-9">
+                    <div class="hero__search">
+                        <div class="hero__search__form">
+                            <form action="#">
+                                <div class="hero__search__categories">
+                                    All Categories
+                                    <span class="arrow_carrot-down"></span>
+                                </div>
+                                <input type="text" placeholder="What do you need?">
+                                <button type="submit" class="site-btn">SEARCH</button>
+                            </form>
+                        </div>
+                        <div class="humberger__menu__cart">
+                            <ul>
+                                <li>
+                                    <a href="{{ url('/my-cart') }}">
+                                        <i class="fa fa-shopping-cart"></i>
+                                        <span>{{ $cartItems }}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="header__cart__price">item: <span>₱{{ number_format($total, 2) }}</span></div>
                         </div>
                     </div>
-                    <!--end::Col-->
                 </div>
-                <!--end::Row-->
             </div>
-            <!--end::Container-->
+        </div>
+    </section>
+    <!-- Hero Section End -->
 
-            <section class="py-5">
-                <div class="container-fluid">
-                    <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4">
-                        @foreach ($products as $product)
-                            <div class="col mb-5">
-                                <div class="card h-100">
-                                    <!-- Product Image -->
-                                    <img src="{{ $product->image ? asset('/' . $product->image) : asset('/unknown.jpg') }}"
-                                        class="card-img-top product-image" alt="{{ $product->product_name }}">
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-section set-bg" data-setbg="{{ asset('assets/img/deviceseries.jpg') }}">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb__text">
+                        <h2>CNFVAPE Shop</h2>
+                        <div class="breadcrumb__option">
+                            <a href="dashboard">Home</a>
+                            <span>Shop</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Breadcrumb Section End -->
 
-                                    <!-- Product Details -->
-                                    <div class="card-body">
-                                        <p class="card-title"><strong>{{ $product->product_name }}</strong></p>
-                                        <p class="card-text text-end">₱{{ number_format($product->price, 2) }}</p>
-                                        <hr>
-                                        <p class="card-text">{{ Str::limit($product->description, 100) }}</p>
-                                        <p class="card-text"><strong>Stock: <span
-                                                    id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
-                                        </p>
-                                        <!-- Display stock information -->
-                                        <form id="add-to-cart-form-{{ $product->id }}">
-                                            @csrf
-                                            <button type="button" class="btn btn-success add-to-cart"
-                                                data-product-id="{{ $product->id }}">Add to Cart</button>
-                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                        </form>
+    @if (session('message'))
+        <div class="alert alert-success"
+            style="position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+            {{ session('message') }}
+        </div>
+    @endif
+
+    <script>
+        // Function to hide alert after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
+                alert.style.opacity = 0; // Fade out the alert
+                setTimeout(() => alert.remove(), 500); // Remove after fade out
+            });
+        }, 3000); // 3000 milliseconds = 3 seconds
+    </script>
+
+    <!-- Product Section Begin -->
+    <section class="product spad">
+
+        <div class="container">
+            <div class="row">
+                
+                <div class="col-lg-3 col-md-5">
+                    <div class="sidebar">
+                        <div class="sidebar__item">
+                            <h4>Categories</h4>
+                            <ul>
+                                <li><a href="#">Vape Device</a></li>
+                                <li><a href="#">Vape Juice</a></li>
+                            </ul>
+                        </div>
+                        <div class="sidebar__item">
+                            <h4>Price</h4>
+                            <div class="price-range-wrap">
+                                <div class="price-range ui-slider ui-corner-all ui-slider-horizontal ui-widget ui-widget-content"
+                                    data-min="10" data-max="540">
+                                    <div class="ui-slider-range ui-corner-all ui-widget-header"></div>
+                                    <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"></span>
+                                    <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"></span>
+                                </div>
+                                <div class="range-slider">
+                                    <div class="price-input">
+                                        <input type="text" id="minamount">
+                                        <input type="text" id="maxamount">
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        </div>
+                
+                        <div class="sidebar__item">
+                            <div class="latest-product__text">
+                                <h4>Latest Products</h4>
+                                <div class="latest-product__slider owl-carousel">
+                                    @foreach ($latestProducts->chunk(3) as $chunk)
+                                        <div class="latest-prdouct__slider__item">
+                                            @foreach ($chunk as $product)
+                                                <a href="#" class="latest-product__item">
+                                                    <div class="latest-product__item__pic">
+                                                        <img src="{{ asset('/' . $product->image) }}" alt="">
+                                                    </div>
+                                                    <div class="latest-product__item__text">
+                                                        <h6>{{ $product->product_name }}</h6>
+                                                        <span>₱{{ number_format($product->price, 2) }}</span>
+                                                    </div>
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </section>
+                
+                
 
+                <div class="col-lg-9 col-md-7">
+                    <div class="product__discount">
+                        <div class="section-title product__discount__title">
+                            <h2>Sale Off</h2>
+                        </div>
+                        <div class="row">
+                            <div class="product__discount__slider owl-carousel">
+                                @foreach ($discountedProducts as $product)
+                                    <div class="col-lg-4">
+                                        <div class="product__discount__item">
+                                            <div class="product__discount__item__pic set-bg"
+                                                data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
+                                                @php
+                                                    $discountPercentage = round(
+                                                        (($product->price - $product->sale_price) / $product->price) *
+                                                            100,
+                                                    );
+                                                @endphp
+                                                <div class="product__discount__percent">-{{ $discountPercentage }}%</div>
+                                                <ul class="product__item__pic__hover">
+                                                    <li><a href="#"><i class="fa fa-heart"></i></a></li>
+                                                    <li>
+                                                        <form action="{{ route('user.cart.add-to-cart') }}"
+                                                            method="POST">
+                                                            @csrf
+                                                            <input type="hidden" name="product_id"
+                                                                value="{{ $product->id }}">
+                                                            <input type="hidden" name="price"
+                                                                value="{{ $product->sale_price }}">
+                                                            <button type="submit" class="add-to-cart">
+                                                                <i class="fa fa-shopping-cart"></i>
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="product__discount__item__text">
+                                                <h5><a href="#">{{ $product->product_name }}</a></h5>
+                                                <div class="product__item__price">
+                                                    ₱{{ number_format($product->sale_price, 2) }}
+                                                    <span>₱{{ number_format($product->price, 2) }}</span>
+                                                </div>
+                                                <p><strong>Stock:<span id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
+                                                </p>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product__filter">
+                        <div class="section-title">
+                            <h4>All Products</h4>
+                        </div>
+                        <div class="row">
+                            @foreach ($products as $product)
+                                <div class="col-lg-4 col-md-6 col-sm-6">
+                                    <div class="product__item">
+                                        <div class="product__item__pic set-bg"
+                                            data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
+                                            <ul class="product__item__pic__hover">
+                                                <li><a href="#"><i class="fa fa-heart"></i></a></li>
+                                                <li>
+                                                    <form action="{{ route('user.cart.add-to-cart') }}" method="POST"
+                                                        id="add-to-cart-form-{{ $product->id }}">
+                                                        @csrf
+                                                        <input type="hidden" name="product_id"
+                                                            value="{{ $product->id }}">
+                                                        <input type="hidden" name="price"
+                                                            value="{{ $product->price }}">
+                                                        <button type="submit" class="add-to-cart"><i
+                                                                class="fa fa-shopping-cart"></i></button>
+
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="product__item__text">
+                                            <h6><a href="#">{{ $product->product_name }}</a></h6>
+                                            <h5>₱{{ number_format($product->price, 2) }}</h5>
+                                            <p><strong>Stock: <span
+                                                        id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!--end::App Content-->
-    </main>
-    <!--end::App Main-->
+    </section>
+    <!-- Product Section End -->
 
-    <style>
-        .product-image {
-            height: 200px;
-            /* Adjust height as needed */
-            width: 100%;
-            object-fit: cover;
-            /* Ensures the image covers the area */
-        }
-    </style>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).on('click', '.add-to-cart', function() {
-            var productId = $(this).data('product-id');
-            var stockElement = $('#stock-' + productId); // Get the stock element
-
-            $.ajax({
-                url: "{{ route('user.cart.add-to-cart') }}",
-                type: "POST",
-                data: {
-                    product_id: productId,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Update stock display on success
-                        var currentStock = parseInt(stockElement.text());
-                        stockElement.text(currentStock - 1); // Decrement stock by 1
-                        $('#flash-message-content').text(response.message).show();
+        document.querySelectorAll('.add-to-cart-form').forEach(form => {
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     }
-                },
-                error: function(xhr) {
-                    console.log(xhr);
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    // Update the cart item count and total price
+                    document.querySelector('.header__cart__price span').innerText = result.totalItems;
+                    // Show the flash message
+                    const flashMessage = document.querySelector('.alert');
+                    if (flashMessage) {
+                        flashMessage.innerText = result.message;
+                        flashMessage.style.display = 'block';
+                        setTimeout(() => {
+                            flashMessage.style.display = 'none';
+                        }, 3000);
+                    }
                 }
             });
         });
     </script>
-
 @endsection

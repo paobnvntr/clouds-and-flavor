@@ -30,6 +30,15 @@
                             @csrf
                             @method('PATCH')
                             <div class="mb-3">
+                                <label for="on_sale">On Sale</label>
+                                <input type="checkbox" id="on_sale" name="on_sale" value="1" {{ $product->on_sale ? 'checked' : '' }} onclick="toggleSalePrice()">
+                            </div>
+                            <div class="mb-3">
+                                <label for="sale_price">Sale Price</label>
+                                <input type="number" step="0.01" id="sale_price" name="sale_price" class="form-control" value="{{ old('sale_price', $product->sale_price) }}" {{ $product->on_sale ? '' : 'disabled' }}>
+                            </div>
+                            
+                            <div class="mb-3">
                                 <label for="product_name" class="form-label">Product Name</label>
                                 <input type="text" class="form-control" id="product_name" name="product_name"
                                     value="{{ $product->product_name }}" required>
@@ -57,6 +66,7 @@
                                 <label for="description" class="form-label">Description</label>
                                 <textarea class="form-control" id="description" name="description" required>{{ $product->description }}</textarea>
                             </div>
+                            
                             <div class="mb-3">
                                 <label for="stock" class="form-label">Stock</label>
                                 <input type="number" class="form-control" id="stock" name="stock"
@@ -90,5 +100,21 @@
             </div>
         </div>
     </main>
+
+    <script>
+        function toggleSalePrice() {
+            const salePriceInput = document.getElementById('sale_price');
+            const onSaleCheckbox = document.getElementById('on_sale');
+            salePriceInput.disabled = !onSaleCheckbox.checked;
+            if (!onSaleCheckbox.checked) {
+                salePriceInput.value = ''; // Clear sale price when checkbox is unchecked
+            }
+        }
+
+        // Initialize the sale price input state based on the checkbox on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleSalePrice();
+        });
+    </script>
 
 @endsection

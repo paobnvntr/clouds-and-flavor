@@ -20,7 +20,11 @@ return new class extends Migration
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->string('description');
             $table->decimal('price', 10, 2);
+            $table->decimal('sale_price', 10, 2)->nullable(); 
+            $table->boolean('on_sale')->default(false);
+            $table->decimal('discount_percentage', 5, 2)->default(0);
             $table->string('image', 300)->nullable();
+
             $table->timestamps();
         });
     }

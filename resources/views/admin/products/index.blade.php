@@ -41,6 +41,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Image</th>
+                            <th>Sale</th>
                             <th>Name</th>
                             <th>Price</th>
                             <th>Stock</th>
@@ -54,6 +55,13 @@
                                 <td>{{ $product->id }}</td>
                                 <td>
                                     <img src="{{ asset($product->image) }}" alt="{{ $product->product_name }}" width="50">
+                                </td>
+                                <td>
+                                    @if ($product->on_sale)
+                                        <span class="badge bg-warning">Yes</span>
+                                    @else
+                                        <span class="badge bg-secondary">No</span>
+                                    @endif
                                 </td>
                                 <td>{{ $product->product_name }}</td>
                                 <td>₱{{ number_format($product->price, 2, '.', ',') }}</td>

@@ -9,6 +9,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
@@ -21,10 +22,20 @@ class CartController extends Controller
         return view('user.cart.index', compact('carts'));
     }
 
+
+
     public function addToCart(Request $request)
     {
+        // Validate incoming request data
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+        ]);
+
         // Retrieve the product
         $product = Product::findOrFail($request->product_id);
+
+        // Determine the price to use (sale price if on sale, otherwise regular price)
+        $price = $product->on_sale ? $product->sale_price : $product->price;
 
         // Check if stock is available
         if ($product->stock > 0) {
@@ -37,13 +48,13 @@ class CartController extends Controller
                 // If the product is already in the cart, increment the quantity
                 $cartItem->increment('quantity');
             } else {
-                // Insert new entry into the carts table
+                // Directly insert a new entry into the carts table with the discounted price
                 DB::table('carts')->insert([
                     'user_id' => Auth::id(), // Assuming user is authenticated
                     'product_id' => $product->id,
-                    'quantity' => 1, // default quantity is 1
-                    'price' => $product->price, // Include the price
-                    'image' => $product->image, // Include the product image
+                    'quantity' => 1, // Default quantity is 1
+                    'price' => $price, // Use sale price if on sale
+                    'image' => $product->image,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -52,11 +63,15 @@ class CartController extends Controller
             // Decrement product stock
             $product->decrement('stock', 1);
 
-            return response()->json(['success' => true, 'message' => 'Product added to cart successfully.']);
+            // Set a flash message
+            session()->flash('message', 'Product added to cart successfully.');
+
+            return redirect()->back(); // Redirect back to the previous page
         } else {
             return response()->json(['success' => false, 'message' => 'Product is out of stock.']);
         }
     }
+
 
 
     public function getCartCount()
@@ -127,6 +142,4 @@ class CartController extends Controller
 
         return view('user.cart.checkout', compact('carts', 'totalPrice', 'user'));
     }
-
-
 }
