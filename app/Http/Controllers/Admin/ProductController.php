@@ -98,7 +98,7 @@ class ProductController extends Controller
         $product->price = $request->price;
         $product->description = $request->description;
         $product->sale_price = $request->sale_price;
-        $product->on_sale = $request->on_sale? true:false;
+        $product->on_sale = $request->on_sale ? true : false;
         $product->stock = $request->stock;
         $product->status = $request->status;
         $product->category_id = $request->category_id;
@@ -139,9 +139,17 @@ class ProductController extends Controller
         // Find the product and update the stock
         $product = Product::findOrFail($request->product_id);
         $product->stock = $request->stock;
+
+        // Automatically set the product status based on the stock
+        if ($product->stock == 0) {
+            $product->status = 1; // Unavailable
+        } else {
+            $product->status = 0; // Available
+        }
+
         $product->save();
 
         // Return a success response
-        return response()->json(['message' => 'Stock updated successfully']);
+        return response()->json(['message' => 'Stock and status updated successfully']);
     }
 }

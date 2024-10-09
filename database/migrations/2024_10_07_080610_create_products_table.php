@@ -24,7 +24,6 @@ return new class extends Migration
             $table->boolean('on_sale')->default(false);
             $table->decimal('discount_percentage', 5, 2)->default(0);
             $table->string('image', 300)->nullable();
-
             $table->timestamps();
         });
     }

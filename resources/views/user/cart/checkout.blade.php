@@ -4,84 +4,111 @@
 
 @section('content')
 
-    <main class="app-main">
-        <div class="app-content-header">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <h3 class="mb-0">Checkout</h3>
-                    </div>
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Checkout</li>
-                        </ol>
+
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-section set-bg" data-setbg="{{ asset('assets/img/deviceseries.jpg') }}">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb__text">
+                        <h2>Checkout</h2>
+                        <div class="breadcrumb__option">
+                            <a href="./index.html">Home</a>
+                            <span>Checkout</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
+    <!-- Breadcrumb Section End -->
 
-        <div class="app-content">
-            <div class="container-fluid">
-                <h4>Order Summary</h4>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($carts as $cart)
-                            <tr>
-                                <td>{{ $cart->product->product_name }}</td>
-                                <td>{{ $cart->quantity }}</td>
-                                <td>₱{{ number_format($cart->product->price, 2) }}</td>
-                                <td>₱{{ number_format($cart->product->price * $cart->quantity, 2) }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                <div class="text-end">
-                    <h4>Total: ₱{{ number_format($totalPrice, 2) }}</h4>
+
+    <section class="checkout spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h6><span class="icon_tag_alt"></span> Have a voucher? <a href="#">Click here</a> to enter your code</h6>
                 </div>
-
-                <!-- Checkout Form -->
+            </div>
+    
+            <div class="checkout__form">
+                <h4>Billing Details</h4>
                 <form action="{{ route('user.cart.placeOrder') }}" method="POST">
                     @csrf
-                    <div class="mb-3">
-                        <label for="address" class="form-label">Address</label>
-                        <input type="text" class="form-control" id="address" name="address"
-                           readonly value="{{ $user->address ?? '' }}" required {{ empty($user->address) ? 'disabled' : '' }}>
-                    </div>
-                    <div class="mb-3">
-                        <label for="phone_number" class="form-label">Phone Number</label>
-                        <input type="text" class="form-control" id="phone_number" name="phone_number"
-                            readonly value="{{ $user->phone_number ?? '' }}" required
-                            {{ empty($user->phone_number) ? 'disabled' : '' }}>
-                    </div>
-                    <div class="mb-3">
-                        <label for="payment_method" class="form-label">Payment Method</label>
-                        <select class="form-select" id="payment_method" name="payment_method" required>
-                            <option value="" disabled selected>Select Payment Method</option>
-                            <option value="cash_on_delivery">Cash on Delivery</option>
-                            <option value="pickup">Pick-Up</option>
-                            <option value="gcash">GCash</option>
-                            <option value="paymaya">PayMaya</option>
-                        </select>
-                    </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-success mt-3"
-                            {{ empty($user->address) || empty($user->phone_number) ? 'disabled' : '' }}>
-                            Place Order
-                        </button>
+                    <div class="row">
+                        <div class="col-lg-8 col-md-6">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Name<span>*</span></p>
+                                        <input type="text" readonly value="{{ $user->name ?? '' }}">
+                                    </div>
+                                </div>
+    
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Phone Number<span>*</span></p>
+                                        <input type="text" name="phone_number" readonly value="{{ $user->phone_number ?? '' }}" required>
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div class="checkout__input">
+                                <p>Address<span>*</span></p>
+                                <input type="text" name="address" class="checkout__input__add" readonly value="{{ $user->address ?? '' }}" required>
+                            </div>
+    
+                            <div class="checkout__input">
+                                <p>Order notes<span>*</span></p>
+                                <input type="text" name="order_notes" placeholder="Notes about your order, e.g. special notes for delivery.">
+                            </div>
+                        </div>
+    
+                        {{-- Your Order --}}
+                        <div class="col-lg-4 col-md-6">
+                            <div class="checkout__order">
+                                <h4>Your Order</h4>
+                                <div class="checkout__order__products">Products<span>Unit</span> <span>Total</span></div>
+                                <ul>
+                                    @foreach ($carts as $cart)
+                                        <li>{{$cart->quantity}}x {{ $cart->product->product_name }} 
+                                            <span>₱{{ number_format($cart->product->price * $cart->quantity, 2) }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                                <div class="checkout__order__subtotal">Subtotal 
+                                    <span>₱{{ number_format($totalPrice, 2) }}</span>
+                                </div>
+                                <div class="checkout__order__total">Voucher
+                                    <span>-₱200.00</span>
+                                </div>
+                                <div class="checkout__order__total">Total 
+                                    <span>₱{{ number_format($totalPrice, 2) }}</span>
+                                </div>
+                                <div class="checkout__input__checkbox">
+                                    <label for="paymaya">
+                                        Paymaya
+                                        <input type="radio" id="paymaya" name="payment_method" value="paymaya" required>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <div class="checkout__input__checkbox">
+                                    <label for="gcash">
+                                        Gcash
+                                        <input type="radio" id="gcash" name="payment_method" value="gcash" required>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <button type="submit" class="site-btn" {{ empty($user->address) || empty($user->phone_number) ? 'disabled' : '' }}>
+                                    PLACE ORDER
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </form>
-
             </div>
         </div>
-    </main>
+    </section>
 
 @endsection

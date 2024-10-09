@@ -28,7 +28,7 @@
 
         @yield('content')
 
-        @include('layouts.footer')
+        @include('layouts.admin.footer')
     </div>
 
     <!-- OverlayScrollbars Configuration -->

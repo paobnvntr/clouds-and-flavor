@@ -23,7 +23,6 @@
                         <li class="breadcrumb-item active" aria-current="page">Products</li>
                     </ol>
                 </div>
-
             </div>
         </div>
     </div>
@@ -31,7 +30,6 @@
     <div class="app-content">
         <div class="container-fluid">
             <div class="row">
-                <!-- Add Product Button -->
                 <div class="col-sm-12 mb-3">
                     <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add Product</a>
                 </div>
@@ -46,6 +44,7 @@
                             <th>Price</th>
                             <th>Stock</th>
                             <th>Status</th>
+                            <th>Added On</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -70,16 +69,14 @@
                                         data-product-id="{{ $product->id }}" style="width: 80px;">
                                 </td>
                                 <td>
-                                    @if ($product->status == 0)
-                                        <span class="badge bg-success">Available</span>
-                                    @else
-                                        <span class="badge bg-danger">Unavailable</span>
-                                    @endif
+                                    <span class="status-badge badge {{ $product->status == 0 ? 'bg-success' : 'bg-danger' }}">
+                                        {{ $product->status == 0 ? 'Available' : 'Unavailable' }}
+                                    </span>
                                 </td>
+                                <td>{{ $product->created_at->format('Y-m-d H:i:s') }}</td>
                                 <td>
                                     <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-warning">Edit</a>
-                                    <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST"
-                                        style="display:inline;">
+                                    <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger">Delete</button>
@@ -103,18 +100,27 @@
         $('.stock-input').on('change', function() {
             var productId = $(this).data('product-id');
             var newStock = $(this).val();
+            var row = $(this).closest('tr');
+            var statusBadge = row.find('.status-badge');
 
-            // AJAX request to update stock
+            // AJAX request to update stock and status
             $.ajax({
-                url: "{{ route('admin.products.update_stock') }}", // URL for stock update
+                url: "{{ route('admin.products.update_stock') }}",
                 type: "POST",
                 data: {
-                    _token: '{{ csrf_token() }}', // Include CSRF token
+                    _token: '{{ csrf_token() }}',
                     product_id: productId,
                     stock: newStock
                 },
                 success: function(response) {
                     alert('Stock updated successfully');
+
+                    // Update the status badge based on the new stock
+                    if (newStock == 0) {
+                        statusBadge.removeClass('bg-success').addClass('bg-danger').text('Unavailable');
+                    } else {
+                        statusBadge.removeClass('bg-danger').addClass('bg-success').text('Available');
+                    }
                 },
                 error: function(xhr) {
                     alert('Error updating stock');

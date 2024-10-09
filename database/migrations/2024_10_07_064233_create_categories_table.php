@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->boolean('status')->default(0); //0 = available , 1 = unavailable
+            $table->string('image', 300)->nullable();
             $table->timestamps();
         });
     }

@@ -60,6 +60,7 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
+                                <th>Image</th>
                                 <th>Name</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -69,6 +70,11 @@
                             @foreach ($categories as $category)
                                 <tr>
                                     <td>{{ $category->id }}</td>
+                                    <td>
+                                        <!-- Check if the category has an image, else use a default image -->
+                                        <img src="{{ asset($category->image ?? 'assets/category_image/unknown.jpg') }}" 
+                                             alt="{{ $category->name }}" width="50">
+                                    </td>
                                     <td>{{ $category->name }}</td>
                                     <td>
                                         <!-- Check status and display "Available" or "Unavailable" -->

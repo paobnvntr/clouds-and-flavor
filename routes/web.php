@@ -102,7 +102,8 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
     // User/ProductController
     Route::controller(UserProductController::class)->group(function () {
         Route::get('/products', 'index')->name('user.products.index');
-        Route::get('/products/category/{category}', 'productsByCategory')->name('user.products-by-category');
+        Route::get('/dashboard', 'home')->name('dashboard');
+        Route::get('/products/category/{categoryId}', 'productsByCategory')->name('user.products-by-category');
     });
 
     // User/CartController

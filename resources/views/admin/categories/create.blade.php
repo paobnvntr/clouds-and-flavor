@@ -35,20 +35,32 @@
                 <!--begin::Row-->
                 <div class="row">
                     <div class="col-sm-12">
-                        <form action="{{ route('admin.categories.store') }}" method="POST">
+                        <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
+                            <!-- Category Name -->
                             <div class="mb-3">
                                 <label for="name" class="form-label">Category Name</label>
                                 <input type="text" class="form-control" id="name" name="name" required>
                             </div>
+
+                            <!-- Status -->
                             <div class="mb-3">
                                 <label for="status" class="form-label">Status</label>
                                 <select class="form-control" id="status" name="status" required>
-                                    <option value="" disabled selected>Select Menu</option>
+                                    <option value="" disabled selected>Select Status</option>
                                     <option value="0">Available</option>
                                     <option value="1">Unavailable</option>
                                 </select>
                             </div>
+
+                            <!-- Image Upload -->
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Category Image</label>
+                                <input type="file" class="form-control" id="image" name="image">
+                                <small class="form-text text-muted">If no image is uploaded, a default image will be used.</small>
+                            </div>
+
+                            <!-- Submit Button -->
                             <button type="submit" class="btn btn-primary">Create Category</button>
                             <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">Cancel</a>
                         </form>

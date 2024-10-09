@@ -60,9 +60,6 @@ class CartController extends Controller
                 ]);
             }
 
-            // Decrement product stock
-            $product->decrement('stock', 1);
-
             // Set a flash message
             session()->flash('message', 'Product added to cart successfully.');
 

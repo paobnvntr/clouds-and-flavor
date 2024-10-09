@@ -23,24 +23,14 @@
                         });
                     }, 3000); // 3000 milliseconds = 3 seconds
                 </script>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <h3 class="mb-0">My Orders</h3>
-                    </div>
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">My Orders</li>
-                        </ol>
-                    </div>
-                </div>
+
             </div>
         </div>
 
         <div class="app-content">
             <div class="container-fluid">
                 <div class="row">
-                    <table id="datatablesSimple" class="table">
+                    <table class="table table-hover">
                         <thead>
                             <tr>
                                 <th>Date & Time</th>
@@ -82,15 +72,23 @@
                 </div>
                 <div class="modal-body">
                     <h6>Address:</h6>
-                    <strong><p id="orderAddress"></p></strong>
+                    <strong>
+                        <p id="orderAddress"></p>
+                    </strong>
                     <h6>Phone Number:</h6>
-                    <strong><p id="orderPhoneNumber"></p></strong>
+                    <strong>
+                        <p id="orderPhoneNumber"></p>
+                    </strong>
                     <h6>Status:</h6>
-                    <strong><p id="orderStatus"></p></strong>
+                    <strong>
+                        <p id="orderStatus"></p>
+                    </strong>
                     <h6>Order Items:</h6>
                     <ul id="orderItemsList" class="list-group"></ul>
                     <h6>Total Price:</h6>
-                    <strong><p id="orderTotalPrice"></p></strong> 
+                    <strong>
+                        <p id="orderTotalPrice"></p>
+                    </strong>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -103,47 +101,43 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        $('#orderModal').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget); // Button that triggered the modal
-            var order = button.data('order'); // Extract order data from data-* attributes
-
-            // Log the order object to the console for debugging
-            console.log(order);
-
-            // Clear the existing items
-            $('#orderItemsList').empty();
-
-            // Check if order data exists
-            if (order && order.order_items) { // Assuming 'order_items' is the correct name
-                let totalOrderPrice = 0; // Initialize total order price
-
-                order.order_items.forEach(item => {
-                    const pricePerUnit = item.price; // Assuming `price` is the field for item price
-                    const totalPrice = item.quantity * pricePerUnit; // Calculate total price for the item
-                    totalOrderPrice += totalPrice; // Add to the total order price
-
-                    $('#orderItemsList').append(
-                        `<li class="list-group-item">
-                            ${item.product.product_name} - (${item.quantity})
-                            - Price/Unit: ₱${number_format(pricePerUnit, 2)} 
-                            - Total: ₱${number_format(totalPrice, 2)}
-                        </li>`
-                    );
+        $(document).ready(function() {
+            $('#orderModal').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget); // Button that triggered the modal
+                var order = button.data('order'); // Extract info from data-* attributes
+    
+                // Populate the modal fields
+                var modal = $(this);
+                modal.find('#orderAddress').text(order.address);
+                modal.find('#orderPhoneNumber').text(order.phone_number);
+                modal.find('#orderStatus').text(order.status);
+                modal.find('#orderTotalPrice').text('₱' + number_format(order.total_price, 2));
+    
+                // Clear previous order items
+                var orderItemsList = modal.find('#orderItemsList');
+                orderItemsList.empty(); // Clear previous items
+                $.each(order.order_items, function(index, item) {
+                    orderItemsList.append('<li class="list-group-item">' + item.product.product_name + ' - x' + item.quantity + '</li>');
                 });
-
-                // Set the total price in the modal
-                $('#orderTotalPrice').text(`₱${number_format(totalOrderPrice, 2)}`);
-            }
-
-            // Populate modal fields
-            $('#orderAddress').text(order.address || 'N/A');
-            $('#orderPhoneNumber').text(order.phone_number || 'N/A');
-            $('#orderStatus').text(order.status || 'N/A');
+            });
         });
-
+    
         // Function to format numbers as currency
         function number_format(number, decimals) {
-            return Number(number).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+            return Number(number).toLocaleString(undefined, {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+    </script>
+
+    <script>
+        // Function to format numbers as currency
+        function number_format(number, decimals) {
+            return Number(number).toLocaleString(undefined, {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
         }
     </script>
 

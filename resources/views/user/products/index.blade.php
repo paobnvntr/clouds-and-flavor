@@ -4,6 +4,13 @@
 
 @section('content')
 
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+
     <!-- Hero Section Begin -->
     <section class="hero hero-normal">
         <div class="container">
@@ -12,37 +19,36 @@
                     <div class="hero__categories">
                         <div class="hero__categories__all">
                             <i class="fa fa-bars"></i>
-                            <span>All departments</span>
+                            <span>Categories</span>
                         </div>
                         <ul>
-                            <li><a href="#">Fresh Meat</a></li>
-                            <li><a href="#">Vegetables</a></li>
-                            <li><a href="#">Fruit & Nut Gifts</a></li>
-                            <li><a href="#">Fresh Berries</a></li>
-                            <li><a href="#">Ocean Foods</a></li>
-                            <li><a href="#">Butter & Eggs</a></li>
-                            <li><a href="#">Fastfood</a></li>
-                            <li><a href="#">Fresh Onion</a></li>
-                            <li><a href="#">Papayaya & Crisps</a></li>
-                            <li><a href="#">Oatmeal</a></li>
-                            <li><a href="#">Fresh Bananas</a></li>
+                            <li>
+                                <a href="{{ route('user.products.index') }}">All Products</a>
+                            </li>
+                            @foreach ($categories as $category)
+                                <li>
+                                    <a href="{{ route('user.products.index', ['category_id' => $category->id]) }}">
+                                        {{ $category->name }}
+                                    </a>
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
                 </div>
+
                 <div class="col-lg-9">
                     <div class="hero__search">
                         <div class="hero__search__form">
-                            <form action="#">
-                                <div class="hero__search__categories">
-                                    All Categories
-                                    <span class="arrow_carrot-down"></span>
-                                </div>
-                                <input type="text" placeholder="What do you need?">
+                            <form action="{{ route('user.products.index') }}" method="GET">
+                                <input type="text" name="search" placeholder="What do you need?"
+                                    value="{{ request('search') }}">
                                 <button type="submit" class="site-btn">SEARCH</button>
                             </form>
                         </div>
-                        <div class="humberger__menu__cart">
+
+                        <div class="header__cart">
                             <ul>
+                                <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
                                 <li>
                                     <a href="{{ url('/my-cart') }}">
                                         <i class="fa fa-shopping-cart"></i>
@@ -50,7 +56,7 @@
                                     </a>
                                 </li>
                             </ul>
-                            <div class="header__cart__price">item: <span>₱{{ number_format($total, 2) }}</span></div>
+                            <div class="header__cart__price">item: <span>₱{{ number_format($totalPrice, 2) }}</span></div>
                         </div>
                     </div>
                 </div>
@@ -101,34 +107,11 @@
 
         <div class="container">
             <div class="row">
-                
+
                 <div class="col-lg-3 col-md-5">
                     <div class="sidebar">
-                        <div class="sidebar__item">
-                            <h4>Categories</h4>
-                            <ul>
-                                <li><a href="#">Vape Device</a></li>
-                                <li><a href="#">Vape Juice</a></li>
-                            </ul>
-                        </div>
-                        <div class="sidebar__item">
-                            <h4>Price</h4>
-                            <div class="price-range-wrap">
-                                <div class="price-range ui-slider ui-corner-all ui-slider-horizontal ui-widget ui-widget-content"
-                                    data-min="10" data-max="540">
-                                    <div class="ui-slider-range ui-corner-all ui-widget-header"></div>
-                                    <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"></span>
-                                    <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"></span>
-                                </div>
-                                <div class="range-slider">
-                                    <div class="price-input">
-                                        <input type="text" id="minamount">
-                                        <input type="text" id="maxamount">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                
+
+
                         <div class="sidebar__item">
                             <div class="latest-product__text">
                                 <h4>Latest Products</h4>
@@ -153,8 +136,6 @@
                         </div>
                     </div>
                 </div>
-                
-                
 
                 <div class="col-lg-9 col-md-7">
                     <div class="product__discount">
@@ -178,8 +159,7 @@
                                                 <ul class="product__item__pic__hover">
                                                     <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                                     <li>
-                                                        <form action="{{ route('user.cart.add-to-cart') }}"
-                                                            method="POST">
+                                                        <form action="{{ route('user.cart.add-to-cart') }}" method="POST">
                                                             @csrf
                                                             <input type="hidden" name="product_id"
                                                                 value="{{ $product->id }}">
@@ -198,9 +178,10 @@
                                                     ₱{{ number_format($product->sale_price, 2) }}
                                                     <span>₱{{ number_format($product->price, 2) }}</span>
                                                 </div>
-                                                <p><strong>Stock:<span id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
+                                                <p><strong>Stock:<span
+                                                            id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
                                                 </p>
-                                                
+
                                             </div>
                                         </div>
                                     </div>
@@ -211,8 +192,12 @@
 
                     <div class="product__filter">
                         <div class="section-title">
-                            <h4>All Products</h4>
+                            <h4>All
+                                {{ request('category_id') ? $categories->firstWhere('id', request('category_id'))->name : 'Products' }}
+                                {{ request('search') ? ' - Search Results for "' . request('search') . '"' : '' }}
+                            </h4>
                         </div>
+
                         <div class="row">
                             @foreach ($products as $product)
                                 <div class="col-lg-4 col-md-6 col-sm-6">
@@ -227,11 +212,9 @@
                                                         @csrf
                                                         <input type="hidden" name="product_id"
                                                             value="{{ $product->id }}">
-                                                        <input type="hidden" name="price"
-                                                            value="{{ $product->price }}">
+                                                        <input type="hidden" name="price" value="{{ $product->price }}">
                                                         <button type="submit" class="add-to-cart"><i
                                                                 class="fa fa-shopping-cart"></i></button>
-
                                                     </form>
                                                 </li>
                                             </ul>
@@ -239,7 +222,7 @@
                                         <div class="product__item__text">
                                             <h6><a href="#">{{ $product->product_name }}</a></h6>
                                             <h5>₱{{ number_format($product->price, 2) }}</h5>
-                                            <p><strong>Stock: <span
+                                            <p><strong>Stock:<span
                                                         id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
                                             </p>
                                         </div>
@@ -247,7 +230,24 @@
                                 </div>
                             @endforeach
                         </div>
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination">
+                                <li class="page-item {{ $products->previousPageUrl() ? '' : 'disabled' }}">
+                                    <a class="page-link" href="{{ $products->previousPageUrl() }}"
+                                        tabindex="-1">Previous</a>
+                                </li>
+                                @for ($i = 1; $i <= $products->lastPage(); $i++)
+                                    <li class="page-item {{ $products->currentPage() == $i ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ $products->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+                                <li class="page-item {{ $products->nextPageUrl() ? '' : 'disabled' }}">
+                                    <a class="page-link" href="{{ $products->nextPageUrl() }}">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -284,4 +284,6 @@
             });
         });
     </script>
+
+
 @endsection

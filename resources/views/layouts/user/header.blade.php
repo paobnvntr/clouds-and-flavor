@@ -61,6 +61,8 @@
             <ul>
               <li class="active"><a href="dashboard">Home</a></li>
               <li><a href="{{ url('/products') }}">Shop</a></li>
+              <li><a href="{{ url('/my-cart') }}">My Cart</a></li>
+              <li><a href="{{ url('/my-order') }}">My Order</a></li>
               {{-- <li>
                 <a href="#">Pages</a>
                 <ul class="header__menu__dropdown">
@@ -118,6 +120,7 @@
     <ul>
       <li class="active"><a href="{{ url('/dashboard') }}">Home</a></li>
       <li><a href="{{ url('/products') }}">Shop</a></li>
+      <li><a href="{{ url('/my-cart') }}">My Cart</a></li>
       {{-- <li>
         <a href="#">Pages</a>
         <ul class="header__menu__dropdown">

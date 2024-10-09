@@ -4,115 +4,142 @@
 
 @section('content')
 
-    <main class="app-main">
-        <div class="app-content-header">
-            <div class="container-fluid">
-                <!-- Flash message for success -->
-                @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                <script>
-                    // Function to hide alert after 5 seconds
-                    setTimeout(function() {
-                        const alerts = document.querySelectorAll('.alert');
-                        alerts.forEach(alert => {
-                            alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
-                            alert.style.opacity = 0; // Fade out the alert
-                            setTimeout(() => alert.remove(), 500); // Remove after fade out
-                        });
-                    }, 3000); // 5000 milliseconds = 5 seconds
-                </script>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <h3 class="mb-0">My Cart</h3>
-                    </div>
-
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">My Cart</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="app-content">
-            <div class="container-fluid">
-                <div class="row">
-                    <table id="datatablesSimple" class="table">
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                                <th>Total</th>
-                                <th>Date & Time</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if ($carts->isEmpty())
+    <!-- Shoping Cart Section Begin -->
+    <section class="shoping-cart spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="shoping__cart__table">
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td colspan="6" class="text-center">Your cart is empty.</td>
+                                    <th class="shoping__product">Products</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th></th>
                                 </tr>
-                            @else
-                                @foreach ($carts as $cart)
+                            </thead>
+                            <tbody>
+                                @if ($carts->isEmpty())
                                     <tr>
-                                        <td>{{ $cart->product->product_name }}</td>
-                                        <td>₱<span class="price">{{ number_format($cart->product->price, 2) }}</span></td>
-                                        <td>
-                                            <input type="number" name="quantity" class="quantity"
-                                                data-product-id="{{ $cart->id }}" value="{{ $cart->quantity }}"
-                                                min="1">
-                                        </td>
-                                        <td>₱<span
-                                                class="total">{{ number_format($cart->product->price * $cart->quantity, 2) }}</span>
-                                        </td>
-                                        <td>{{ $cart->created_at->format('Y-m-d H:i') }}</td>
-                                        <td>
-                                            <button class="btn btn-danger btn-sm remove-item"
-                                                data-product-id="{{ $cart->id }}">Remove</button>
-                                        </td>
+                                        <td colspan="5" class="text-center">Your cart is empty.</td>
                                     </tr>
-                                @endforeach
-                            @endif
-                        </tbody>
-                    </table>
+                                @else
+                                    @foreach ($carts as $cart)
+                                        <tr>
+                                            <td class="shoping__cart__item">
+                                                <img src="{{ asset('/' . $cart->product->image) }}" alt="">
+                                                <h5>{{ $cart->product->product_name }}</h5>
+                                            </td>
+                                            <td class="shoping__cart__price">
+                                                ₱<span class="price">{{ number_format($cart->product->price, 2) }}</span>
+                                            </td>
+                                            <td class="shoping__cart__quantity">
+                                                <div class="quantity">
+                                                    <div class="pro-qty1">
+                                                        <button class="dec qtybtn" style="border: none;">-</button>
+                                                        <input type="text" name="quantity" class="quantity"
+                                                            data-product-id="{{ $cart->id }}"
+                                                            value="{{ $cart->quantity }}" min="1">
+                                                        <button class="inc qtybtn" style="border: none;">+</button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="shoping__cart__total">
+                                                ₱<span
+                                                    class="total">{{ number_format($cart->product->price * $cart->quantity, 2) }}</span>
+                                            </td>
+                                            <td class="shoping__cart__item__close">
+                                                <button class="btn btn-danger btn-sm remove-item"
+                                                    data-product-id="{{ $cart->id }}">
+                                                    <span class="icon_close"></span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+                            </tbody>
 
-                    <div class="text-end">
-                        <strong>Total: ₱<span id="grand-total">{{ $carts->isEmpty() ? '0.00' : number_format($carts->sum(function ($cart) {
-                            return $cart->product->price * $cart->quantity;
-                        }), 2) }}</span></strong>
-                        <br>
-                        <a href="{{ route('user.cart.checkout') }}" class="btn btn-primary mt-3">Proceed to Checkout</a>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="shoping__cart__btns">
+                        <a href="#" class="primary-btn cart-btn">CONTINUE SHOPPING</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="shoping__continue">
+                        <div class="shoping__discount">
+                            <h5>Discount Codes</h5>
+                            <form action="#">
+                                <input type="text" placeholder="Enter your coupon code">
+                                <button type="submit" class="site-btn">APPLY COUPON</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="shoping__checkout">
+                        <h5>Cart Total</h5>
+                        <ul>
+                            <li>Subtotal <span>₱<span
+                                        id="subtotal">{{ $carts->isEmpty()? '0.00': number_format($carts->sum(function ($cart) {return $cart->product->price * $cart->quantity;}),2) }}</span></span>
+                            </li>
+                            <li>Total <span>₱<span
+                                        id="grand-total">{{ $carts->isEmpty()? '0.00': number_format($carts->sum(function ($cart) {return $cart->product->price * $cart->quantity;}),2) }}</span></span>
+                            </li>
+                        </ul>
+                        <a href="{{ route('user.cart.checkout') }}" class="primary-btn">PROCEED TO CHECKOUT</a>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
+    </section>
+    <!-- Shoping Cart Section End -->
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
             // Function to update totals dynamically
             function updateTotal() {
-                let grandTotal = 0;
+                let subtotal = 0;
                 $('tbody tr').each(function() {
                     let price = parseFloat($(this).find('.price').text().replace(/[^0-9.-]+/g, ""));
-                    let quantity = parseInt($(this).find('.quantity').val());
-                    let total = price * quantity;
+                    let quantity = parseInt($(this).find('input[name="quantity"]').val());
 
-                    $(this).find('.total').text(total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-                    grandTotal += total;
+                    if (!isNaN(price) && !isNaN(quantity)) {
+                        let total = price * quantity;
+                        $(this).find('.total').text(total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                        subtotal += total;
+                    }
                 });
-                $('#grand-total').text(grandTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                $('#subtotal').text(subtotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                $('#grand-total').text(subtotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
             }
 
+            // Update quantity on button click
+            $('.qtybtn').on('click', function() {
+                let $input = $(this).siblings('input[name="quantity"]');
+                let currentVal = parseInt($input.val());
+                let newVal;
+
+                // Increment by 2 when the increment button is clicked
+                if ($(this).hasClass('inc')) {
+                    newVal = currentVal + 1;
+                } else {
+                    // Decrement by 1 (or ensure it does not go below 1)
+                    newVal = currentVal > 1 ? currentVal - 1 : 1;
+                }
+
+                $input.val(newVal).trigger('change');
+            });
+
             // Update price and stock when quantity changes
-            $('.quantity').on('change', function() {
+            $('input[name="quantity"]').on('change', function() {
                 let productId = $(this).data('product-id');
                 let newQuantity = $(this).val();
                 $.ajax({
@@ -163,5 +190,7 @@
             updateTotal();
         });
     </script>
+
+
 
 @endsection
