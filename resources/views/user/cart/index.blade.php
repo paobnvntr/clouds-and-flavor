@@ -4,6 +4,24 @@
 
 @section('content')
 
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-section set-bg" data-setbg="{{ asset('assets/img/deviceseries.jpg') }}">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb__text">
+                        <h2>My Cart</h2>
+                        <div class="breadcrumb__option">
+                            <a href="dashboard">Home</a>
+                            <span>Cart</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Breadcrumb Section End -->
+
     <!-- Shoping Cart Section Begin -->
     <section class="shoping-cart spad">
         <div class="container">
@@ -68,7 +86,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="shoping__cart__btns">
-                        <a href="#" class="primary-btn cart-btn">CONTINUE SHOPPING</a>
+                        <a href="/products" class="primary-btn cart-btn">CONTINUE SHOPPING</a>
                     </div>
                 </div>
                 <div class="col-lg-6">

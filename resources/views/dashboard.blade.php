@@ -61,7 +61,7 @@
                         <div class="col-lg-3">
                             <div class="categories__item set-bg"
                                 data-setbg="{{ asset($category->image ? '/' . $category->image : 'assets/category_image/unknown.jpg') }}">
-                                <h5><a href="#">{{ $category->name }}</a></h5>
+                                <h5><a href="/products">{{ $category->name }}</a></h5>
                             </div>
                         </div>
                     @endforeach
@@ -90,7 +90,7 @@
                             <div class="featured__item__pic set-bg" data-setbg="{{ asset('/' . $product->image) }}">
                             </div>
                             <div class="featured__item__text">
-                                <h6><a href="#">{{ $product->product_name }}</a></h6>
+                                <h6><a href="/products">{{ $product->product_name }}</a></h6>
                                 <h5>₱{{ number_format($product->price, 2) }}</h5>
                             </div>
                         </div>

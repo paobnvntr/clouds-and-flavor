@@ -4,6 +4,24 @@
 
 @section('content')
 
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-section set-bg" data-setbg="{{ asset('assets/img/deviceseries.jpg') }}">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb__text">
+                        <h2>My Order</h2>
+                        <div class="breadcrumb__option">
+                            <a href="dashboard">Home</a>
+                            <span>Order</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Breadcrumb Section End -->
+
     <main class="app-main">
         <div class="app-content-header">
             <div class="container-fluid">
@@ -105,23 +123,24 @@
             $('#orderModal').on('show.bs.modal', function(event) {
                 var button = $(event.relatedTarget); // Button that triggered the modal
                 var order = button.data('order'); // Extract info from data-* attributes
-    
+
                 // Populate the modal fields
                 var modal = $(this);
                 modal.find('#orderAddress').text(order.address);
                 modal.find('#orderPhoneNumber').text(order.phone_number);
                 modal.find('#orderStatus').text(order.status);
                 modal.find('#orderTotalPrice').text('₱' + number_format(order.total_price, 2));
-    
+
                 // Clear previous order items
                 var orderItemsList = modal.find('#orderItemsList');
                 orderItemsList.empty(); // Clear previous items
                 $.each(order.order_items, function(index, item) {
-                    orderItemsList.append('<li class="list-group-item">' + item.product.product_name + ' - x' + item.quantity + '</li>');
+                    orderItemsList.append('<li class="list-group-item">' + item.product
+                        .product_name + ' - x' + item.quantity + '</li>');
                 });
             });
         });
-    
+
         // Function to format numbers as currency
         function number_format(number, decimals) {
             return Number(number).toLocaleString(undefined, {
