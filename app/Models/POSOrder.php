@@ -30,4 +30,9 @@ class POSOrder extends Model
     {
         return $this->hasMany(POSOrderItem::class, 'pos_order_id');
     }
+
+    public function getCustomerName()
+    {
+        return $this->customer_name;
+    }
 }

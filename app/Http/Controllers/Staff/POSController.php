@@ -86,28 +86,41 @@ class POSController extends Controller
     public function getOrderDetails($type, $id)
     {
         try {
-            if ($type === 'user') {
-                $order = Order::with('orderItems.product')->find($id);
-            } else {
-                $order = POSOrder::with('posOrderItems.product')->find($id);
+            // Check if the provided ID is valid
+            if (!is_numeric($id)) {
+                return response()->json(['error' => 'Invalid order ID'], 400);
             }
 
+            if ($type === 'user') {
+                // Retrieve user order with related items and user
+                $order = Order::with(['orderItems.product', 'user'])->find($id);
+            } else {
+                // Retrieve POS order with related items
+                $order = POSOrder::with('items.product')->find($id);
+            }
+
+            // Check if order was found
             if (!$order) {
+                Log::warning('Order not found:', ['id' => $id, 'type' => $type]);
                 return response()->json(['error' => 'Order not found'], 404);
             }
 
             // Log the order data for debugging
             Log::info('Order found:', ['order' => $order]);
 
+            // Return the order with its items
             return response()->json([
                 'order' => $order,
-                'items' => $order->posOrderItems
+                'items' => ($type === 'user') ? $order->orderItems : $order->items // Ensure correct items are returned
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching order details:', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     }
+
+
+
 
 
     public function showCheckoutPage()

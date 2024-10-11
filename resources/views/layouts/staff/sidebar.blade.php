@@ -68,12 +68,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{url('staff/pending-order')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <a href="{{url('staff/pending-orders')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                 <p>Pending Orders</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{url('staff/completed-order')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <a href="{{url('staff/completed-orders')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                 <p>Completed Orders</p>
                             </a>
                         </li>

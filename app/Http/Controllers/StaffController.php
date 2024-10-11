@@ -18,6 +18,22 @@ class StaffController extends Controller
         return view('staff.dashboard', compact('totalOrders', 'pendingOrders', 'completedOrders'));
     }
 
+
+    public function pendingList()
+    {
+        $userOrders = Order::where('status', 'pending')->with('user')->get();
+        $posOrders = PosOrder::where('status', 'pending')->with('items')->get();
+
+        return view('staff.orders.pending-order', compact('userOrders', 'posOrders'));
+    }
+    public function completedList()
+    {
+        $userOrders = Order::where('status', 'completed')->with('user')->get();
+        $posOrders = PosOrder::where('status', 'completed')->with('items')->get();
+
+        return view('staff.orders.completed-order', compact('userOrders', 'posOrders'));
+    }
+
     public function orderList()
     {
         $userOrders = Order::all(); // Orders from users

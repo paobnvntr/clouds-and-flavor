@@ -22,6 +22,7 @@
             </thead>
             <tbody>
                 @foreach ($userOrders as $order)
+                    @if ($order->status === 'completed') <!-- Check for completed status -->
                     <tr>
                         <td>{{ $order->id }}</td>
                         <td>{{ $order->user->name }}</td>
@@ -33,6 +34,7 @@
                                 onclick="showOrderDetails({{ $order->id }}, 'user')">View</button>
                         </td>
                     </tr>
+                    @endif
                 @endforeach
             </tbody>
         </table>
@@ -52,6 +54,7 @@
             </thead>
             <tbody>
                 @foreach ($posOrders as $order)
+                    @if ($order->status === 'completed') <!-- Check for completed status -->
                     <tr>
                         <td>{{ $order->id }}</td>
                         <td>{{ $order->customer_name }}</td>
@@ -63,6 +66,7 @@
                                 onclick="showOrderDetails({{ $order->id }}, 'pos')">View</button>
                         </td>
                     </tr>
+                    @endif
                 @endforeach
             </tbody>
         </table>

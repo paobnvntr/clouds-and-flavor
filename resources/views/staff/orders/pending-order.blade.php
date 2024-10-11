@@ -1,6 +1,6 @@
 @extends('layouts.staff.app')
 
-@section('title', 'Order List')
+@section('title', 'Pending Order List')
 
 @section('content')
 
@@ -151,7 +151,6 @@
                     orderDetailsContent.innerHTML = `<p class="text-danger">Error loading order details. Please try again later.</p>`;
                 });
         }
-
     </script>
 
 @endsection

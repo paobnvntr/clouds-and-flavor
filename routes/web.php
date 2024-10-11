@@ -110,6 +110,9 @@ Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
     });
 
     Route::get('/staff/orders', [StaffController::class, 'orderList'])->name('staff.orders.index');
+    Route::get('/staff/pending-orders', [StaffController::class, 'pendingList'])->name('staff.orders.pending-order');
+    Route::get('/staff/completed-orders', [StaffController::class, 'completedList'])->name('staff.orders.completed-order');
+
 });
 
 
