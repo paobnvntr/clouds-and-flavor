@@ -31,7 +31,7 @@
                     <div class="hero__search">
                         <div class="hero__search__form">
                             <form action="{{ route('user.products.index') }}" method="GET">
-                                <input type="text" name="search" placeholder="What do you need?" />
+                                <input type="text" name="search" placeholder="Search products" />
                                 <button type="submit" class="site-btn">SEARCH</button>
                             </form>
                         </div>

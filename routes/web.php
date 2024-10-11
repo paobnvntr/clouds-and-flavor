@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Staff\POSController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\User\OrderController;
@@ -62,7 +63,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/all-order', 'index')->name('admin.orders.index');
         Route::get('admin/pending-order', 'pendingOrder')->name('admin.orders.pending');
         Route::get('admin/completed-order', 'completedOrder')->name('admin.orders.completed');
-        
     });
 
 
@@ -85,7 +85,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
         Route::get('admin/total-earnings', 'showTotalEarnings')->name('admin.total_earnings');
     });
-
 });
 
 
@@ -93,6 +92,24 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 //Group Staff routes role = 1
 Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
     Route::get('/staff/dashboard', [StaffController::class, 'index'])->name('staff.dashboard');
+    
+   
+
+    Route::controller(POSController::class)->group(function () {
+        Route::get('/staff/pos', 'index')->name('staff.pos.index');
+        Route::get('/staff/pos/order-success', 'orderSuccess')->name('staff.pos.order-success');
+        Route::post('/staff/pos/add-to-cart', 'addToCart')->name('staff.pos.addToCart');
+        Route::get('/staff/pos/cart-items', 'getCartItems')->name('staff.pos.getCartItems');
+        Route::post('/staff/checkout', 'showCheckoutPage')->name('staff.pos.checkout');
+        // Route::post('/staff/place-order', 'placeOrder')->name('staff.pos.placeOrder');
+        Route::post('/staff/pos/place-order', 'placeOrder')->name('staff.pos.placeOrder');
+        Route::get('/staff/orders/{type}/{id}', 'getOrderDetails');
+        Route::post('/pos/update-cart-item', 'updateCartItem')->name('staff.pos.updateCartItem');
+        Route::post('/pos/remove-cart-item', 'removeCartItem')->name('staff.pos.removeCartItem');
+        Route::get('/staff/order-success', 'orderSuccess')->name('staff.pos.orderSuccess');
+    });
+
+    Route::get('/staff/orders', [StaffController::class, 'orderList'])->name('staff.orders.index');
 });
 
 
@@ -129,7 +146,6 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
     Route::controller(OrderController::class)->group(function () {
         Route::get('/my-order', 'index')->name('user.order.index');
     });
-
 });
 
 

@@ -47,12 +47,23 @@ class OrderController extends Controller
             'address' => $request->address,
             'phone_number' => $request->phone_number,
             'payment_method' => $request->payment_method,
-            'total_price' => $totalPrice, // Make sure to include the total price here
+            'total_price' => $totalPrice,
             'status' => 'pending',
         ]);
 
-        // Optionally, you can loop through the carts to create order items if necessary
+        // Loop through the cart items to create order items and decrement stock
         foreach ($carts as $cart) {
+            // Check if the product has enough stock
+            $product = $cart->product;
+            if ($product->stock < $cart->quantity) {
+                return redirect()->route('user.cart.index')->with('error', 'Insufficient stock for ' . $product->product_name);
+            }
+
+            // Decrement the stock by the exact quantity in the cart
+            $product->stock -= $cart->quantity;
+            $product->save(); // Save the updated stock
+
+            // Create order items
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $cart->product_id,

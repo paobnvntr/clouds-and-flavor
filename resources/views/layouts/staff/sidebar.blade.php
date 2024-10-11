@@ -46,19 +46,11 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{ url('staff/category') }}" class="nav-link">
+                    <a href="{{ url('/staff/pos') }}" class="nav-link">
                         <i class="nav-icon bi bi-clipboard"></i>
-                        <p>Categories</p>
+                        <p>POS</p>
                     </a>
                 </li>
-
-                <li class="nav-item">
-                    <a href="{{ url('staff/product') }}" class="nav-link">
-                        <i class="nav-icon bi bi-clipboard"></i>
-                        <p>Products</p>
-                    </a>
-                </li>
-
 
                 <li class="nav-item">
                     <a href="#" class="nav-link">
@@ -71,7 +63,7 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{url('staff/all-order')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <a href="{{url('/staff/orders')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                 <p>All Orders</p>
                             </a>
                         </li>

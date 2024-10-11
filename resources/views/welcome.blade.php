@@ -40,9 +40,7 @@
         </div>
         <div class="humberger__menu__cart">
             <ul>
-                <li>
-                    <a href="/login"><i class="fa fa-heart"></i> <span>0</span></a>
-                </li>
+              
                 <li>
                     <a href="/login"><i class="fa fa-shopping-bag"></i> <span>0</span></a>
                 </li>
@@ -150,15 +148,13 @@
                     <div class="hero__search">
                         <div class="hero__search__form">
                             <form action="{{ route('landing-page-shop') }}" method="GET">
-                                <input type="text" name="search" placeholder="What do you need?" />
+                                <input type="text" name="search" placeholder="Search products" />
                                 <button type="submit" class="site-btn">SEARCH</button>
                             </form>
                         </div>
                         <div class="header__cart">
                             <ul>
-                                <li>
-                                    <a href="/login"><i class="fa fa-heart"></i> <span>0</span></a>
-                                </li>
+                              
                                 <li>
                                     <a href="/login"><i class="fa fa-shopping-cart"></i> <span>0</span></a>
                                 </li>

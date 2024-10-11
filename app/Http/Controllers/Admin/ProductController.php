@@ -130,26 +130,24 @@ class ProductController extends Controller
 
     public function updateStock(Request $request)
     {
-        // Validate incoming data
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'stock' => 'required|integer|min:0',
         ]);
 
-        // Find the product and update the stock
-        $product = Product::findOrFail($request->product_id);
-        $product->stock = $request->stock;
+        try {
+            $product = Product::findOrFail($request->product_id);
+            $product->stock = $request->stock;
+            $product->save();
 
-        // Automatically set the product status based on the stock
-        if ($product->stock == 0) {
-            $product->status = 1; // Unavailable
-        } else {
-            $product->status = 0; // Available
+            // Check if the stock is 0 to determine status
+            $status = $product->stock == 0 ? 'Unavailable' : 'Available';
+            return response()->json([
+                'success' => 'Stock updated successfully.',
+                'status' => $status,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error updating stock'], 500);
         }
-
-        $product->save();
-
-        // Return a success response
-        return response()->json(['message' => 'Stock and status updated successfully']);
     }
 }

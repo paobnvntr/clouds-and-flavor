@@ -60,14 +60,16 @@ class CartController extends Controller
                 ]);
             }
 
-            // Set a flash message
+            // Set a flash message for success
             session()->flash('message', 'Product added to cart successfully.');
 
             return redirect()->back(); // Redirect back to the previous page
         } else {
-            return response()->json(['success' => false, 'message' => 'Product is out of stock.']);
+            // If stock is 0, show an out-of-stock alert
+            return redirect()->back()->with('error', 'Product is out of stock.');
         }
     }
+
 
 
 
@@ -87,19 +89,18 @@ class CartController extends Controller
         $newQuantity = $request->quantity;
         $quantityDifference = $newQuantity - $oldQuantity;
 
+        // Check if the product has enough stock (Optional: You can keep or remove this check)
         if ($product->stock >= $quantityDifference) {
             // Update the cart quantity
             $cart->quantity = $newQuantity;
             $cart->save();
-
-            // Adjust the product stock
-            $product->decrement('stock', $quantityDifference);
 
             return response()->json(['success' => true, 'message' => 'Cart updated successfully.']);
         } else {
             return response()->json(['success' => false, 'message' => 'Not enough stock available.']);
         }
     }
+
 
     public function removeItem(Request $request)
     {

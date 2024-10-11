@@ -44,9 +44,6 @@
         <div class="humberger__menu__cart">
             <ul>
                 <li>
-                    <a href="/login"><i class="fa fa-heart"></i> <span>0</span></a>
-                </li>
-                <li>
                     <a href="/login"><i class="fa fa-shopping-bag"></i> <span>0</span></a>
                 </li>
             </ul>
@@ -157,7 +154,7 @@
                     <div class="hero__search">
                         <div class="hero__search__form">
                             <form action="{{ route('landing-page-shop') }}" method="GET">
-                                <input type="text" name="search" placeholder="What do you need?"
+                                <input type="text" name="search" placeholder="Search products"
                                     value="{{ request('search') }}">
                                 <button type="submit" class="site-btn">SEARCH</button>
                             </form>
@@ -165,9 +162,6 @@
 
                         <div class="header__cart">
                             <ul>
-                                <li>
-                                    <a href="/login"><i class="fa fa-heart"></i> <span>0</span></a>
-                                </li>
                                 <li>
                                     <a href="/login"><i class="fa fa-shopping-cart"></i> <span>0</span></a>
                                 </li>
@@ -274,7 +268,6 @@
                                                 <div class="product__discount__percent">-{{ $discountPercentage }}%
                                                 </div>
                                                 <ul class="product__item__pic__hover">
-                                                    <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                                     <li>
                                                         <form action="{{ route('user.cart.add-to-cart') }}"
                                                             method="POST">
@@ -325,7 +318,6 @@
                                         <div class="product__item__pic set-bg"
                                             data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
                                             <ul class="product__item__pic__hover">
-                                                <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                                 <li>
                                                     <form action="{{ route('user.cart.add-to-cart') }}"
                                                         method="POST" id="add-to-cart-form-{{ $product->id }}">
