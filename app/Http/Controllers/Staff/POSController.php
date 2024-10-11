@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\POSOrder;
 use App\Models\POSOrderItem;
@@ -11,22 +12,36 @@ use App\Models\StaffCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class POSController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::where('stock', '>', 0)->get(); // Fetch available products
-        $cartItems = StaffCart::with('product')->where('staff_id', Auth::id())->get(); // Fetch current staff cart items with product data
+        // Get the search term from the request
+        $searchTerm = $request->input('search');
+
+        // Fetch available products, filter by search term if provided
+        $products = Product::where('stock', '>', 0)
+            ->when($searchTerm, function ($query) use ($searchTerm) {
+                return $query->where('product_name', 'like', '%' . $searchTerm . '%');
+            })
+            ->get();
+
+        // Fetch current staff cart items with product data
+        $cartItems = StaffCart::with('product')->where('staff_id', Auth::id())->get();
 
         // Calculate cart total
         $cartTotal = $cartItems->sum(function ($item) {
             return $item->quantity * $item->price;
         });
 
-        return view('staff.pos.index', compact('products', 'cartItems', 'cartTotal'));
+        // Fetch available categories
+        $categories = Category::where('status', 0)->get(); // Only fetch available categories
+
+        // Pass products, cart items, cart total, and categories to the view
+        return view('staff.pos.index', compact('products', 'cartItems', 'cartTotal', 'categories', 'searchTerm'));
     }
+
 
 
     public function addToCart(Request $request)
@@ -101,12 +116,8 @@ class POSController extends Controller
 
             // Check if order was found
             if (!$order) {
-                Log::warning('Order not found:', ['id' => $id, 'type' => $type]);
                 return response()->json(['error' => 'Order not found'], 404);
             }
-
-            // Log the order data for debugging
-            Log::info('Order found:', ['order' => $order]);
 
             // Return the order with its items
             return response()->json([
@@ -114,14 +125,9 @@ class POSController extends Controller
                 'items' => ($type === 'user') ? $order->orderItems : $order->items // Ensure correct items are returned
             ]);
         } catch (\Exception $e) {
-            Log::error('Error fetching order details:', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     }
-
-
-
-
 
     public function showCheckoutPage()
     {
@@ -179,6 +185,12 @@ class POSController extends Controller
                     'quantity' => $item->quantity,
                     'price' => $item->price,
                 ]);
+
+                // Decrement the stock of the product
+                $product = Product::find($item->product_id);
+                if ($product) {
+                    $product->decrement('stock', $item->quantity);
+                }
             }
 
             // Clear the cart after placing the order
@@ -196,32 +208,10 @@ class POSController extends Controller
             // Rollback the transaction if there is an error
             DB::rollBack();
 
-            // Log the error
-            Log::error('Error placing order:', ['error' => $e->getMessage()]);
-
             return response()->json(['message' => 'Error placing order. Please try again later.'], 500);
         }
     }
 
-
-
-
-
-
-    private function calculateTotalPrice()
-    {
-        // Assuming you're fetching cart items for the current staff
-        $cartItems = StaffCart::where('staff_id', Auth::id())->get();
-
-        $total = 0;
-
-        foreach ($cartItems as $item) {
-            $price = $item->product->on_sale ? $item->product->sale_price : $item->product->price;
-            $total += $price * $item->quantity;
-        }
-
-        return $total;
-    }
 
     public function orderSuccess()
     {
@@ -255,7 +245,6 @@ class POSController extends Controller
         ]);
     }
 
-
     public function removeCartItem(Request $request)
     {
         // Assuming you have a method to remove the item from the cart
@@ -272,5 +261,17 @@ class POSController extends Controller
             'cartItems' => $cartItems,
             'cartTotal' => $cartTotal,
         ]);
+    }
+
+    public function filterProducts(Request $request)
+    {
+        $categoryId = $request->input('category_id');
+
+        // Fetch products based on category ID
+        $products = Product::when($categoryId, function ($query) use ($categoryId) {
+            return $query->where('category_id', $categoryId);
+        })->get();
+
+        return response()->json(['products' => $products]);
     }
 }

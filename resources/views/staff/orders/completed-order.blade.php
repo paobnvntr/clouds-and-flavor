@@ -5,7 +5,7 @@
 @section('content')
 
     <div class="container">
-        <h2>Order List</h2>
+        <h2>All Completed Orders</h2>
 
         <!-- User Orders Section -->
         <h4>User Orders</h4>
@@ -22,18 +22,19 @@
             </thead>
             <tbody>
                 @foreach ($userOrders as $order)
-                    @if ($order->status === 'completed') <!-- Check for completed status -->
-                    <tr>
-                        <td>{{ $order->id }}</td>
-                        <td>{{ $order->user->name }}</td>
-                        <td>{{ $order->order_items_count }}</td>
-                        <td>₱{{ number_format($order->total_price, 2) }}</td>
-                        <td>{{ ucfirst($order->status) }}</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal"
-                                onclick="showOrderDetails({{ $order->id }}, 'user')">View</button>
-                        </td>
-                    </tr>
+                    @if ($order->status === 'completed')
+                        <!-- Check for completed status -->
+                        <tr>
+                            <td>{{ $order->id }}</td>
+                            <td>{{ $order->user->name }}</td>
+                            <td>{{ $order->order_items_count }}</td>
+                            <td>₱{{ number_format($order->total_price, 2) }}</td>
+                            <td>{{ ucfirst($order->status) }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal"
+                                    onclick="showOrderDetails({{ $order->id }}, 'user')">View</button>
+                            </td>
+                        </tr>
                     @endif
                 @endforeach
             </tbody>
@@ -54,18 +55,19 @@
             </thead>
             <tbody>
                 @foreach ($posOrders as $order)
-                    @if ($order->status === 'completed') <!-- Check for completed status -->
-                    <tr>
-                        <td>{{ $order->id }}</td>
-                        <td>{{ $order->customer_name }}</td>
-                        <td>{{ $order->items->count() }}</td>
-                        <td>₱{{ number_format($order->total_price, 2) }}</td>
-                        <td>{{ ucfirst($order->status) }}</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal"
-                                onclick="showOrderDetails({{ $order->id }}, 'pos')">View</button>
-                        </td>
-                    </tr>
+                    @if ($order->status === 'completed')
+                        <!-- Check for completed status -->
+                        <tr>
+                            <td>{{ $order->id }}</td>
+                            <td>{{ $order->customer_name }}</td>
+                            <td>{{ $order->items->count() }}</td>
+                            <td>₱{{ number_format($order->total_price, 2) }}</td>
+                            <td>{{ ucfirst($order->status) }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal"
+                                    onclick="showOrderDetails({{ $order->id }}, 'pos')">View</button>
+                            </td>
+                        </tr>
                     @endif
                 @endforeach
             </tbody>
@@ -152,10 +154,10 @@
                 })
                 .catch(error => {
                     console.error('Error fetching order details:', error);
-                    orderDetailsContent.innerHTML = `<p class="text-danger">Error loading order details. Please try again later.</p>`;
+                    orderDetailsContent.innerHTML =
+                        `<p class="text-danger">Error loading order details. Please try again later.</p>`;
                 });
         }
-
     </script>
 
 @endsection

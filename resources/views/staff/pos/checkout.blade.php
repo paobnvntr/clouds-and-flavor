@@ -75,6 +75,7 @@
                             with cash.</div>
                     </div>
                     <button type="submit" class="btn btn-success">Place Order</button>
+                    <a href="{{ route('staff.pos.index') }}" class="btn btn-secondary">Back</a>
                 </form>
             </div>
         </div>

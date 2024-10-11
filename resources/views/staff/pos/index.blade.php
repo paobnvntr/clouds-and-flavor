@@ -12,10 +12,19 @@
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
             @if (session('error'))
-                <div class="alert alert-danger">
-                    {{ session('error') }}
-                </div>
+                <div class="alert alert-danger">{{ session('error') }}</div>
             @endif
+            <script>
+                // Function to hide alert after 5 seconds
+                setTimeout(function() {
+                    const alerts = document.querySelectorAll('.alert');
+                    alerts.forEach(alert => {
+                        alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
+                        alert.style.opacity = 0; // Fade out the alert
+                        setTimeout(() => alert.remove(), 500); // Remove after fade out
+                    });
+                }, 3000); // 5000 milliseconds = 5 seconds
+            </script>
         </div>
 
         <script>
@@ -27,16 +36,39 @@
                     alert.style.opacity = 0; // Fade out the alert
                     setTimeout(() => alert.remove(), 500); // Remove after fade out
                 });
-            }, 3000); // 5000 milliseconds = 5 seconds
+            }, 2000); // 5000 milliseconds = 5 seconds
         </script>
 
         <div class="row">
             <div class="col-lg-8">
                 <h4>Products</h4>
-                <div class="row d-flex flex-wrap">
+
+                <!-- Search Bar -->
+                <div class="mb-3">
+                    <form action="{{ route('staff.pos.index') }}" method="GET" class="d-flex">
+                        <input type="text" name="search" value="{{ request()->get('search') }}"
+                            class="form-control me-2" placeholder="Search Products" aria-label="Search">
+                        <button class="btn btn-outline-success" type="submit">Search</button>
+                    </form>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="mb-3">
+                    <label for="category-filter" class="form-label">Filter by Category:</label>
+                    <select id="category-filter" class="form-select">
+                        <option value="">All Categories</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="row d-flex flex-wrap" id="product-list">
                     @foreach ($products as $product)
-                        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                            <div class="product-card text-center border rounded p-3 d-flex flex-column" style="height: 100%;">
+                        <div class="col-lg-4 col-md-6 col-sm-12 mb-4 product-item"
+                            data-category-id="{{ $product->category_id }}">
+                            <div class="product-card text-center border rounded p-3 d-flex flex-column"
+                                style="height: 100%;">
                                 <img src="{{ asset('/' . $product->image) }}" alt="{{ $product->product_name }}"
                                     class="img-fluid">
                                 <h5 class="mt-2">{{ $product->product_name }}</h5>
@@ -98,11 +130,11 @@
                     data: $(this).serialize(), // Serialize form data
                     success: function(response) {
                         updateCart(response.cartItems, response
-                            .cartTotal); // Update cart items and total
+                        .cartTotal); // Update cart items and total
                         // Show flash message
                         $('#flash-message').html(
                             '<div class="alert alert-success">Product added to cart successfully!</div>'
-                        );
+                            );
                     },
                     error: function(xhr) {
                         alert(xhr.responseJSON.message);
@@ -180,7 +212,6 @@
                 });
             });
 
-
             // Handle item removal from cart
             $(document).on('click', '.remove-item', function() {
                 const cartItemId = $(this).closest('li').data('id');
@@ -191,13 +222,12 @@
                     type: 'POST', // Use POST
                     url: '{{ route('staff.pos.removeCartItem') }}', // Use the named route
                     data: {
-                        id: cartItemId, // Pass the ID
-                        _token: '{{ csrf_token() }}' // Pass CSRF token
+                        id: cartItemId, // Pass the cart item ID
+                        _token: '{{ csrf_token() }}' // Include CSRF token
                     },
                     success: function(response) {
-                        $item.remove(); // Remove item from DOM
-                        updateCart(response.cartItems, response
-                            .cartTotal); // Update cart items and total
+                        $item.remove(); // Remove the item from the UI
+                        updateCart(response.cartItems, response.cartTotal); // Update cart total
                     },
                     error: function(xhr) {
                         alert(xhr.responseJSON.message);
@@ -205,8 +235,20 @@
                 });
             });
 
-            
+            // Category filtering
+            $('#category-filter').change(function() {
+                const selectedCategoryId = $(this).val();
+
+                $('.product-item').each(function() {
+                    const productCategoryId = $(this).data('category-id');
+
+                    if (!selectedCategoryId || productCategoryId == selectedCategoryId) {
+                        $(this).show(); // Show product if matches category or all categories
+                    } else {
+                        $(this).hide(); // Hide product if it doesn't match
+                    }
+                });
+            });
         });
     </script>
-
 @endsection

@@ -39,8 +39,8 @@
                 </li> --}}
 
                 <li class="nav-item">
-                    <a href="{{ url('staff/dashboard') }}" class="nav-link">
-                        <i class="nav-icon bi bi-circle"></i>
+                    <a href="{{ url('/staff/order-dashboard') }}" class="nav-link"> <i
+                            class="nav-icon bi bi-circle"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
@@ -63,18 +63,20 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{url('/staff/orders')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <a href="{{ url('/staff/orders') }}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                 <p>All Orders</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{url('staff/pending-orders')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                <p>Pending Orders</p>
+                            <a href="{{ url('staff/pending-orders') }}" class="nav-link"> <i
+                                    class="nav-icon bi bi-circle"></i>
+                                <p>All Pending Orders</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{url('staff/completed-orders')}}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                <p>Completed Orders</p>
+                            <a href="{{ url('staff/completed-orders') }}" class="nav-link"> <i
+                                    class="nav-icon bi bi-circle"></i>
+                                <p>All Completed Orders</p>
                             </a>
                         </li>
 

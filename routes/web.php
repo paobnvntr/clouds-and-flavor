@@ -97,6 +97,7 @@ Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
 
     Route::controller(POSController::class)->group(function () {
         Route::get('/staff/pos', 'index')->name('staff.pos.index');
+        Route::get('/staff/pos/filter-products', 'filterProducts')->name('staff.pos.filterProducts');
         Route::get('/staff/pos/order-success', 'orderSuccess')->name('staff.pos.order-success');
         Route::post('/staff/pos/add-to-cart', 'addToCart')->name('staff.pos.addToCart');
         Route::get('/staff/pos/cart-items', 'getCartItems')->name('staff.pos.getCartItems');
@@ -108,10 +109,17 @@ Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
         Route::post('/pos/remove-cart-item', 'removeCartItem')->name('staff.pos.removeCartItem');
         Route::get('/staff/order-success', 'orderSuccess')->name('staff.pos.orderSuccess');
     });
-
+    Route::get('/staff/order-dashboard', [StaffController::class, 'dashboard'])->name('staff.orders.dashboard');
     Route::get('/staff/orders', [StaffController::class, 'orderList'])->name('staff.orders.index');
     Route::get('/staff/pending-orders', [StaffController::class, 'pendingList'])->name('staff.orders.pending-order');
     Route::get('/staff/completed-orders', [StaffController::class, 'completedList'])->name('staff.orders.completed-order');
+    Route::get('/staff/online-orders', [StaffController::class, 'onlinePending'])->name('staff.orders.online-pending');
+    Route::get('/staff/pos-orders', [StaffController::class, 'posPending'])->name('staff.orders.pos-pending');
+    Route::get('/staff/deliver-or-pickup', [StaffController::class, 'dORp'])->name('staff.orders.deliver-or-pickup');
+    Route::get('/staff/deliver-or-pickup-completed', [StaffController::class, 'dORpCompleted'])->name('staff.orders.deliver-or-pickup-completed');
+    Route::post('/staff/orders/complete', [StaffController::class, 'completeOrder'])->name('staff.orders.complete');
+    Route::post('/staff/posorders/complete', [StaffController::class, 'completePosOrder'])->name('staff.orders.pos-complete');
+    Route::post('/staff/orders/complete/{id}', [StaffController::class, 'dORpComplete'])->name('staff.orders.dORpcomplete');
 
 });
 
@@ -148,6 +156,7 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
 
     Route::controller(OrderController::class)->group(function () {
         Route::get('/my-order', 'index')->name('user.order.index');
+        Route::post('/orders/pay', 'payOrder')->name('user.orders.pay');
     });
 });
 

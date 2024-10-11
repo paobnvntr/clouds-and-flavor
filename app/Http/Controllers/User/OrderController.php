@@ -17,7 +17,25 @@ class OrderController extends Controller
         return view('user.order.index', compact('orders'));
     }
 
+    public function payOrder(Request $request)
+    {
+        $order = Order::find($request->order_id);
 
+        if ($order && $order->payment_status == 'unpaid') {
+            // Update payment status to paid and save reference number
+            $order->payment_status = 'paid';
+            $order->reference_number = $request->reference_number;
+            // Update the delivery option if provided
+            if ($request->has('delivery_option')) {
+                $order->delivery_option = $request->delivery_option;
+            }
+            
+            $order->save();
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false]);
+    }
 
 
     public function placeOrder(Request $request)
