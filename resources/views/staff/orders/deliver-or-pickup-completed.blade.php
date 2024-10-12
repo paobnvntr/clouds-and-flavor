@@ -19,6 +19,7 @@
                     <th>Reference #</th>
                     <th>Delivery Option</th>
                     <th>Status</th>
+                    <th>Voucher</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -33,6 +34,17 @@
                         <td>{{ ucfirst($order->reference_number) }}</td>
                         <td>{{ ucfirst($order->delivery_option) }}</td>
                         <td>{{ ucfirst($order->status) }}</td>
+                        <td>
+                            @if ($order->voucher_id)
+                                @php
+                                    $voucher = $order->voucher;
+                                @endphp
+
+                                {{ $voucher->code }} - ₱{{ number_format($voucher->discount, 2) }}
+                            @else
+                                None
+                            @endif
+                        </td>
                         <td>
                             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal"
                                 onclick="showOrderDetails({{ $order->id }}, 'user')">View</button>

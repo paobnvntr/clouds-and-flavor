@@ -145,11 +145,13 @@
                                                     <p><strong>Total Amount:</strong>
                                                         ₱{{ number_format($totalAmount - $discountAmount, 2) }}</p>
                                                     <!-- Display total amount after discount -->
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Close</button>
-                                                </div>
+                                                </div>  
+                                                @if ($order->status != 'completed')
+                                                    <button class="btn btn-success complete-order-btn"
+                                                        data-id="{{ $order->id }}">
+                                                        Complete Order
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
