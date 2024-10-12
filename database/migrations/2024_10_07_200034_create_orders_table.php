@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('payment_method');
             $table->string('status')->default('pending');
             $table->decimal('total_price', 10, 2);
+            $table->foreignId('voucher_id')->nullable()->constrained()->after('total_price');
             $table->timestamps();
         });
     }

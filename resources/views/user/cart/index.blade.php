@@ -49,9 +49,19 @@
                                             <td class="shoping__cart__item">
                                                 <img src="{{ asset('/' . $cart->product->image) }}" alt="">
                                                 <h5>{{ $cart->product->product_name }}</h5>
+                                                @if ($cart->product->on_sale)
+                                                    <span style="color:red;">On Sale!</span>
+                                                    <br>
+                                                    <del>₱{{ number_format($cart->product->price, 2) }}</del>
+                                                    <br>
+                                                    <strong>₱{{ number_format($cart->product->sale_price, 2) }}</strong>
+                                                @else
+                                                    <span>₱{{ number_format($cart->product->price, 2) }}</span>
+                                                @endif
                                             </td>
                                             <td class="shoping__cart__price">
-                                                ₱<span class="price">{{ number_format($cart->product->price, 2) }}</span>
+                                                ₱<span
+                                                    class="price">{{ number_format($cart->product->on_sale ? $cart->product->sale_price : $cart->product->price, 2) }}</span>
                                             </td>
                                             <td class="shoping__cart__quantity">
                                                 <div class="quantity">
@@ -66,7 +76,7 @@
                                             </td>
                                             <td class="shoping__cart__total">
                                                 ₱<span
-                                                    class="total">{{ number_format($cart->product->price * $cart->quantity, 2) }}</span>
+                                                    class="total">{{ number_format(($cart->product->on_sale ? $cart->product->sale_price : $cart->product->price) * $cart->quantity, 2) }}</span>
                                             </td>
                                             <td class="shoping__cart__item__close">
                                                 <button class="btn btn-danger btn-sm remove-item"
@@ -93,8 +103,9 @@
                     <div class="shoping__continue">
                         <div class="shoping__discount">
                             <h5>Discount Codes</h5>
-                            <form action="#">
-                                <input type="text" placeholder="Enter your coupon code">
+                            <form id="voucher-form">
+                                @csrf
+                                <input type="text" name="voucher_code" placeholder="Enter your coupon code">
                                 <button type="submit" class="site-btn">APPLY COUPON</button>
                             </form>
                         </div>
@@ -105,12 +116,19 @@
                         <h5>Cart Total</h5>
                         <ul>
                             <li>Subtotal <span>₱<span
-                                        id="subtotal">{{ $carts->isEmpty()? '0.00': number_format($carts->sum(function ($cart) {return $cart->product->price * $cart->quantity;}),2) }}</span></span>
-                            </li>
+                                        id="subtotal">{{ number_format($totals['subtotal'], 2) }}</span></span></li>
+                            @if (session('applied_voucher'))
+                                <li>Discount <span>-₱<span
+                                            id="discount">{{ number_format($totals['discount'], 2) }}</span></span></li>
+                            @endif
                             <li>Total <span>₱<span
-                                        id="grand-total">{{ $carts->isEmpty()? '0.00': number_format($carts->sum(function ($cart) {return $cart->product->price * $cart->quantity;}),2) }}</span></span>
-                            </li>
+                                        id="grand-total">{{ number_format($totals['grandTotal'], 2) }}</span></span></li>
                         </ul>
+                        @if (session('applied_voucher'))
+                            <p>Voucher applied: {{ session('applied_voucher')->code }}
+                                <button id="remove-voucher" class="btn btn-sm btn-danger">Remove</button>
+                            </p>
+                        @endif
                         <a href="{{ route('user.cart.checkout') }}" class="primary-btn">PROCEED TO CHECKOUT</a>
                     </div>
                 </div>
@@ -122,93 +140,130 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Function to update totals dynamically
             function updateTotal() {
                 let subtotal = 0;
-                $('tbody tr').each(function() {
-                    let price = parseFloat($(this).find('.price').text().replace(/[^0-9.-]+/g, ""));
-                    let quantity = parseInt($(this).find('input[name="quantity"]').val());
-
-                    if (!isNaN(price) && !isNaN(quantity)) {
-                        let total = price * quantity;
-                        $(this).find('.total').text(total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-                        subtotal += total;
-                    }
+                $('.shoping__cart__total').each(function() {
+                    subtotal += parseFloat($(this).find('.total').text().replace(/[^0-9.-]+/g, ""));
                 });
                 $('#subtotal').text(subtotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-                $('#grand-total').text(subtotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+
+                // Fetch the current discount from the server
+                $.get('/cart/get-totals', function(response) {
+                    // Ensure discount and grandTotal are numbers
+                    let discount = parseFloat(response.discount) || 0;
+                    let grandTotal = parseFloat(response.grandTotal) || 0;
+
+                    $('#discount').text(discount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                    $('#grand-total').text(grandTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                });
             }
 
-            // Update quantity on button click
             $('.qtybtn').on('click', function() {
                 let $input = $(this).siblings('input[name="quantity"]');
                 let currentVal = parseInt($input.val());
-                let newVal;
-
-                // Increment by 2 when the increment button is clicked
-                if ($(this).hasClass('inc')) {
-                    newVal = currentVal + 1;
-                } else {
-                    // Decrement by 1 (or ensure it does not go below 1)
-                    newVal = currentVal > 1 ? currentVal - 1 : 1;
-                }
-
+                let newVal = $(this).hasClass('inc') ? currentVal + 1 : (currentVal > 1 ? currentVal - 1 : 1);
                 $input.val(newVal).trigger('change');
             });
 
-            // Update price and stock when quantity changes
             $('input[name="quantity"]').on('change', function() {
-                let productId = $(this).data('product-id');
+                let $row = $(this).closest('tr');
+                let cartId = $(this).data('product-id');
                 let newQuantity = $(this).val();
                 $.ajax({
                     url: '/cart/update',
-                    method: 'POST',
+                    type: 'POST',
                     data: {
-                        _token: '{{ csrf_token() }}',
-                        product_id: productId,
-                        quantity: newQuantity
+                        product_id: cartId,
+                        quantity: newQuantity,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $row.find('.shoping__cart__quantity input').val(response.newQuantity);
+                            $row.find('.shoping__cart__total .total').text(response.newTotalPrice);
+                            updateTotal();
+                        } else {
+                            console.error(response.message);
+                            $row.find('.shoping__cart__quantity input').val($row.find('.shoping__cart__quantity input').data('original-quantity'));
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseJSON.message);
+                        $row.find('.shoping__cart__quantity input').val($row.find('.shoping__cart__quantity input').data('original-quantity'));
+                    }
+                });
+            });
+
+            $('.remove-item').on('click', function() {
+                let $row = $(this).closest('tr');
+                let cartId = $(this).data('product-id');
+                $.ajax({
+                    url: '/cart/remove',
+                    type: 'POST',
+                    data: {
+                        product_id: cartId,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $row.remove();
+                            updateTotal();
+                        } else {
+                            console.error(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseJSON.message);
+                    }
+                });
+            });
+
+            $('#voucher-form').on('submit', function(e) {
+                e.preventDefault();
+                let voucherCode = $(this).find('input[name="voucher_code"]').val();
+                $.ajax({
+                    url: '/cart/apply-voucher',
+                    type: 'POST',
+                    data: {
+                        voucher_code: voucherCode,
+                        _token: $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
                         if (response.success) {
                             updateTotal();
+                            // Optionally reload the page to refresh the cart totals
+                            location.reload();
                         } else {
-                            alert('Error: ' + response.message);
+                            alert(response.message);
                         }
                     },
                     error: function(xhr) {
-                        alert('Error updating cart.');
+                        console.error(xhr.responseJSON.message);
                     }
                 });
             });
 
-            // Remove item from cart and update stock
-            $('.remove-item').on('click', function() {
-                let productId = $(this).data('product-id');
+            $('#remove-voucher').on('click', function() {
                 $.ajax({
-                    url: '/cart/remove',
-                    method: 'POST',
+                    url: '/cart/remove-voucher',
+                    type: 'POST',
                     data: {
-                        _token: '{{ csrf_token() }}',
-                        product_id: productId
+                        _token: $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
                         if (response.success) {
-                            window.location.reload();
+                            updateTotal();
+                            // Optionally reload the page to refresh the cart totals
+                            location.reload();
                         } else {
-                            alert('Error: ' + response.message);
+                            alert(response.message);
                         }
                     },
                     error: function(xhr) {
-                        alert('Error removing item from cart.');
+                        console.error(xhr.responseJSON.message);
                     }
                 });
             });
-
-            // Initial grand total calculation
-            updateTotal();
         });
     </script>
-
-
-
 @endsection

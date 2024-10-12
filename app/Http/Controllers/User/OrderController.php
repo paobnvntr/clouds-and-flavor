@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -29,7 +32,7 @@ class OrderController extends Controller
             if ($request->has('delivery_option')) {
                 $order->delivery_option = $request->delivery_option;
             }
-            
+
             $order->save();
             return response()->json(['success' => true]);
         }
@@ -40,59 +43,80 @@ class OrderController extends Controller
 
     public function placeOrder(Request $request)
     {
-        // Validate the incoming request
         $request->validate([
             'address' => 'required|string|max:255',
             'phone_number' => 'required|string|max:15',
             'payment_method' => 'required|string',
+            'grand_total' => 'required|numeric|min:0',
         ]);
 
-        // Fetch the cart data for the current user
         $carts = Cart::where('user_id', Auth::id())->get();
 
         if ($carts->isEmpty()) {
             return redirect()->route('user.cart.index')->with('error', 'Your cart is empty.');
         }
 
-        // Calculate the total price
-        $totalPrice = $carts->sum(function ($cart) {
-            return $cart->product->price * $cart->quantity;
-        });
+        $subtotal = $carts->sum('total_price');
+        $grandTotal = $request->grand_total;
+        $discount = $subtotal - $grandTotal;
 
-        // Create the order
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'address' => $request->address,
-            'phone_number' => $request->phone_number,
-            'payment_method' => $request->payment_method,
-            'total_price' => $totalPrice,
-            'status' => 'pending',
-        ]);
+        DB::beginTransaction();
 
-        // Loop through the cart items to create order items and decrement stock
-        foreach ($carts as $cart) {
-            // Check if the product has enough stock
-            $product = $cart->product;
-            if ($product->stock < $cart->quantity) {
-                return redirect()->route('user.cart.index')->with('error', 'Insufficient stock for ' . $product->product_name);
+        try {
+            $orderData = [
+                'user_id' => Auth::id(),
+                'address' => $request->address,
+                'phone_number' => $request->phone_number,
+                'payment_method' => $request->payment_method,
+                'total_price' => $grandTotal,
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'status' => 'pending',
+            ];
+
+            // Check if a voucher was applied
+            $appliedVoucher = session('applied_voucher');
+            if ($appliedVoucher) {
+                $voucher = Voucher::find($appliedVoucher->id);
+                if ($voucher) {
+                    $orderData['voucher_id'] = $voucher->id;
+                    $voucher->increment('times_used');
+                    if ($voucher->usage_limit && $voucher->times_used >= $voucher->usage_limit) {
+                        $voucher->update(['is_active' => false]);
+                    }
+                }
             }
 
-            // Decrement the stock by the exact quantity in the cart
-            $product->stock -= $cart->quantity;
-            $product->save(); // Save the updated stock
+            $order = Order::create($orderData);
 
-            // Create order items
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $cart->product_id,
-                'quantity' => $cart->quantity,
-                'price' => $cart->product->price,
-            ]);
+            foreach ($carts as $cart) {
+                $product = $cart->product;
+                if ($product->stock < $cart->quantity) {
+                    throw new \Exception('Insufficient stock for ' . $product->product_name);
+                }
+
+                $product->stock -= $cart->quantity;
+                $product->save();
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $cart->product_id,
+                    'quantity' => $cart->quantity,
+                    'price' => $cart->product->price,
+                ]);
+            }
+
+            Cart::where('user_id', Auth::id())->delete();
+
+            // Clear the applied voucher from the session
+            session()->forget('applied_voucher');
+
+            DB::commit();
+
+            return redirect()->route('user.order.index')->with('success', 'Order placed successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('user.cart.index')->with('error', $e->getMessage());
         }
-
-        // Clear the cart after placing the order
-        Cart::where('user_id', Auth::id())->delete();
-
-        return redirect()->route('user.order.index')->with('success', 'Order placed successfully.');
     }
 }

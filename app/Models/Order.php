@@ -15,6 +15,7 @@ class Order extends Model
         'phone_number',
         'payment_method',
         'total_price',
+        'voucher_id',
         'status',
     ];
 
@@ -31,5 +32,10 @@ class Order extends Model
     public function getOrderItemsCountAttribute()
     {
         return $this->orderItems()->count();
+    }
+
+    public function voucher()
+    {
+        return $this->belongsTo(Voucher::class);
     }
 }
