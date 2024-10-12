@@ -77,6 +77,8 @@
                                             <button class="btn btn-success" data-bs-toggle="modal"
                                                 data-bs-target="#paymentModal" data-order-id="{{ $order->id }}"
                                                 data-payment-method="{{ $order->payment_method }}">Pay</button>
+                                        @else
+                                           
                                         @endif
                                     </td>
                                 </tr>
@@ -94,14 +96,12 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="paymentModalLabel">Complete Payment (enter reference #)</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <h6>Payment Method:</h6>
                     <strong>
                         <p id="paymentMethod"></p>
                     </strong>
-                    <h6>QR Code:</h6>
                     <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid mb-3" />
 
                     <h6>Reference Number:</h6>
@@ -154,14 +154,15 @@
                     <h6>Order Items:</h6>
                     <ul id="orderItemsList" class="list-group"></ul>
 
-                    <h6>Total Price:</h6>
-                    <strong>
-                        <p id="orderTotalPrice"></p>
-                    </strong>
-
+                    <br>
                     <h6>Voucher Applied:</h6>
                     <strong>
                         <p id="orderVoucher"></p>
+                    </strong>
+
+                    <h6>Total Price:</h6>
+                    <strong>
+                        <p id="orderTotalPrice"></p>
                     </strong>
                 </div>
                 <div class="modal-footer">
@@ -189,8 +190,7 @@
 
                 // Voucher logic
                 if (order.voucher) {
-                    modal.find('#orderVoucher').text(order.voucher.code + ' (₱' + number_format(order
-                        .voucher.discount, 2) + ' off)');
+                    modal.find('#orderVoucher').text(order.voucher.code + ' (₱' + number_format(order.voucher.discount, 2) + ' off)');
                 } else {
                     modal.find('#orderVoucher').text('No voucher applied');
                 }
@@ -199,10 +199,7 @@
                 var orderItemsList = modal.find('#orderItemsList');
                 orderItemsList.empty(); // Clear previous items
                 $.each(order.order_items, function(index, item) {
-                    orderItemsList.append('<li class="list-group-item">' +
-                        item.product.product_name + ' - x' +
-                        item.quantity + ' @ ₱' +
-                        number_format(item.product.price, 2) + '</li>');
+                    orderItemsList.append('<li class="list-group-item">' + item.product.product_name + ' - x' + item.quantity + ' @ ₱' + number_format(item.product.price, 2) + '</li>');
                 });
             });
 
@@ -215,9 +212,17 @@
                 // Populate payment modal fields
                 $('#paymentMethod').text(paymentMethod);
                 $('#orderId').val(orderId);
+                $('#payNowBtn').prop('disabled', true);
+                $('#referenceNumber').val('');
 
                 // Simulate fetching a QR code image based on the payment method
-                $('#qrCodeImage').attr('src', '/path/to/qr/' + paymentMethod + '.png');
+                $('#qrCodeImage').attr('src', '/assets/img/' + paymentMethod + '.jfif');
+            });
+
+            // Enable/disable Pay Now button based on Reference Number input
+            $('#referenceNumber').on('input', function() {
+                var referenceNumber = $(this).val();
+                $('#payNowBtn').prop('disabled', !referenceNumber.trim());
             });
 
             // Complete payment action
@@ -228,32 +233,32 @@
 
                 // Proceed with payment submission
                 $.ajax({
-                    url: '/orders/' + orderId + '/pay',
-                    method: 'POST',
+                    url: '/orders/pay', 
+                    type: 'POST',
                     data: {
+                        order_id: orderId,
                         reference_number: referenceNumber,
                         delivery_option: deliveryOption,
                         _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
-                        if (response.success) {
-                            alert('Payment successful!');
-                            $('#paymentModal').modal('hide');
-                        } else {
-                            alert('Payment failed. Please try again.');
-                        }
+                        $('#paymentModal').modal('hide');
+                        alert('Payment sent Successfully.');
+                        location.reload(); // Refresh the page to see updated order status
+                    },
+                    error: function(xhr) {
+                        // Handle error
+                        alert('Payment could not be processed. Please try again.');
                     }
                 });
             });
         });
 
-        // Function to format numbers as currency
         function number_format(number, decimals) {
-            return Number(number).toLocaleString(undefined, {
+            return Number(number).toLocaleString('en-US', {
                 minimumFractionDigits: decimals,
                 maximumFractionDigits: decimals
             });
         }
     </script>
-
 @endsection
