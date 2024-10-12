@@ -10,7 +10,6 @@ use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
@@ -93,39 +92,28 @@ class CartController extends Controller
         ]);
     }
 
-
-
-
     public function addToCart(Request $request)
     {
-        // Validate incoming request data
         $request->validate([
             'product_id' => 'required|exists:products,id',
         ]);
 
-        // Retrieve the product
         $product = Product::findOrFail($request->product_id);
-
-        // Determine the price to use (sale price if on sale, otherwise regular price)
         $price = $product->on_sale ? $product->sale_price : $product->price;
 
-        // Check if stock is available
         if ($product->stock > 0) {
-            // Check if the product already exists in the cart
             $cartItem = Cart::where('user_id', Auth::id())
                 ->where('product_id', $product->id)
                 ->first();
 
             if ($cartItem) {
-                // If the product is already in the cart, increment the quantity
                 $cartItem->increment('quantity');
             } else {
-                // Directly insert a new entry into the carts table with the discounted price
                 DB::table('carts')->insert([
-                    'user_id' => Auth::id(), // Assuming user is authenticated
+                    'user_id' => Auth::id(),
                     'product_id' => $product->id,
-                    'quantity' => 1, // Default quantity is 1
-                    'price' => $price, // Use sale price if on sale
+                    'quantity' => 1,
+                    'price' => $price,
                     'total_price' => $price,
                     'image' => $product->image,
                     'created_at' => now(),
@@ -133,18 +121,13 @@ class CartController extends Controller
                 ]);
             }
 
-            // Set a flash message for success
             session()->flash('message', 'Product added to cart successfully.');
 
-            return redirect()->back(); // Redirect back to the previous page
+            return redirect()->back();
         } else {
-            // If stock is 0, show an out-of-stock alert
             return redirect()->back()->with('error', 'Product is out of stock.');
         }
     }
-
-
-
 
     public function getCartCount()
     {
@@ -154,27 +137,20 @@ class CartController extends Controller
 
     public function updateQuantity(Request $request)
     {
-        Log::info('Update Quantity Request Data:', $request->all());
-
-        // Validate the incoming request
         $request->validate([
             'product_id' => 'required|exists:carts,id,user_id,' . Auth::id(),
             'quantity' => 'required|integer|min:1',
         ]);
 
-        // Find the cart item for the authenticated user
         $cart = Cart::where('user_id', Auth::id())->where('id', $request->product_id)->first();
 
-        // Debug: Check if cart item is found
         if (!$cart) {
-            Log::error('Cart item not found for id: ' . $request->product_id);
             return response()->json(['success' => false, 'message' => 'Cart item not found.'], 404);
         }
 
         $newQuantity = $request->quantity;
-
-        // Check if the product has enough stock
         $product = Product::findOrFail($cart->product_id);
+
         if ($product->stock >= $newQuantity) {
             $cart->quantity = $newQuantity;
             $cart->total_price = $product->on_sale ? $product->sale_price * $newQuantity : $product->price * $newQuantity;
@@ -215,7 +191,6 @@ class CartController extends Controller
                 $discount = $voucher->discount;
             }
 
-            // Ensure discount doesn't exceed the maximum discount amount
             if ($voucher->max_discount !== null) {
                 $discount = min($discount, $voucher->max_discount);
             }
@@ -230,37 +205,24 @@ class CartController extends Controller
         ];
     }
 
-
-
     public function removeItem(Request $request)
     {
-        Log::info('Remove Item Request Data:', $request->all());
-
-        // Validate the incoming request
         $request->validate([
-            'product_id' => 'required|exists:carts,id,user_id,' . Auth::id(), // Now checking against cart id
+            'product_id' => 'required|exists:carts,id,user_id,' . Auth::id(),
         ]);
 
-        // Find the cart item for the authenticated user
         $cart = Cart::where('user_id', Auth::id())->where('id', $request->product_id)->first();
 
-        // Debug: Check if cart item is found
         if (!$cart) {
-            Log::error('Cart item not found for id: ' . $request->product_id);
             return response()->json(['success' => false, 'message' => 'Cart item not found.'], 404);
         }
 
-        // Restock the product
         $product = Product::findOrFail($cart->product_id);
         $product->increment('stock', $cart->quantity);
-
-        // Remove the cart item
         $cart->delete();
 
         return response()->json(['success' => true, 'message' => 'Item removed and stock updated.']);
     }
-
-
 
     public function checkout()
     {
@@ -270,23 +232,16 @@ class CartController extends Controller
             return redirect()->route('user.cart.index')->with('error', 'Your cart is empty.');
         }
 
-        // Calculate subtotal from the cart items
         $subtotal = $carts->sum('total_price');
-
-        // Get the applied voucher discount from the session
         $appliedVoucher = session('applied_voucher');
         $discount = $appliedVoucher ? $appliedVoucher['discount'] : 0;
-
-        // Calculate the grand total
         $grandTotal = $subtotal - $discount;
-
         $user = Auth::user();
 
         if (empty($user->address) || empty($user->phone_number)) {
             session()->flash('warning', 'Please update your address and phone number in your profile.');
         }
 
-        // Prepare totals array
         $totals = [
             'subtotal' => $subtotal,
             'discount' => $discount,

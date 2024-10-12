@@ -16,7 +16,11 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with(['orderItems.product'])->where('user_id', Auth::id())->get();
+        // Fetch orders along with order items, products, and the voucher if applied
+        $orders = Order::with(['orderItems.product', 'voucher'])
+            ->where('user_id', Auth::id())
+            ->get();
+
         return view('user.order.index', compact('orders'));
     }
 
