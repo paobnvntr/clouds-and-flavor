@@ -55,6 +55,7 @@
                     <th>Reference #</th>
                     <th>Delivery Option</th>
                     <th>Status</th>
+                    <th>Voucher</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -69,6 +70,17 @@
                         <td>{{ ucfirst($order->reference_number) }}</td>
                         <td>{{ ucfirst($order->delivery_option) }}</td>
                         <td>{{ ucfirst($order->status) }}</td>
+                        <td>
+                            @if ($order->voucher_id)
+                                @php
+                                    $voucher = $order->voucher;
+                                @endphp
+
+                                {{ $voucher->code }} - ₱{{ number_format($voucher->discount, 2) }}
+                            @else
+                                None
+                            @endif
+                        </td>
                         <td>
                             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal"
                                 onclick="showOrderDetails({{ $order->id }}, 'user')">View</button>
@@ -104,10 +116,10 @@
         function showOrderDetails(orderId, orderType) {
             const orderDetailsContent = document.getElementById('orderDetailsContent');
             orderDetailsContent.innerHTML = `<div class="text-center">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>`;
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>`;
 
             fetch(`/staff/orders/${orderType}/${orderId}`)
                 .then(response => {
@@ -124,33 +136,44 @@
                     }
 
                     let orderDetailsHtml = `
-                    <h5>Customer Details</h5>
-                    <p><strong>Name:</strong> ${order.customer_name || (order.user ? order.user.name : 'N/A')}</p>
-                    <p><strong>Address:</strong> ${order.address || 'N/A'}</p>
-                    <p><strong>Phone Number:</strong> ${order.phone_number || 'N/A'}</p>
-                    <p><strong>Payment Method:</strong> ${order.payment_method}</p>
-                    <p><strong>Total Price:</strong> ₱${(Number(order.total_price) || 0).toFixed(2)}</p>
-                    <p><strong>Status:</strong> ${order.status}</p>
-                    <p><strong>Delivery Option:</strong> ${order.delivery_option}</p>
-                    <h5>Order Items</h5>
-                    <ul class="list-group">`;
+                        <h5>Customer Details</h5>
+                        <p><strong>Name:</strong> ${order.customer_name || (order.user ? order.user.name : 'N/A')}</p>
+                        <p><strong>Address:</strong> ${order.address || 'N/A'}</p>
+                        <p><strong>Phone Number:</strong> ${order.phone_number || 'N/A'}</p>
+                        <p><strong>Payment Method:</strong> ${order.payment_method}</p>
+                        <p><strong>Total Price:</strong> ₱${(Number(order.total_price) || 0).toFixed(2)}</p>
+                        <p><strong>Status:</strong> ${order.status}</p>
+                        <p><strong>Delivery Option:</strong> ${order.delivery_option}</p>
+                        <h5>Order Items</h5>
+                        <ul class="list-group">`;
 
+                    // Loop through order items to display accurately
                     if (order.order_items) {
                         order.order_items.forEach(item => {
                             const productName = item.product ? item.product.product_name : 'Unknown Product';
+                            // Check if the item is on sale
+                            const itemPrice = item.product && item.product.on_sale ? item.product.sale_price :
+                                item.price;
+                            const itemTotal = (Number(itemPrice) || 0) * item.quantity;
+
                             orderDetailsHtml += `
-                            <li class="list-group-item">
-                                ${productName} (₱${(Number(item.price) || 0).toFixed(2)} x ${item.quantity}) = ₱${((Number(item.price) || 0) * item.quantity).toFixed(2)}
-                            </li>`;
+                                <li class="list-group-item">
+                                    ${productName} (₱${(Number(itemPrice) || 0).toFixed(2)} x ${item.quantity}) = ₱${itemTotal.toFixed(2)}
+                                </li>`;
                         });
                     }
 
+                    // Handle additional items if any
                     if (order.items) {
                         order.items.forEach(item => {
+                            // Check if the item is on sale
+                            const itemPrice = item.on_sale ? item.sale_price : item.price;
+                            const itemTotal = (Number(itemPrice) || 0) * item.quantity;
+
                             orderDetailsHtml += `
-                            <li class="list-group-item">
-                                ${item.product_name} (₱${(Number(item.price) || 0).toFixed(2)} x ${item.quantity}) = ₱${((Number(item.price) || 0) * item.quantity).toFixed(2)}
-                            </li>`;
+                                <li class="list-group-item">
+                                    ${item.product_name} (₱${(Number(itemPrice) || 0).toFixed(2)} x ${item.quantity}) = ₱${itemTotal.toFixed(2)}
+                                </li>`;
                         });
                     }
 
@@ -163,4 +186,6 @@
                 });
         }
     </script>
+
+
 @endsection

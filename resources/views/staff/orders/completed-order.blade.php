@@ -17,6 +17,7 @@
                     <th>Total Items</th>
                     <th>Total Price</th>
                     <th>Status</th>
+                    <th>Voucher</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -30,6 +31,17 @@
                             <td>{{ $order->order_items_count }}</td>
                             <td>₱{{ number_format($order->total_price, 2) }}</td>
                             <td>{{ ucfirst($order->status) }}</td>
+                            <td>
+                                @if ($order->voucher_id)
+                                    @php
+                                        $voucher = $order->voucher;
+                                    @endphp
+
+                                    {{ $voucher->code }} - ₱{{ number_format($voucher->discount, 2) }}
+                                @else
+                                    None
+                                @endif
+                            </td>
                             <td>
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal"
                                     onclick="showOrderDetails({{ $order->id }}, 'user')">View</button>
@@ -50,6 +62,7 @@
                     <th>Total Items</th>
                     <th>Total Price</th>
                     <th>Status</th>
+                    <th>Voucher</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -63,6 +76,17 @@
                             <td>{{ $order->items->count() }}</td>
                             <td>₱{{ number_format($order->total_price, 2) }}</td>
                             <td>{{ ucfirst($order->status) }}</td>
+                            <td>
+                                @if ($order->voucher_id)
+                                    @php
+                                        $voucher = $order->voucher;
+                                    @endphp
+
+                                    {{ $voucher->code }} - ₱{{ number_format($voucher->discount, 2) }}
+                                @else
+                                    None
+                                @endif
+                            </td>
                             <td>
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal"
                                     onclick="showOrderDetails({{ $order->id }}, 'pos')">View</button>
@@ -96,6 +120,10 @@
     </div>
 
     <script>
+        function formatCurrency(value) {
+            return '₱' + Number(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
         function showOrderDetails(orderId, orderType) {
             const orderDetailsContent = document.getElementById('orderDetailsContent');
             orderDetailsContent.innerHTML = `<div class="text-center">
@@ -124,27 +152,38 @@
                         <p><strong>Address:</strong> ${order.address || 'N/A'}</p>
                         <p><strong>Phone Number:</strong> ${order.phone_number || 'N/A'}</p>
                         <p><strong>Payment Method:</strong> ${order.payment_method}</p>
-                        <p><strong>Total Price:</strong> ₱${(Number(order.total_price) || 0).toFixed(2)}</p>
+                        <p><strong>Total Price:</strong> ${formatCurrency(Number(order.total_price) || 0)}</p>
                         <p><strong>Status:</strong> ${order.status}</p>
                         <h5>Order Items</h5>
                         <ul class="list-group">`;
 
+                    // Loop through order items to display accurately
                     if (order.order_items) {
                         order.order_items.forEach(item => {
                             const productName = item.product ? item.product.product_name : 'Unknown Product';
+                            // Determine the price based on whether the item is on sale
+                            const price = item.product && item.product.on_sale ? item.product.sale_price : item
+                                .price;
+                            const total = (Number(price) || 0) * item.quantity;
+
                             orderDetailsHtml += `
                                 <li class="list-group-item">
-                                    ${productName} (₱${(Number(item.price) || 0).toFixed(2)} x ${item.quantity}) = ₱${((Number(item.price) || 0) * item.quantity).toFixed(2)}
+                                    ${productName} (${formatCurrency(Number(price) || 0)} x ${item.quantity}) = ${formatCurrency(total)}
                                 </li>`;
                         });
                     }
 
+                    // Handle additional items if any
                     if (order.items) {
                         order.items.forEach(item => {
                             const productName = item.product ? item.product.product_name : 'Unknown Product';
+                            // Determine the price based on whether the item is on sale
+                            const price = item.on_sale ? item.sale_price : item.price;
+                            const total = (Number(price) || 0) * item.quantity;
+
                             orderDetailsHtml += `
                                 <li class="list-group-item">
-                                    ${productName} (₱${(Number(item.price) || 0).toFixed(2)} x ${item.quantity}) = ₱${((Number(item.price) || 0) * item.quantity).toFixed(2)}
+                                    ${productName} (${formatCurrency(Number(price) || 0)} x ${item.quantity}) = ${formatCurrency(total)}
                                 </li>`;
                         });
                     }
@@ -159,5 +198,6 @@
                 });
         }
     </script>
+
 
 @endsection

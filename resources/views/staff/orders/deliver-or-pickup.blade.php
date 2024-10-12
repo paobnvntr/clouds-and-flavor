@@ -20,6 +20,7 @@
                     <th>Reference #</th>
                     <th>Delivery Option</th>
                     <th>Status</th>
+                    <th>Vouchers</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -35,15 +36,29 @@
                         <td>{{ ucfirst($order->delivery_option) }}</td>
                         <td>{{ ucfirst($order->status) }}</td>
                         <td>
+                            @if ($order->voucher_id)
+                                @php
+                                    $voucher = $order->voucher;
+                                @endphp
+
+                                {{ $voucher->code }} - ₱{{ number_format($voucher->discount, 2) }}
+                            @else
+                                None
+                            @endif
+                        </td>
+                        <td>
                             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal"
                                 onclick="showOrderDetails({{ $order->id }}, 'user')">View</button>
                             <button class="btn btn-success btn-sm" onclick="completeOrder({{ $order->id }})">Complete
-                                Order</button>
+                            </button>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
+
+
+
 
         <!-- Pickup Orders Section -->
         <h4>:To Pickup Orders</h4>
@@ -58,6 +73,7 @@
                     <th>Reference #</th>
                     <th>Delivery Option</th>
                     <th>Status</th>
+                    <th>Vouchers</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -73,17 +89,26 @@
                         <td>{{ ucfirst($order->delivery_option) }}</td>
                         <td>{{ ucfirst($order->status) }}</td>
                         <td>
+                            @if ($order->voucher_id)
+                                @php
+                                    $voucher = $order->voucher;
+                                @endphp
+
+                                {{ $voucher->code }} - ₱{{ number_format($voucher->discount, 2) }}
+                            @else
+                                None
+                            @endif
+                        </td>
+                        <td>
                             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal"
                                 onclick="showOrderDetails({{ $order->id }}, 'user')">View</button>
                             <button class="btn btn-success btn-sm" onclick="completeOrder({{ $order->id }})">Complete
-
+                            </button>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-
-
 
         <!-- Modal for Viewing Order Details -->
         <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
@@ -108,6 +133,14 @@
     </div>
 
     <script>
+        // Helper function to format numbers with commas and two decimal places
+        function formatCurrency(value) {
+            return '₱' + Number(value).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
         function showOrderDetails(orderId, orderType) {
             const orderDetailsContent = document.getElementById('orderDetailsContent');
             orderDetailsContent.innerHTML = `<div class="text-center">
@@ -136,27 +169,33 @@
                         <p><strong>Address:</strong> ${order.address || 'N/A'}</p>
                         <p><strong>Phone Number:</strong> ${order.phone_number || 'N/A'}</p>
                         <p><strong>Payment Method:</strong> ${order.payment_method}</p>
-                        <p><strong>Total Price:</strong> ₱${(Number(order.total_price) || 0).toFixed(2)}</p>
                         <p><strong>Status:</strong> ${order.status}</p>
                         <p><strong>Delivery Option:</strong> ${order.delivery_option}</p>
+                        <p><strong>Total Price:</strong> ${formatCurrency(order.total_price)}</p>
                         <h5>Order Items</h5>
                         <ul class="list-group">`;
 
+                    // Loop through order items to display accurately
                     if (order.order_items) {
                         order.order_items.forEach(item => {
                             const productName = item.product ? item.product.product_name : 'Unknown Product';
+                            // Determine price based on sale status
+                            const itemPrice = item.product && item.product.on_sale ?
+                                item.product.sale_price : item.price;
+
                             orderDetailsHtml += `
                                 <li class="list-group-item">
-                                    ${productName} (₱${(Number(item.price) || 0).toFixed(2)} x ${item.quantity}) = ₱${((Number(item.price) || 0) * item.quantity).toFixed(2)}
+                                    ${productName} (${formatCurrency(itemPrice)} x ${item.quantity}) = ${formatCurrency((itemPrice * item.quantity))}
                                 </li>`;
                         });
                     }
 
                     if (order.items) {
                         order.items.forEach(item => {
+                            const itemPrice = item.on_sale ? item.sale_price : item.price; // Check if on sale
                             orderDetailsHtml += `
                                 <li class="list-group-item">
-                                    ${item.product_name} (₱${(Number(item.price) || 0).toFixed(2)} x ${item.quantity}) = ₱${((Number(item.price) || 0) * item.quantity).toFixed(2)}
+                                    ${item.product_name} (${formatCurrency(itemPrice)} x ${item.quantity}) = ${formatCurrency((itemPrice * item.quantity))}
                                 </li>`;
                         });
                     }
@@ -170,6 +209,7 @@
                 });
         }
     </script>
+
 
     <script>
         function completeOrder(orderId) {

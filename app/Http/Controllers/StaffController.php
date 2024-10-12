@@ -115,11 +115,12 @@ class StaffController extends Controller
     {
         $orders = Order::where('status', 'pending')
             ->where('payment_status', 'paid')
-            ->with('user', 'orderItems.product') // Eager loading to optimize performance
+            ->with('user', 'orderItems.product', 'voucher') // Corrected to use 'voucher'
             ->get();
 
         return view('staff.orders.online-pending', compact('orders'));
     }
+
 
     public function posPending()
     {
@@ -153,13 +154,13 @@ class StaffController extends Controller
         // Count completed delivery orders with status 'completed' and delivery option 'to-deliver'
         $toDeliverOrdersCount = Order::where('status', 'completed')
             ->where('delivery_option', 'to-deliver')
-            ->with('user')
+            ->with('user', 'voucher')
             ->get();
 
         // Count completed pickup orders with status 'completed' and delivery option 'pick-up'
         $pickUpOrdersCount = Order::where('status', 'completed')
             ->where('delivery_option', 'pick-up')
-            ->with('user')
+            ->with('user', 'voucher')
             ->get();
 
         // Ensure both variables are being passed to the view
