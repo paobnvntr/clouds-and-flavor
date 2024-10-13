@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AddOn;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -71,9 +72,11 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('addOns')->findOrFail($id); // Load the product with its add-ons
         $categories = Category::where('status', 0)->get(); // Fetch only available categories
-        return view('admin.products.edit', compact('product', 'categories'));
+        $addons = AddOn::all(); // Fetch only available add-ons
+
+        return view('admin.products.edit', compact('product', 'categories', 'addons'));
     }
 
     /**
@@ -91,6 +94,8 @@ class ProductController extends Controller
             'status' => 'required|in:0,1',
             'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'addons' => 'array', 
+            'addons.*' => 'exists:add_ons,id', 
         ]);
 
         // Update product details
@@ -114,10 +119,19 @@ class ProductController extends Controller
         // If no new image is uploaded, retain the existing image in the database
         // No need to assign $product->image here
 
+        // Save the product
         $product->save();
+
+        // Sync the selected add-ons
+        if ($request->has('addons')) {
+            $product->addOns()->sync($request->addons); // Assuming you have a many-to-many relationship
+        } else {
+            $product->addOns()->sync([]); // Clear all if no add-ons are selected
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
     }
+
 
     /**
      * Remove the specified resource from storage.

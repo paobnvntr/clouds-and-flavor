@@ -20,7 +20,7 @@
                 </div>
             </div>
         </div>
-        
+
         @if (session('success'))
             <div class="alert alert-success" style="display:none;">
                 {{ session('success') }}
@@ -32,7 +32,7 @@
                 {{ session('error') }}
             </div>
         @endif
-        
+
         <div class="app-content">
             <div class="container-fluid">
                 <div class="row">
@@ -50,6 +50,7 @@
                                 <th>Price</th>
                                 <th>Stock</th>
                                 <th>Status</th>
+                                <th>Add-ons</th>
                                 <th>Added On</th>
                                 <th>Actions</th>
                             </tr>
@@ -59,7 +60,8 @@
                                 <tr>
                                     <td>{{ $product->id }}</td>
                                     <td>
-                                        <img src="{{ asset($product->image) }}" alt="{{ $product->product_name }}" width="50">
+                                        <img src="{{ asset($product->image) }}" alt="{{ $product->product_name }}"
+                                            width="50">
                                     </td>
                                     <td>
                                         @if ($product->on_sale)
@@ -71,17 +73,33 @@
                                     <td>{{ $product->product_name }}</td>
                                     <td>₱{{ number_format($product->price, 2, '.', ',') }}</td>
                                     <td>
-                                        <input type="number" value="{{ $product->stock }}" class="stock-input form-control" data-product-id="{{ $product->id }}" style="width: 80px;">
+                                        <input type="number" value="{{ $product->stock }}" class="stock-input form-control"
+                                            data-product-id="{{ $product->id }}" style="width: 80px;">
                                     </td>
                                     <td>
-                                        <span class="status-badge badge {{ $product->stock == 0 ? 'bg-danger' : 'bg-success' }}">
+                                        <span
+                                            class="status-badge badge {{ $product->stock == 0 ? 'bg-danger' : 'bg-success' }}">
                                             {{ $product->stock == 0 ? 'Unavailable' : 'Available' }}
                                         </span>
                                     </td>
+                                    <td>
+                                        @if ($product->addOns->isNotEmpty())
+                                            <!-- Check if there are associated add-ons -->
+                                            @foreach ($product->addOns as $addOn)
+                                                <div>
+                                                    {{ $addOn->name }} - ₱{{ number_format($addOn->price, 2, '.', ',') }}
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <span>No Add-ons</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $product->created_at->format('Y-m-d H:i:s') }}</td>
                                     <td>
-                                        <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-warning">Edit</a>
-                                        <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" style="display:inline;">
+                                        <a href="{{ route('admin.products.edit', $product->id) }}"
+                                            class="btn btn-warning">Edit</a>
+                                        <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST"
+                                            style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger">Delete</button>
@@ -120,13 +138,16 @@
                     success: function(response) {
                         // Display flash message using jQuery
                         if (response.success) {
-                            $('.alert-success').text(response.success).fadeIn().delay(3000).fadeOut();
+                            $('.alert-success').text(response.success).fadeIn().delay(3000)
+                                .fadeOut();
 
                             // Update the status badge based on the new stock
                             if (newStock == 0) {
-                                statusBadge.removeClass('bg-success').addClass('bg-danger').text('Unavailable');
+                                statusBadge.removeClass('bg-success').addClass('bg-danger')
+                                    .text('Unavailable');
                             } else {
-                                statusBadge.removeClass('bg-danger').addClass('bg-success').text('Available');
+                                statusBadge.removeClass('bg-danger').addClass('bg-success')
+                                    .text('Available');
                             }
                         }
                     },

@@ -13,6 +13,8 @@ class AddOn extends Model
 
     public function products()
     {
-        return $this->belongsToMany(Product::class, 'product_add_on');
+        return $this->belongsToMany(Product::class, 'product_add_on', 'add_on_id', 'product_id');
     }
+
+    
 }
