@@ -224,4 +224,6 @@ class AdminController extends Controller
 
         return view('admin.total_earnings', compact('formattedEarnings', 'startDate', 'endDate'));
     }
+
+
 }

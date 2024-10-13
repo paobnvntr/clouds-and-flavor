@@ -45,7 +45,7 @@ class RoleMiddleware
             case 0:
                 return redirect()->route('dashboard');
             case 1:
-                return redirect()->route('staff.dashboard');
+                return redirect()->route('staff.orders.dashboard');
             case 2:
                 return redirect()->route('admin.dashboard');
         }

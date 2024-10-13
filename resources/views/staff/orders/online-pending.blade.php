@@ -79,35 +79,73 @@
                                                         aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <p><strong>{{ $order->created_at->format('Y-m-d H:i:s') ?? 'N/A' }}</strong>
-                                                    </p>
-                                                    <p><strong>Status:</strong> <span class="modal-status">{{ $order->status ?? 'N/A' }}</span></p>
+                                                    <p><strong>Order Date:</strong>
+                                                        {{ $order->created_at->format('Y-m-d H:i:s') ?? 'N/A' }}</p>
+                                                    <p><strong>Status:</strong> {{ $order->status ?? 'N/A' }}</p>
                                                     <p><strong>Payment Method:</strong>
                                                         {{ $order->payment_method ?? 'N/A' }}</p>
                                                     <p><strong>Address:</strong> {{ $order->address ?? 'N/A' }}</p>
                                                     <p><strong>Phone Number:</strong> {{ $order->phone_number ?? 'N/A' }}
                                                     </p>
                                                     <hr>
+
+                                                    <p><strong>Total Items:</strong>
+                                                        {{ $order->orderItems->sum('quantity') }}</p>
+                                                    @php
+                                                        $totalAmount = 0;
+                                                        $discountAmount = 0;
+                                                    @endphp
+
                                                     <ul>
-                                                        <p><strong>Total Items:</strong>
-                                                            {{ $order->orderItems->sum('quantity') }}</p>
-                                                        @php $totalAmount = 0; @endphp
                                                         @foreach ($order->orderItems as $item)
                                                             @php
-                                                                $itemTotal = $item->quantity * $item->price;
+                                                                // Check if the product is on sale
+                                                                $itemPrice = $item->product->on_sale
+                                                                    ? $item->product->sale_price
+                                                                    : $item->price;
+                                                                $itemTotal = $item->quantity * $itemPrice;
                                                                 $totalAmount += $itemTotal;
                                                             @endphp
-                                                            <li>{{ $item->product->product_name ?? 'N/A' }}
-                                                                ({{ $item->quantity }})
-                                                                -
-                                                                ₱{{ number_format($item->price, 2) }} =
-                                                                ₱{{ number_format($itemTotal, 2) }}</li>
+                                                            <li>
+                                                                {{ $item->product->product_name ?? 'N/A' }}
+                                                                ({{ $item->quantity }}) -
+                                                                ₱{{ number_format($itemPrice, 2) }} =
+                                                                ₱{{ number_format($itemTotal, 2) }}
+                                                            </li>
                                                         @endforeach
                                                     </ul>
                                                     <hr>
-                                                    <p><strong>Total Amount:</strong> ₱{{ number_format($totalAmount, 2) }}
+
+                                                    <!-- Vouchers Applied Section -->
+                                                    <p><strong>Vouchers Applied:</strong>
+                                                        @if ($order->voucher_id)
+                                                            <!-- Check if a voucher_id exists -->
+                                                            @php
+                                                                $voucher = $order->voucher; // Fetch the voucher related to this order
+                                                            @endphp
+                                                            <ul>
+                                                                <li>
+                                                                    {{ $voucher->code }} -
+                                                                    ₱{{ number_format($voucher->discount, 2) }}
+                                                                    @php
+                                                                        $discountAmount += $voucher->discount; // Add to total discount
+                                                                    @endphp
+                                                                </li>
+                                                            </ul>
+                                                        @else
+                                                            None
+                                                        @endif
                                                     </p>
-                                                </div>
+                                                    <hr>
+
+                                                    <p><strong>Total Amount Before Discount:</strong>
+                                                        ₱{{ number_format($totalAmount, 2) }}</p>
+                                                    <p><strong>Discount:</strong> ₱{{ number_format($discountAmount, 2) }}
+                                                    </p>
+                                                    <p><strong>Total Amount:</strong>
+                                                        ₱{{ number_format($totalAmount - $discountAmount, 2) }}</p>
+                                                    <!-- Display total amount after discount -->
+                                                </div>  
                                                 @if ($order->status != 'completed')
                                                     <button class="btn btn-success complete-order-btn"
                                                         data-id="{{ $order->id }}">
@@ -144,13 +182,15 @@
                         success: function(response) {
                             if (response.success) {
                                 // Update the order status in the table
-                                $('button[data-id="' + orderId + '"]').closest('tr').find('.order-status').text('completed');
+                                $('button[data-id="' + orderId + '"]').closest('tr').find(
+                                    '.order-status').text('completed');
 
                                 // Hide the Complete Order button
                                 $('button[data-id="' + orderId + '"]').hide();
 
                                 // Update modal status and close modal
-                                $('#orderModal' + orderId).find('.modal-status').text('completed');
+                                $('#orderModal' + orderId).find('.modal-status').text(
+                                    'completed');
                                 $('#orderModal' + orderId).modal('hide');
 
                                 alert('Order completed successfully!');

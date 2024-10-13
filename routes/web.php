@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\AddOnController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController;
-
+use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
@@ -65,6 +66,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/completed-order', 'completedOrder')->name('admin.orders.completed');
     });
 
+    Route::prefix('admin')->group(function () {
+        Route::resource('addons', AddOnController::class);
+    });
 
     Route::controller(AdminController::class)->group(function () {
         //User routes
@@ -85,6 +89,14 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
         Route::get('admin/total-earnings', 'showTotalEarnings')->name('admin.total_earnings');
     });
+    Route::controller(VoucherController::class)->group(function () {
+        Route::get('admin/vouchers', 'index')->name('admin.vouchers.index');
+        Route::get('admin/vouchers/create', 'create')->name('admin.vouchers.create');
+        Route::post('admin/vouchers/store', 'store')->name('admin.vouchers.store');
+        Route::get('admin/vouchers/edit/{id}', 'edit')->name('admin.vouchers.edit');
+        Route::patch('admin/vouchers/{id}', 'update')->name('admin.vouchers.update');
+        Route::delete('admin/vouchers/delete/{id}', 'destroy')->name('admin.vouchers.destroy');
+    });
 });
 
 
@@ -92,8 +104,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 //Group Staff routes role = 1
 Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
     Route::get('/staff/dashboard', [StaffController::class, 'index'])->name('staff.dashboard');
-    
-   
+
+
 
     Route::controller(POSController::class)->group(function () {
         Route::get('/staff/pos', 'index')->name('staff.pos.index');
@@ -120,7 +132,6 @@ Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
     Route::post('/staff/orders/complete', [StaffController::class, 'completeOrder'])->name('staff.orders.complete');
     Route::post('/staff/posorders/complete', [StaffController::class, 'completePosOrder'])->name('staff.orders.pos-complete');
     Route::post('/staff/orders/complete/{id}', [StaffController::class, 'dORpComplete'])->name('staff.orders.dORpcomplete');
-
 });
 
 
@@ -150,6 +161,9 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
         Route::post('/cart/remove', 'removeItem')->name('user.cart.remove');
         Route::get('/cart/checkout', 'checkout')->name('user.cart.checkout');
         Route::post('/cart/place-order', [OrderController::class, 'placeOrder'])->name('user.cart.placeOrder');
+        Route::post('/cart/remove-voucher',  'removeVoucher')->name('user.cart.remove-voucher');
+        Route::post('/cart/apply-voucher', 'applyVoucher')->name('user.cart.apply-voucher');
+        Route::get('/cart/get-totals', 'getTotals')->name('user.cart.get-totals');
         // Route::post('/cart/place-order', 'placeOrder')->name('user.cart.placeOrder');
     });
 

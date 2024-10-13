@@ -15,17 +15,6 @@
             {{ session('error') }}
         </div>
     @endif
-    <script>
-        // Function to hide alert after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
-                alert.style.opacity = 0; // Fade out the alert
-                setTimeout(() => alert.remove(), 500); // Remove after fade out
-            });
-        }, 3000); // 5000 milliseconds = 5 seconds
-    </script>
 
     <!-- Breadcrumb Section Begin -->
     <section class="breadcrumb-section set-bg" data-setbg="{{ asset('assets/img/deviceseries.jpg') }}">
@@ -45,13 +34,12 @@
     </section>
     <!-- Breadcrumb Section End -->
 
-
     <section class="checkout spad">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <h6><span class="icon_tag_alt"></span> Have a discount? <a href="#">Click here</a> to enter your
-                        code</h6>
+                    <h6><span class="icon_tag_alt"></span> Have a discount? <a href="#" data-toggle="modal"
+                            data-target="#voucherModal">Click here</a> to enter your code</h6>
                 </div>
             </div>
 
@@ -99,19 +87,22 @@
                                 <ul>
                                     @foreach ($carts as $cart)
                                         <li>{{ $cart->quantity }}x {{ $cart->product->product_name }}
-                                            <span>₱{{ number_format($cart->product->price * $cart->quantity, 2) }}</span>
+                                            <span>₱{{ number_format($cart->total_price, 2) }}</span>
                                         </li>
                                     @endforeach
                                 </ul>
                                 <div class="checkout__order__subtotal">Subtotal
-                                    <span>₱{{ number_format($totalPrice, 2) }}</span>
+                                    <span>₱{{ number_format($totals['subtotal'], 2) }}</span>
                                 </div>
+
                                 <div class="checkout__order__total">Discount
-                                    <span>-₱0.00</span>
+                                    <span>-₱{{ number_format($totals['discount'], 2) }}</span>
                                 </div>
                                 <div class="checkout__order__total">Total
-                                    <span>₱{{ number_format($totalPrice, 2) }}</span>
+                                    <span id="grandTotal">₱{{ number_format($totals['grandTotal'], 2) }}</span>
                                 </div>
+                                <input type="hidden" name="grand_total" id="grandTotalInput"
+                                    value="{{ $totals['grandTotal'] }}">
                                 <div class="checkout__input__checkbox">
                                     <label for="paymaya">
                                         Paymaya
@@ -137,5 +128,97 @@
             </div>
         </div>
     </section>
+
+    <!-- Voucher Modal -->
+    <div class="modal fade" id="voucherModal" tabindex="-1" role="dialog" aria-labelledby="voucherModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="voucherModalLabel">Apply Voucher</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="voucher-form">
+                        <div class="form-group">
+                            <label for="voucher_code">Voucher Code</label>
+                            <input type="text" name="voucher_code" class="form-control"
+                                placeholder="Enter your voucher code" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Apply</button>
+                        <button type="button" id="remove-voucher" class="btn btn-danger">Remove Voucher</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to hide alert after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
+                alert.style.opacity = 0; // Fade out the alert
+                setTimeout(() => alert.remove(), 500); // Remove after fade out
+            });
+        }, 3000); // 3000 milliseconds = 3 seconds
+
+        // AJAX for applying and removing vouchers
+        document.addEventListener('DOMContentLoaded', function() {
+            function updateTotal(data) {
+                document.querySelector('.checkout__order__subtotal span').textContent = `₱${data.subtotal}`;
+                document.querySelector('.checkout__order__total:nth-of-type(2) span').textContent =
+                    `-₱${data.discount}`;
+                document.querySelector('#grandTotal').textContent = `₱${data.grandTotal}`;
+                document.querySelector('#grandTotalInput').value = data.grandTotal;
+            }
+
+            // Handle voucher application
+            document.querySelector('#voucher-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                let voucherCode = this.querySelector('input[name="voucher_code"]').value;
+                fetch('/cart/apply-voucher', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            voucher_code: voucherCode
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateTotal(data);
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+            });
+
+            // Handle voucher removal
+            document.querySelector('#remove-voucher').addEventListener('click', function() {
+                fetch('/cart/remove-voucher', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateTotal(data);
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+            });
+        });
+    </script>
 
 @endsection

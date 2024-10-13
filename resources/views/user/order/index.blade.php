@@ -39,9 +39,8 @@
                             alert.style.opacity = 0; // Fade out the alert
                             setTimeout(() => alert.remove(), 500); // Remove after fade out
                         });
-                    }, 3000); // 3000 milliseconds = 3 seconds
+                    }, 3000);
                 </script>
-
             </div>
         </div>
 
@@ -78,6 +77,8 @@
                                             <button class="btn btn-success" data-bs-toggle="modal"
                                                 data-bs-target="#paymentModal" data-order-id="{{ $order->id }}"
                                                 data-payment-method="{{ $order->payment_method }}">Pay</button>
+                                        @else
+                                           
                                         @endif
                                     </td>
                                 </tr>
@@ -88,20 +89,19 @@
             </div>
         </div>
     </main>
+
     <!-- Payment Modal -->
     <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="paymentModalLabel">Complete Payment (enter reference #)</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <h6>Payment Method:</h6>
                     <strong>
                         <p id="paymentMethod"></p>
                     </strong>
-                    <h6>QR Code:</h6>
                     <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid mb-3" />
 
                     <h6>Reference Number:</h6>
@@ -127,8 +127,7 @@
         </div>
     </div>
 
-
-    <!-- Modal -->
+    <!-- Order Modal -->
     <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -141,16 +140,26 @@
                     <strong>
                         <p id="orderAddress"></p>
                     </strong>
+
                     <h6>Phone Number:</h6>
                     <strong>
                         <p id="orderPhoneNumber"></p>
                     </strong>
+
                     <h6>Status:</h6>
                     <strong>
                         <p id="orderStatus"></p>
                     </strong>
+
                     <h6>Order Items:</h6>
                     <ul id="orderItemsList" class="list-group"></ul>
+
+                    <br>
+                    <h6>Voucher Applied:</h6>
+                    <strong>
+                        <p id="orderVoucher"></p>
+                    </strong>
+
                     <h6>Total Price:</h6>
                     <strong>
                         <p id="orderTotalPrice"></p>
@@ -179,97 +188,77 @@
                 modal.find('#orderStatus').text(order.status);
                 modal.find('#orderTotalPrice').text('₱' + number_format(order.total_price, 2));
 
+                // Voucher logic
+                if (order.voucher) {
+                    modal.find('#orderVoucher').text(order.voucher.code + ' (₱' + number_format(order.voucher.discount, 2) + ' off)');
+                } else {
+                    modal.find('#orderVoucher').text('No voucher applied');
+                }
+
                 // Clear previous order items
                 var orderItemsList = modal.find('#orderItemsList');
                 orderItemsList.empty(); // Clear previous items
                 $.each(order.order_items, function(index, item) {
-                    orderItemsList.append('<li class="list-group-item">' + item.product
-                        .product_name + ' - x' + item.quantity + '</li>');
+                    orderItemsList.append('<li class="list-group-item">' + item.product.product_name + ' - x' + item.quantity + ' @ ₱' + number_format(item.product.price, 2) + '</li>');
                 });
             });
-        });
 
-        // Function to format numbers as currency
-        function number_format(number, decimals) {
-            return Number(number).toLocaleString(undefined, {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals
-            });
-        }
-    </script>
-
-    <script>
-        // Function to format numbers as currency
-        function number_format(number, decimals) {
-            return Number(number).toLocaleString(undefined, {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals
-            });
-        }
-    </script>
-
-    <script>
-        $(document).ready(function() {
+            // Payment modal setup
             $('#paymentModal').on('show.bs.modal', function(event) {
                 var button = $(event.relatedTarget);
                 var paymentMethod = button.data('payment-method');
                 var orderId = button.data('order-id');
 
-                // Set the modal fields
-                var modal = $(this);
-                modal.find('#paymentMethod').text(paymentMethod);
-                modal.find('#orderId').val(orderId);
+                // Populate payment modal fields
+                $('#paymentMethod').text(paymentMethod);
+                $('#orderId').val(orderId);
+                $('#payNowBtn').prop('disabled', true);
+                $('#referenceNumber').val('');
 
-                // Display the correct QR code based on the payment method
-                var qrCodeImage = modal.find('#qrCodeImage');
-                if (paymentMethod === 'gcash') {
-                    qrCodeImage.attr('src', 'assets/img/QRCode.jfif'); // Replace with actual GCASH QR path
-                } else if (paymentMethod === 'paymaya') {
-                    qrCodeImage.attr('src',
-                        'assets/img/MayaQRCode.jfif'); // Replace with actual PayMaya QR path
-                }
-
-                // Disable the Pay Now button initially
-                $('#payNowBtn').attr('disabled', true);
+                // Simulate fetching a QR code image based on the payment method
+                $('#qrCodeImage').attr('src', '/assets/img/' + paymentMethod + '.jfif');
             });
 
-            // Enable the Pay Now button if reference number has a value
+            // Enable/disable Pay Now button based on Reference Number input
             $('#referenceNumber').on('input', function() {
-                var referenceNumber = $(this).val().trim();
-                if (referenceNumber.length > 0) {
-                    $('#payNowBtn').attr('disabled', false); // Enable the button if there's a value
-                } else {
-                    $('#payNowBtn').attr('disabled', true); // Disable the button if empty
-                }
+                var referenceNumber = $(this).val();
+                $('#payNowBtn').prop('disabled', !referenceNumber.trim());
             });
 
+            // Complete payment action
             $('#payNowBtn').on('click', function() {
                 var orderId = $('#orderId').val();
                 var referenceNumber = $('#referenceNumber').val();
-                var deliveryOption = $('#delivery_option').val(); // Get the selected delivery option
+                var deliveryOption = $('#delivery_option').val();
 
-                // Send AJAX request to mark the order as paid
+                // Proceed with payment submission
                 $.ajax({
-                    url: '/orders/pay',
-                    method: 'POST',
+                    url: '/orders/pay', 
+                    type: 'POST',
                     data: {
-                        _token: '{{ csrf_token() }}',
                         order_id: orderId,
                         reference_number: referenceNumber,
-                        delivery_option: deliveryOption // Include delivery option in the request
+                        delivery_option: deliveryOption,
+                        _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
-                        if (response.success) {
-                            alert('Payment Successful');
-                            location.reload(); // Reload the page after successful payment
-                        } else {
-                            alert('Payment Failed. Try again.');
-                        }
+                        $('#paymentModal').modal('hide');
+                        alert('Payment sent Successfully.');
+                        location.reload(); // Refresh the page to see updated order status
+                    },
+                    error: function(xhr) {
+                        // Handle error
+                        alert('Payment could not be processed. Please try again.');
                     }
                 });
             });
-
         });
-    </script>
 
+        function number_format(number, decimals) {
+            return Number(number).toLocaleString('en-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+    </script>
 @endsection

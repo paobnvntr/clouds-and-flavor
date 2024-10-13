@@ -53,9 +53,23 @@
                 </li>
 
                 <li class="nav-item">
+                    <a href="{{ route('addons.index') }}" class="nav-link">
+                        <i class="nav-icon bi bi-clipboard"></i>
+                        <p>Add-ons</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     <a href="{{ url('admin/product') }}" class="nav-link">
                         <i class="nav-icon bi bi-clipboard"></i>
                         <p>Products</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ url('admin/vouchers') }}" class="nav-link">
+                        <i class="nav-icon bi bi-clipboard"></i>
+                        <p>Vouchers</p>
                     </a>
                 </li>
 
