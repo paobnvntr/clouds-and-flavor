@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AddOnController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController;
@@ -65,6 +66,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/completed-order', 'completedOrder')->name('admin.orders.completed');
     });
 
+    Route::prefix('admin')->group(function () {
+        Route::resource('addons', AddOnController::class);
+    });
 
     Route::controller(AdminController::class)->group(function () {
         //User routes
@@ -92,7 +96,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/vouchers/edit/{id}', 'edit')->name('admin.vouchers.edit');
         Route::patch('admin/vouchers/{id}', 'update')->name('admin.vouchers.update');
         Route::delete('admin/vouchers/delete/{id}', 'destroy')->name('admin.vouchers.destroy');
-
     });
 });
 
