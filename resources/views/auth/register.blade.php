@@ -1,5 +1,5 @@
 <x-guest-layout>
-    @section('title', 'Cloud N Flavor | Register')
+    @section('title', 'Register')
 
     <div class="text-center mb-6">
         <h2 class="text-2xl font-medium text-gray-600">

@@ -1,5 +1,5 @@
 <x-guest-layout>
-    @section('title', 'Cloud N Flavor | Login')
+    @section('title', 'Login')
 
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
