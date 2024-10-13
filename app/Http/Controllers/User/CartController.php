@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\AddOn;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Models\Product;
@@ -16,12 +17,14 @@ class CartController extends Controller
 {
     public function index()
     {
-        $carts = Cart::with('product')->where('user_id', Auth::id())->get();
+        // Fetch the carts with their associated products and add-ons
+        $carts = Cart::with(['product', 'addOns'])->where('user_id', Auth::id())->get();
         $totals = $this->calculateTotals();
         $appliedVoucher = session('applied_voucher');
 
         return view('user.cart.index', compact('carts', 'totals', 'appliedVoucher'));
     }
+
 
     public function applyVoucher(Request $request)
     {
@@ -30,10 +33,7 @@ class CartController extends Controller
         ]);
 
         if (session('applied_voucher')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'A voucher is already applied. Please remove it first.',
-            ]);
+            session()->forget('applied_voucher');
         }
 
         $voucher = Voucher::where('code', $request->voucher_code)
@@ -72,9 +72,10 @@ class CartController extends Controller
             'success' => true,
             'message' => 'Voucher applied successfully.',
             'voucherCode' => $voucher->code,
-            'subtotal' => number_format($totals['subtotal'], 2),
-            'discount' => number_format($totals['discount'], 2),
-            'grandTotal' => number_format($totals['grandTotal'], 2),
+            'subtotal' => $totals['subtotal'],
+            'addons' => $totals['addons'],
+            'discount' => $totals['discount'],
+            'grandTotal' => $totals['grandTotal'],
         ]);
     }
 
@@ -86,9 +87,10 @@ class CartController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Voucher removed successfully.',
-            'subtotal' => number_format($totals['subtotal'], 2),
-            'discount' => number_format($totals['discount'], 2),
-            'grandTotal' => number_format($totals['grandTotal'], 2),
+            'subtotal' => $totals['subtotal'],
+            'addons' => $totals['addons'],
+            'discount' => $totals['discount'],
+            'grandTotal' => $totals['grandTotal'],
         ]);
     }
 
@@ -96,38 +98,68 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
+            'addons' => 'nullable|array',  // Assuming add-ons are an array
+            'addons.*' => 'exists:add_ons,id',  // Validate each add-on exists
         ]);
 
         $product = Product::findOrFail($request->product_id);
         $price = $product->on_sale ? $product->sale_price : $product->price;
 
+        // Calculate add-ons price
+        $addons = $request->input('addons', []);
+        $addonsPrice = AddOn::whereIn('id', $addons)->sum('price');
+        $totalPrice = $price + $addonsPrice;
+
         if ($product->stock > 0) {
+            // Check if the cart item already exists
             $cartItem = Cart::where('user_id', Auth::id())
                 ->where('product_id', $product->id)
                 ->first();
 
             if ($cartItem) {
+                // If it exists, increment the quantity and update total price
                 $cartItem->increment('quantity');
+                $cartItem->update(['total_price' => $cartItem->total_price + $totalPrice]);
+                $cartId = $cartItem->id; // Get the cart item ID
             } else {
-                DB::table('carts')->insert([
+                // Insert a new cart item and get its ID
+                $cartId = DB::table('carts')->insertGetId([
                     'user_id' => Auth::id(),
                     'product_id' => $product->id,
                     'quantity' => 1,
                     'price' => $price,
-                    'total_price' => $price,
+                    'total_price' => $totalPrice,
                     'image' => $product->image,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             }
 
-            session()->flash('message', 'Product added to cart successfully.');
+            // Attach add-ons to the cart item in the pivot table
+            if (!empty($addons)) {
+                foreach ($addons as $addonId) {
+                    // Get the add-on price to store
+                    $addonPrice = AddOn::find($addonId)->price;
+                    DB::table('cart_add_on')->insert([
+                        'cart_id' => $cartId, // Reference the cart item ID
+                        'add_on_id' => $addonId,
+                        'price' => $addonPrice,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
 
+            session()->flash('message', 'Product added to cart successfully.');
             return redirect()->back();
         } else {
             return redirect()->back()->with('error', 'Product is out of stock.');
         }
     }
+
+
+
+
 
     public function getCartCount()
     {
@@ -175,18 +207,27 @@ class CartController extends Controller
     public function getTotals()
     {
         $totals = $this->calculateTotals();
-        return response()->json($totals);
+        $appliedVoucher = session('applied_voucher');
+
+        return response()->json(array_merge($totals, ['appliedVoucher' => $appliedVoucher]));
     }
 
     private function calculateTotals()
     {
-        $subtotal = Cart::where('user_id', Auth::id())->sum('total_price');
+        $subtotal = Cart::where('user_id', Auth::id())->sum(DB::raw('price * quantity'));
+        $addonsTotal = Cart::where('user_id', Auth::id())
+            ->with('addOns')
+            ->get()
+            ->sum(function ($cartItem) {
+                return $cartItem->addOns->sum('price') * $cartItem->quantity;
+            });
+
         $voucher = session('applied_voucher');
         $discount = 0;
 
         if ($voucher) {
             if ($voucher->type === 'percentage') {
-                $discount = $subtotal * ($voucher->discount / 100);
+                $discount = ($subtotal + $addonsTotal) * ($voucher->discount / 100);
             } else {
                 $discount = $voucher->discount;
             }
@@ -196,14 +237,16 @@ class CartController extends Controller
             }
         }
 
-        $grandTotal = max($subtotal - $discount, 0);
+        $grandTotal = max($subtotal + $addonsTotal - $discount, 0);
 
         return [
             'subtotal' => $subtotal,
+            'addons' => $addonsTotal,
             'discount' => $discount,
             'grandTotal' => $grandTotal,
         ];
     }
+
 
     public function removeItem(Request $request)
     {
@@ -226,28 +269,67 @@ class CartController extends Controller
 
     public function checkout()
     {
-        $carts = Cart::where('user_id', Auth::id())->get();
+        // Fetch the user's carts with products and add-ons
+        $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
 
+        // Check if the cart is empty
         if ($carts->isEmpty()) {
             return redirect()->route('user.cart.index')->with('error', 'Your cart is empty.');
         }
 
-        $subtotal = $carts->sum('total_price');
+        // Calculate subtotal for products
+        $subtotal = $carts->sum(function ($cart) {
+            return $cart->product->price * $cart->quantity; // Adjusted to access the product price
+        });
+
+        // Calculate total for add-ons
+        $addonsTotal = $carts->sum(function ($cart) {
+            return $cart->addOns->sum(function ($addOn) {
+                return $addOn->price; // Each add-on price does not depend on quantity
+            });
+        });
+
+        // Get the applied voucher from the session
         $appliedVoucher = session('applied_voucher');
-        $discount = $appliedVoucher ? $appliedVoucher['discount'] : 0;
-        $grandTotal = $subtotal - $discount;
-        $user = Auth::user();
+        // Calculate discount if a voucher is applied
+        $discount = $appliedVoucher ? $this->calculateDiscount($subtotal + $addonsTotal, $appliedVoucher) : 0;
+        // Calculate grand total
+        $grandTotal = $subtotal + $addonsTotal - $discount;
 
-        if (empty($user->address) || empty($user->phone_number)) {
-            session()->flash('warning', 'Please update your address and phone number in your profile.');
-        }
-
+        // Prepare totals for the view
         $totals = [
             'subtotal' => $subtotal,
+            'addons' => $addonsTotal,
             'discount' => $discount,
             'grandTotal' => $grandTotal,
         ];
 
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Check if the user has filled in their address and phone number
+        if (empty($user->address) || empty($user->phone_number)) {
+            session()->flash('warning', 'Please update your address and phone number in your profile.');
+        }
+
+        // Return the checkout view with necessary data
         return view('user.cart.checkout', compact('carts', 'totals', 'user', 'appliedVoucher'));
+    }
+
+    private function calculateDiscount($total, $voucher)
+    {
+        // Calculate discount based on voucher type
+        if ($voucher->type === 'percentage') {
+            $discount = $total * ($voucher->discount / 100);
+        } else {
+            $discount = $voucher->discount;
+        }
+
+        // Ensure discount does not exceed the maximum limit
+        if ($voucher->max_discount !== null) {
+            $discount = min($discount, $voucher->max_discount);
+        }
+
+        return $discount;
     }
 }

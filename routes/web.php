@@ -150,6 +150,7 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
         Route::get('/products', 'index')->name('user.products.index');
         Route::get('/dashboard', 'home')->name('dashboard');
         Route::get('/products/category/{categoryId}', 'productsByCategory')->name('user.products-by-category');
+        Route::get('/products/{id}/details', 'productsDetails')->name('user.products.product-details');
     });
 
     // User/CartController
@@ -164,6 +165,7 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
         Route::post('/cart/remove-voucher',  'removeVoucher')->name('user.cart.remove-voucher');
         Route::post('/cart/apply-voucher', 'applyVoucher')->name('user.cart.apply-voucher');
         Route::get('/cart/get-totals', 'getTotals')->name('user.cart.get-totals');
+        Route::get('/products/{product}/addons', 'getAddons')->name('products.addons');
         // Route::post('/cart/place-order', 'placeOrder')->name('user.cart.placeOrder');
     });
 

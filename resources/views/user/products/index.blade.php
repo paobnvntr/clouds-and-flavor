@@ -85,7 +85,7 @@
 
     @if (session('error'))
         <div class="alert alert-danger"
-        style="position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+            style="position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
             {{ session('error') }}
         </div>
     @endif
@@ -118,7 +118,7 @@
                 <div class="col-lg-3 col-md-5">
                     <div class="sidebar">
 
-
+                        <!-- Latest Products Section -->
                         <div class="sidebar__item">
                             <div class="latest-product__text">
                                 <h4>Latest Products</h4>
@@ -126,9 +126,11 @@
                                     @foreach ($latestProducts->chunk(3) as $chunk)
                                         <div class="latest-prdouct__slider__item">
                                             @foreach ($chunk as $product)
-                                                <a href="#" class="latest-product__item">
+                                                <a href="{{ route('user.products.product-details', $product->id) }}"
+                                                    class="latest-product__item">
                                                     <div class="latest-product__item__pic">
-                                                        <img src="{{ asset('/' . $product->image) }}" alt="">
+                                                        <img src="{{ asset('/' . $product->image) }}"
+                                                            alt="{{ $product->product_name }}">
                                                     </div>
                                                     <div class="latest-product__item__text">
                                                         <h6>{{ $product->product_name }}</h6>
@@ -141,6 +143,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -165,29 +168,22 @@
                                                 <div class="product__discount__percent">-{{ $discountPercentage }}%</div>
                                                 <ul class="product__item__pic__hover">
                                                     <li>
-                                                        <form action="{{ route('user.cart.add-to-cart') }}" method="POST">
-                                                            @csrf
-                                                            <input type="hidden" name="product_id"
-                                                                value="{{ $product->id }}">
-                                                            <input type="hidden" name="price"
-                                                                value="{{ $product->sale_price }}">
-                                                            <button type="submit" class="add-to-cart">
-                                                                <i class="fa fa-shopping-cart"></i>
-                                                            </button>
-                                                        </form>
+                                                        <!-- Change the button to a link that redirects to product details -->
+                                                        <a href="{{ route('user.products.product-details', $product->id) }}"
+                                                            class="add-to-cart">
+                                                            <i class="fa fa-shopping-cart"></i>
+                                                        </a>
                                                     </li>
                                                 </ul>
                                             </div>
                                             <div class="product__discount__item__text">
-                                                <h5><a href="#">{{ $product->product_name }}</a></h5>
+                                                <h5><a
+                                                        href="{{ route('user.products.product-details', $product->id) }}">{{ $product->product_name }}</a>
+                                                </h5>
                                                 <div class="product__item__price">
                                                     ₱{{ number_format($product->sale_price, 2) }}
                                                     <span>₱{{ number_format($product->price, 2) }}</span>
                                                 </div>
-                                                <p><strong>Stock:<span
-                                                            id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
-                                                </p>
-
                                             </div>
                                         </div>
                                     </div>
@@ -212,20 +208,18 @@
                                             data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
                                             <ul class="product__item__pic__hover">
                                                 <li>
-                                                    <form action="{{ route('user.cart.add-to-cart') }}" method="POST"
-                                                        id="add-to-cart-form-{{ $product->id }}">
-                                                        @csrf
-                                                        <input type="hidden" name="product_id"
-                                                            value="{{ $product->id }}">
-                                                        <input type="hidden" name="price" value="{{ $product->price }}">
-                                                        <button type="submit" class="add-to-cart"><i
-                                                                class="fa fa-shopping-cart"></i></button>
-                                                    </form>
+                                                    <!-- Change the button to a link that redirects to product details -->
+                                                    <a href="{{ route('user.products.product-details', $product->id) }}"
+                                                        class="add-to-cart">
+                                                        <i class="fa fa-shopping-cart"></i>
+                                                    </a>
                                                 </li>
                                             </ul>
                                         </div>
                                         <div class="product__item__text">
-                                            <h6><a href="#">{{ $product->product_name }}</a></h6>
+                                            <h6><a
+                                                    href="{{ route('user.products.product-details', $product->id) }}">{{ $product->product_name }}</a>
+                                            </h6>
                                             <h5>₱{{ number_format($product->price, 2) }}</h5>
                                             <p><strong>Stock:<span
                                                         id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
@@ -235,6 +229,7 @@
                                 </div>
                             @endforeach
                         </div>
+
                         <nav aria-label="Page navigation example">
                             <ul class="pagination">
                                 <li class="page-item {{ $products->previousPageUrl() ? '' : 'disabled' }}">

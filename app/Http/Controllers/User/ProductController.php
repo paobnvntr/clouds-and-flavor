@@ -48,6 +48,7 @@ class ProductController extends Controller
     }
 
 
+
     public function productsByCategory($categoryId)
     {
         return $this->index(request()->merge(['category_id' => $categoryId]));
@@ -86,5 +87,17 @@ class ProductController extends Controller
         $products = $productsQuery->where('status', 0)->paginate(6);
 
         return view('dashboard', compact('products', 'newProducts', 'categories', 'latestProducts', 'discountedProducts', 'selectedCategory'));
+    }
+
+    public function productsDetails($id)
+    {
+        // Use camelCase for the relationship method name
+        $product = Product::with('addOns')->findOrFail($id);
+        $cartItems = Cart::where('user_id', Auth::id())->count();
+        $carts = Cart::where('user_id', Auth::id())->get();
+        $totalPrice = $carts->sum(function ($cart) {
+            return $cart->product->price * $cart->quantity;
+        });
+        return view('user.products.product-details', compact('product', 'cartItems', 'totalPrice'));
     }
 }

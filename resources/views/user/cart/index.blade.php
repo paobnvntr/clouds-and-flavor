@@ -22,6 +22,32 @@
     </section>
     <!-- Breadcrumb Section End -->
 
+    @if (session('error'))
+        <div class="alert alert-danger"
+            style="position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if (session('message'))
+        <div class="alert alert-success"
+            style="position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+            {{ session('message') }}
+        </div>
+    @endif
+
+    <script>
+        // Function to hide alert after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
+                alert.style.opacity = 0; // Fade out the alert
+                setTimeout(() => alert.remove(), 500); // Remove after fade out
+            });
+        }, 3000); // 3000 milliseconds = 3 seconds
+    </script>
+
     <!-- Shoping Cart Section Begin -->
     <section class="shoping-cart spad">
         <div class="container">
@@ -32,6 +58,7 @@
                             <thead>
                                 <tr>
                                     <th class="shoping__product">Products</th>
+                                    <th>Add-ons</th>
                                     <th>Price</th>
                                     <th>Quantity</th>
                                     <th>Total</th>
@@ -47,7 +74,8 @@
                                     @foreach ($carts as $cart)
                                         <tr>
                                             <td class="shoping__cart__item">
-                                                <img src="{{ asset('/' . $cart->product->image) }}" alt="">
+                                                <img src="{{ asset('/' . $cart->product->image) }}" alt=""
+                                                    class="cart-product-image">
                                                 <h5>{{ $cart->product->product_name }}</h5>
                                                 @if ($cart->product->on_sale)
                                                     <span style="color:red;">On Sale!</span>
@@ -59,10 +87,26 @@
                                                     <span>₱{{ number_format($cart->product->price, 2) }}</span>
                                                 @endif
                                             </td>
+                                            <td class="shoping__cart__item">
+                                                <div class="add-ons-section">
+                                                    @if ($cart->addOns->count() > 0)
+                                                        <ul>
+                                                            @foreach ($cart->addOns as $addon)
+                                                                <li>{{ $addon->name }}
+                                                                    (+₱{{ number_format($addon->price, 2) }})
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @else
+                                                        <p>No add-ons added.</p>
+                                                    @endif
+                                                </div>
+                                            </td>
                                             <td class="shoping__cart__price">
                                                 ₱<span
                                                     class="price">{{ number_format($cart->product->on_sale ? $cart->product->sale_price : $cart->product->price, 2) }}</span>
                                             </td>
+
                                             <td class="shoping__cart__quantity">
                                                 <div class="quantity">
                                                     <div class="pro-qty1">
@@ -74,6 +118,7 @@
                                                     </div>
                                                 </div>
                                             </td>
+
                                             <td class="shoping__cart__total">
                                                 ₱<span
                                                     class="total">{{ number_format(($cart->product->on_sale ? $cart->product->sale_price : $cart->product->price) * $cart->quantity, 2) }}</span>
@@ -88,7 +133,6 @@
                                     @endforeach
                                 @endif
                             </tbody>
-
                         </table>
                     </div>
                 </div>
@@ -117,21 +161,22 @@
                         <ul>
                             <li>Subtotal <span>₱<span
                                         id="subtotal">{{ number_format($totals['subtotal'], 2) }}</span></span></li>
-                            @if (session('applied_voucher'))
-                                <li>Discount <span>-₱<span
-                                            id="discount">{{ number_format($totals['discount'], 2) }}</span></span></li>
-                            @endif
+                            <li>Add-ons <span>₱<span
+                                        id="addons-total">{{ number_format($totals['addons'], 2) }}</span></span></li>
+                            <li id="discount-row" style="display: none;">Discount <span>-₱<span
+                                        id="discount">0.00</span></span></li>
                             <li>Total <span>₱<span
                                         id="grand-total">{{ number_format($totals['grandTotal'], 2) }}</span></span></li>
                         </ul>
-                        @if (session('applied_voucher'))
-                            <p>Voucher applied: {{ session('applied_voucher')->code }}
+                        <div id="voucher-info" style="display: none;">
+                            <p>Voucher applied: <span id="applied-voucher-code"></span>
                                 <button id="remove-voucher" class="btn btn-sm btn-danger">Remove</button>
                             </p>
-                        @endif
+                        </div>
                         <a href="{{ route('user.cart.checkout') }}" class="primary-btn">PROCEED TO CHECKOUT</a>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -141,129 +186,107 @@
     <script>
         $(document).ready(function() {
             function updateTotal() {
-                let subtotal = 0;
-                $('.shoping__cart__total').each(function() {
-                    subtotal += parseFloat($(this).find('.total').text().replace(/[^0-9.-]+/g, ""));
-                });
-                $('#subtotal').text(subtotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-
-                // Fetch the current discount from the server
                 $.get('/cart/get-totals', function(response) {
-                    // Ensure discount and grandTotal are numbers
-                    let discount = parseFloat(response.discount) || 0;
-                    let grandTotal = parseFloat(response.grandTotal) || 0;
+                    $('#subtotal').text(formatCurrency(response.subtotal));
+                    $('#addons-total').text(formatCurrency(response.addons));
+                    $('#grand-total').text(formatCurrency(response.grandTotal));
 
-                    $('#discount').text(discount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-                    $('#grand-total').text(grandTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                    if (response.discount > 0) {
+                        $('#discount').text(formatCurrency(response.discount));
+                        $('#discount-row').show();
+                    } else {
+                        $('#discount-row').hide();
+                    }
+
+                    if (response.appliedVoucher) {
+                        $('#applied-voucher-code').text(response.appliedVoucher.code);
+                        $('#voucher-info').show();
+                    } else {
+                        $('#voucher-info').hide();
+                    }
                 });
+            }
+
+            function formatCurrency(value) {
+                return parseFloat(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             }
 
             $('.qtybtn').on('click', function() {
                 let $input = $(this).siblings('input[name="quantity"]');
                 let currentVal = parseInt($input.val());
-                let newVal = $(this).hasClass('inc') ? currentVal + 1 : (currentVal > 1 ? currentVal - 1 : 1);
+                let newVal = $(this).hasClass('inc') ? currentVal + 1 : (currentVal > 1 ? currentVal - 1 :
+                    1);
                 $input.val(newVal).trigger('change');
             });
 
             $('input[name="quantity"]').on('change', function() {
-                let $row = $(this).closest('tr');
-                let cartId = $(this).data('product-id');
+                let productId = $(this).data('product-id');
                 let newQuantity = $(this).val();
                 $.ajax({
                     url: '/cart/update',
-                    type: 'POST',
+                    method: 'POST',
                     data: {
-                        product_id: cartId,
+                        product_id: productId,
                         quantity: newQuantity,
-                        _token: $('meta[name="csrf-token"]').attr('content')
+                        _token: '{{ csrf_token() }}'
                     },
-                    success: function(response) {
-                        if (response.success) {
-                            $row.find('.shoping__cart__quantity input').val(response.newQuantity);
-                            $row.find('.shoping__cart__total .total').text(response.newTotalPrice);
-                            updateTotal();
-                        } else {
-                            console.error(response.message);
-                            $row.find('.shoping__cart__quantity input').val($row.find('.shoping__cart__quantity input').data('original-quantity'));
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseJSON.message);
-                        $row.find('.shoping__cart__quantity input').val($row.find('.shoping__cart__quantity input').data('original-quantity'));
+                    success: function() {
+                        updateTotal();
                     }
                 });
             });
 
             $('.remove-item').on('click', function() {
-                let $row = $(this).closest('tr');
-                let cartId = $(this).data('product-id');
+                let productId = $(this).data('product-id');
                 $.ajax({
                     url: '/cart/remove',
-                    type: 'POST',
+                    method: 'POST',
                     data: {
-                        product_id: cartId,
-                        _token: $('meta[name="csrf-token"]').attr('content')
+                        product_id: productId,
+                        _token: '{{ csrf_token() }}'
                     },
-                    success: function(response) {
-                        if (response.success) {
-                            $row.remove();
-                            updateTotal();
-                        } else {
-                            console.error(response.message);
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseJSON.message);
+                    success: function() {
+                        location.reload();
                     }
                 });
             });
 
+            // Voucher form submission
             $('#voucher-form').on('submit', function(e) {
                 e.preventDefault();
-                let voucherCode = $(this).find('input[name="voucher_code"]').val();
                 $.ajax({
                     url: '/cart/apply-voucher',
-                    type: 'POST',
-                    data: {
-                        voucher_code: voucherCode,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
+                    method: 'POST',
+                    data: $(this).serialize(),
                     success: function(response) {
+                        alert(response.message);
                         if (response.success) {
                             updateTotal();
-                            // Optionally reload the page to refresh the cart totals
-                            location.reload();
-                        } else {
-                            alert(response.message);
                         }
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseJSON.message);
                     }
                 });
             });
 
+            // Remove voucher
             $('#remove-voucher').on('click', function() {
                 $.ajax({
                     url: '/cart/remove-voucher',
-                    type: 'POST',
+                    method: 'POST',
                     data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
+                        _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
+                        alert(response.message);
                         if (response.success) {
                             updateTotal();
-                            // Optionally reload the page to refresh the cart totals
-                            location.reload();
-                        } else {
-                            alert(response.message);
                         }
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseJSON.message);
                     }
                 });
             });
+
+            // Initial calculation
+            updateTotal();
         });
     </script>
+
 @endsection

@@ -78,7 +78,6 @@
                                                 data-bs-target="#paymentModal" data-order-id="{{ $order->id }}"
                                                 data-payment-method="{{ $order->payment_method }}">Pay</button>
                                         @else
-                                           
                                         @endif
                                     </td>
                                 </tr>
@@ -133,7 +132,6 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <h6>Address:</h6>
@@ -153,6 +151,9 @@
 
                     <h6>Order Items:</h6>
                     <ul id="orderItemsList" class="list-group"></ul>
+
+                    <h6>Add-ons:</h6>
+                    <ul id="orderAddonsList" class="list-group"></ul>
 
                     <br>
                     <h6>Voucher Applied:</h6>
@@ -178,30 +179,54 @@
     <script>
         $(document).ready(function() {
             $('#orderModal').on('show.bs.modal', function(event) {
-                var button = $(event.relatedTarget); // Button that triggered the modal
-                var order = button.data('order'); // Extract info from data-* attributes
+                var button = $(event.relatedTarget);
+                var order = button.data('order');
 
-                // Populate the modal fields
                 var modal = $(this);
                 modal.find('#orderAddress').text(order.address);
                 modal.find('#orderPhoneNumber').text(order.phone_number);
                 modal.find('#orderStatus').text(order.status);
                 modal.find('#orderTotalPrice').text('₱' + number_format(order.total_price, 2));
 
-                // Voucher logic
                 if (order.voucher) {
-                    modal.find('#orderVoucher').text(order.voucher.code + ' (₱' + number_format(order.voucher.discount, 2) + ' off)');
+                    modal.find('#orderVoucher').text(order.voucher.code + ' (₱' + number_format(order
+                        .voucher.discount, 2) + ' off)');
                 } else {
                     modal.find('#orderVoucher').text('No voucher applied');
                 }
 
-                // Clear previous order items
                 var orderItemsList = modal.find('#orderItemsList');
-                orderItemsList.empty(); // Clear previous items
+                orderItemsList.empty();
+
                 $.each(order.order_items, function(index, item) {
-                    orderItemsList.append('<li class="list-group-item">' + item.product.product_name + ' - x' + item.quantity + ' @ ₱' + number_format(item.product.price, 2) + '</li>');
+                    var price = item.product.on_sale ? item.product.sale_price : item.product.price;
+                    var priceText = item.product.on_sale ?
+                        `<del>₱${number_format(item.product.price, 2)}</del> ₱${number_format(item.product.sale_price, 2)}` :
+                        `₱${number_format(item.product.price, 2)}`;
+
+                    orderItemsList.append('<li class="list-group-item">' +
+                        item.product.product_name +
+                        ' - x' + item.quantity +
+                        ' @ ' + priceText +
+                        '</li>');
                 });
+
+                // Add-ons section
+                var orderAddonsList = modal.find('#orderAddonsList');
+                orderAddonsList.empty();
+
+                if (order.addons && order.addons.length > 0) {
+                    $.each(order.addons, function(index, addon) {
+                        orderAddonsList.append('<li class="list-group-item">' +
+                            addon.name +
+                            ' - ₱' + number_format(addon.price, 2) +
+                            '</li>');
+                    });
+                } else {
+                    orderAddonsList.append('<li class="list-group-item">No add-ons</li>');
+                }
             });
+
 
             // Payment modal setup
             $('#paymentModal').on('show.bs.modal', function(event) {
@@ -233,7 +258,7 @@
 
                 // Proceed with payment submission
                 $.ajax({
-                    url: '/orders/pay', 
+                    url: '/orders/pay',
                     type: 'POST',
                     data: {
                         order_id: orderId,

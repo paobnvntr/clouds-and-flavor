@@ -83,18 +83,40 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="checkout__order">
                                 <h4>Your Order</h4>
-                                <div class="checkout__order__products">Products<span>Unit</span> <span>Total</span></div>
+                                <div class="checkout__order__products">
+                                    Products
+                                    <span>Total</span>
+                                   
+                                </div>
                                 <ul>
                                     @foreach ($carts as $cart)
-                                        <li>{{ $cart->quantity }}x {{ $cart->product->product_name }}
-                                            <span>₱{{ number_format($cart->total_price, 2) }}</span>
+                                        <li>
+                                            {{ $cart->quantity }}x {{ $cart->product->product_name }}
+                                            <span>₱{{ number_format($cart->price * $cart->quantity, 2) }}</span>
+
                                         </li>
+                                        @if ($cart->addOns->isNotEmpty())
+                                            <li class="add-ons">
+                                                Add-ons:
+                                                @foreach ($cart->addOns as $addOn)
+                                                    <div>
+                                                        {{ $cart->quantity }}x {{ $addOn->name }}
+                                                        <span>₱{{ number_format($addOn->price, 2) }}</span>
+                                                        <span></span>
+                                                    </div>
+                                                @endforeach
+                                            </li>
+                                        @endif
                                     @endforeach
                                 </ul>
                                 <div class="checkout__order__subtotal">Subtotal
                                     <span>₱{{ number_format($totals['subtotal'], 2) }}</span>
                                 </div>
-
+                                @if (isset($totals['addons']) && $totals['addons'] > 0)
+                                    <div class="checkout__order__subtotal">Add-ons Total
+                                        <span>₱{{ number_format($totals['addons'], 2) }}</span>
+                                    </div>
+                                @endif
                                 <div class="checkout__order__total">Discount
                                     <span>-₱{{ number_format($totals['discount'], 2) }}</span>
                                 </div>
@@ -169,11 +191,18 @@
         // AJAX for applying and removing vouchers
         document.addEventListener('DOMContentLoaded', function() {
             function updateTotal(data) {
-                document.querySelector('.checkout__order__subtotal span').textContent = `₱${data.subtotal}`;
-                document.querySelector('.checkout__order__total:nth-of-type(2) span').textContent =
-                    `-₱${data.discount}`;
-                document.querySelector('#grandTotal').textContent = `₱${data.grandTotal}`;
+                document.querySelector('.checkout__order__subtotal:nth-of-type(1) span').textContent =
+                    `₱${formatNumber(data.subtotal)}`;
+                document.querySelector('.checkout__order__subtotal:nth-of-type(2) span').textContent =
+                    `₱${formatNumber(data.addons)}`;
+                document.querySelector('.checkout__order__total:nth-of-type(1) span').textContent =
+                    `-₱${formatNumber(data.discount)}`;
+                document.querySelector('#grandTotal').textContent = `₱${formatNumber(data.grandTotal)}`;
                 document.querySelector('#grandTotalInput').value = data.grandTotal;
+            }
+
+            function formatNumber(num) {
+                return parseFloat(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             }
 
             // Handle voucher application
@@ -194,12 +223,12 @@
                     .then(data => {
                         if (data.success) {
                             updateTotal(data);
+                            alert(data.message);
                         } else {
                             alert(data.message);
                         }
                     });
             });
-
             // Handle voucher removal
             document.querySelector('#remove-voucher').addEventListener('click', function() {
                 fetch('/cart/remove-voucher', {
@@ -213,6 +242,7 @@
                     .then(data => {
                         if (data.success) {
                             updateTotal(data);
+                            alert(data.message);
                         } else {
                             alert(data.message);
                         }

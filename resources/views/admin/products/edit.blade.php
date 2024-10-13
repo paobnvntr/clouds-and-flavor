@@ -20,6 +20,31 @@
                 </div>
             </div>
         </div>
+        @if (session('error'))
+            <div class="alert alert-danger"
+                style="position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if (session('message'))
+            <div class="alert alert-success"
+                style="position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+                {{ session('message') }}
+            </div>
+        @endif
+
+        <script>
+            // Function to hide alert after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
+                    alert.style.opacity = 0; // Fade out the alert
+                    setTimeout(() => alert.remove(), 500); // Remove after fade out
+                });
+            }, 3000); // 3000 milliseconds = 3 seconds
+        </script>
 
         <div class="app-content">
             <div class="container-fluid">
@@ -62,7 +87,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="addons" class="form-label">Select Add-ons</label>
-                                <select class="form-control" id="addons" name="addons[]" multiple required>
+                                <select class="form-control" id="addons" name="addons[]" multiple>
                                     @foreach ($addons as $addOn)
                                         <option value="{{ $addOn->id }}"
                                             {{ in_array($addOn->id, $product->addOns->pluck('id')->toArray()) ? 'selected' : '' }}>
@@ -101,8 +126,8 @@
                                 <label for="image" class="form-label">Product Image</label>
                                 <input type="file" class="form-control" id="image" name="image">
                                 @if ($product->image)
-                                    <img src="{{ asset($product->image) }}" alt="Product Image" class="img-thumbnail mt-2"
-                                        width="150">
+                                    <img src="{{ asset($product->image) }}" alt="Product Image"
+                                        class="img-thumbnail mt-2" width="150">
                                 @else
                                     <img src="{{ asset('assets/product_image/unknown.jpg') }}" alt="Default Image"
                                         class="img-thumbnail mt-2" width="150">
