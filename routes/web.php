@@ -90,7 +90,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/vouchers/create', 'create')->name('admin.vouchers.create');
         Route::post('admin/vouchers/store', 'store')->name('admin.vouchers.store');
         Route::get('admin/vouchers/edit/{id}', 'edit')->name('admin.vouchers.edit');
-        Route::patch('admin/vouchers/update/{id}', 'update')->name('admin.vouchers.update');
+        Route::patch('admin/vouchers/{id}', 'update')->name('admin.vouchers.update');
         Route::delete('admin/vouchers/delete/{id}', 'destroy')->name('admin.vouchers.destroy');
 
     });

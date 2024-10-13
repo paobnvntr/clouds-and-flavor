@@ -51,7 +51,7 @@
                             <th>Discount</th>
                             <th>Type</th>
                             <th>Expiry Date</th>
-                            <th>Status</th>
+                            <th>Status</th> <!-- Updated status column -->
                             <th>Usage</th>
                             <th>Min. Purchase</th>
                             <th>Max Discount</th>
@@ -66,7 +66,15 @@
                                 <td>{{ $voucher->discount }}</td>
                                 <td>{{ ucfirst($voucher->type) }}</td>
                                 <td>{{ $voucher->expiry_date }}</td>
-                                <td>{{ $voucher->is_active ? 'Active' : 'Inactive' }}</td>
+                                <td>
+                                    @if (\Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($voucher->expiry_date)))
+                                        <span class="badge bg-danger">Expired</span>
+                                    @elseif ($voucher->is_active)
+                                        <span class="badge bg-success">Active</span>
+                                    @else
+                                        <span class="badge bg-warning">Inactive</span>
+                                    @endif
+                                </td>
                                 <td>{{ $voucher->times_used }} / {{ $voucher->usage_limit ?: 'Unlimited' }}</td>
                                 <td>{{ $voucher->minimum_purchase ?: 'N/A' }}</td>
                                 <td>{{ $voucher->max_discount ?: 'N/A' }}</td>
