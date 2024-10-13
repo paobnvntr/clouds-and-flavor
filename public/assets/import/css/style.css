@@ -30,6 +30,10 @@
 /* Template default CSS
 /*----------------------------------------*/
 
+:root {
+	--main-color: #B759AB;
+}
+
 html,
 body {
 	height: 100%;
@@ -129,7 +133,7 @@ ol {
 	right: 0;
 	height: 4px;
 	width: 80px;
-	background: #7fad39;
+	background: var(--main-color);
 	content: "";
 	margin: 0 auto;
 }
@@ -167,7 +171,7 @@ ol {
 	color: #ffffff;
 	text-transform: uppercase;
 	font-weight: 700;
-	background: #7fad39;
+	background: var(--main-color);
 	letter-spacing: 2px;
 }
 
@@ -178,7 +182,7 @@ ol {
 	text-transform: uppercase;
 	display: inline-block;
 	padding: 13px 30px 12px;
-	background: #7fad39;
+	background: var(--main-color);
 	border: none;
 }
 
@@ -217,7 +221,7 @@ ol {
 	50% {
 		-webkit-transform: rotate(180deg);
 		transform: rotate(180deg);
-		border: 4px solid #673ab7;
+		border: 4px solid var(--main-color);
 		border-left-color: transparent;
 	}
 	100% {
@@ -236,7 +240,7 @@ ol {
 	}
 	50% {
 		-webkit-transform: rotate(180deg);
-		border: 4px solid #673ab7;
+		border: 4px solid var(--main-color);
 		border-left-color: transparent;
 	}
 	100% {
@@ -466,7 +470,7 @@ ol {
 }
 
 .header__menu ul li .header__menu__dropdown li:hover>a {
-	color: #7fad39;
+	color: var(--main-color);
 }
 
 .header__menu ul li .header__menu__dropdown li a {
@@ -477,7 +481,7 @@ ol {
 }
 
 .header__menu ul li.active a {
-	color: #7fad39;
+	color: var(--main-color);
 }
 
 .header__menu ul li:hover .header__menu__dropdown {
@@ -487,7 +491,7 @@ ol {
 }
 
 .header__menu ul li:hover>a {
-	color: #7fad39;
+	color: var(--main-color);
 }
 
 .header__menu ul li:last-child {
@@ -541,7 +545,7 @@ ol {
 .header__cart ul li a span {
 	height: 13px;
 	width: 13px;
-	background: #7fad39;
+	background: var(--main-color);
 	font-size: 10px;
 	color: #ffffff;
 	line-height: 13px;
@@ -604,7 +608,7 @@ ol {
 }
 
 .hero__categories__all {
-	background: #7fad39;
+	background: var(--main-color);
 	position: relative;
 	padding: 10px 25px 10px 40px;
 	cursor: pointer;
@@ -730,7 +734,7 @@ ol {
 
 .hero__search__phone__icon {
 	font-size: 18px;
-	color: #7fad39;
+	color: var(--main-color)#;
 	height: 50px;
 	width: 50px;
 	background: #f5f5f5;
@@ -768,7 +772,7 @@ ol {
 	text-transform: uppercase;
 	font-weight: 700;
 	letter-spacing: 4px;
-	color: #7fad39;
+	color: var(--main-color);
 }
 
 .hero__text h2 {
@@ -871,7 +875,7 @@ ol {
 	bottom: -2px;
 	width: 100%;
 	height: 2px;
-	background: #7fad39;
+	background: var(--main-color);
 	content: "";
 	opacity: 0;
 }
@@ -919,8 +923,8 @@ ol {
 }
 
 .featured__item__pic__hover li:hover a {
-	background: #7fad39;
-	border-color: #7fad39;
+	background: var(--main-color);
+	border-color: var(--main-color);
 }
 
 .featured__item__pic__hover li:hover a i {
@@ -1355,13 +1359,13 @@ ol {
 }
 
 .product__item__pic__hover li:hover a {
-	background: #7fad39;
-	border-color: #7fad39;
+	background: var(--main-color);
+	border-color: var(--main-color);
 }
 
 .product__item__pic__hover li:hover button {
-	background: #7fad39;
-	border-color: #7fad39;
+	background: var(--main-color);
+	border-color: var(--main-color);
 }
 
 .product__item__pic__hover li:hover a i {
@@ -1564,7 +1568,7 @@ ol {
 }
 
 .filter__option span:hover {
-	color: #7fad39;
+	color: var(--main-color)#;
 }
 
 .product__item {
@@ -1605,13 +1609,13 @@ ol {
 }
 
 .product__item__pic__hover li:hover a {
-	background: #7fad39;
-	border-color: #7fad39;
+	background: var(--main-color);
+	border-color: var(--main-color);
 }
 
 .product__item__pic__hover li:hover button {
-	background: #7fad39;
-	border-color: #7fad39;
+	background: var(--main-color);
+	border-color: var(--main-color);
 }
 
 .product__item__pic__hover li:hover a i {
@@ -1706,8 +1710,8 @@ ol {
 
 .product__pagination a:hover,
 .blog__pagination a:hover {
-	background: #7fad39;
-	border-color: #7fad39;
+	background: var(--main-color);
+	border-color: var(--main-color);
 	color: #ffffff;
 }
 
@@ -2262,8 +2266,8 @@ ol {
 }
 
 .checkout__input__checkbox label input:checked~.checkmark {
-	background: #7fad39;
-	border-color: #7fad39;
+	background: var(--main-color);
+	border-color: var(--main-color);
 }
 
 .checkout__input__checkbox label input:checked~.checkmark:after {
@@ -2490,7 +2494,7 @@ ol {
 }
 
 .blog__sidebar__item ul li a:hover {
-	color: #7fad39;
+	color: var(--main-color);
 }
 
 .blog__sidebar__search {
@@ -2710,7 +2714,7 @@ ol {
 }
 
 .blog__details__widget .blog__details__social a:hover {
-	color: #7fad39;
+	color: var(--main-color);
 }
 
 .blog__details__widget .blog__details__social a:last-child {
@@ -2723,7 +2727,7 @@ ol {
 
 .footer {
 	background: #F3F6FA;
-	padding-top: 70px;
+	padding-top: 40px;
 	padding-bottom: 0;
 }
 
@@ -2740,6 +2744,7 @@ ol {
 
 .footer__about__logo {
 	margin-bottom: 15px;
+	mix-blend-mode: multiply; 
 }
 
 .footer__about__logo a {
@@ -2828,7 +2833,7 @@ ol {
 }
 
 .footer__widget .footer__widget__social a:hover {
-	background: #7fad39;
+	background: var(--main-color);
 	color: #ffffff;
 	border-color: #ffffff;
 }
@@ -2866,7 +2871,7 @@ ol {
 
 .contact__widget span {
 	font-size: 36px;
-	color: #7fad39;
+	color: var(--main-color);
 }
 
 .contact__widget h4 {
@@ -2905,7 +2910,7 @@ ol {
 
 .map .map-inside i {
 	font-size: 48px;
-	color: #7fad39;
+	color: var(--main-color);
 	position: absolute;
 	bottom: -75px;
 	left: 50%;
@@ -3162,7 +3167,7 @@ ol {
 	.humberger__menu__cart ul li a span {
 		height: 13px;
 		width: 13px;
-		background: #7fad39;
+		background: var(--main-color);
 		font-size: 10px;
 		color: #ffffff;
 		line-height: 13px;
@@ -3228,7 +3233,7 @@ ol {
 		-webkit-border-radius: 0;
 		border-radius: 0;
 		background: transparent;
-		color: #7fad39;
+		color: var(--main-color);
 	}
 	.humberger__menu__wrapper .slicknav_nav .slicknav_row,
 	.humberger__menu__wrapper .slicknav_nav a {
@@ -3420,7 +3425,7 @@ ol {
 	.humberger__menu__cart ul li a span {
 		height: 13px;
 		width: 13px;
-		background: #7fad39;
+		background: var(--main-color);
 		font-size: 10px;
 		color: #ffffff;
 		line-height: 13px;
@@ -3486,7 +3491,7 @@ ol {
 		-webkit-border-radius: 0;
 		border-radius: 0;
 		background: transparent;
-		color: #7fad39;
+		color: var(--main-color);
 	}
 	.humberger__menu__wrapper .slicknav_nav .slicknav_row,
 	.humberger__menu__wrapper .slicknav_nav a {
