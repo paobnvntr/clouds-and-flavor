@@ -86,7 +86,14 @@ class ProductController extends Controller
 
         $products = $productsQuery->where('status', 0)->paginate(6);
 
-        return view('dashboard', compact('products', 'newProducts', 'categories', 'latestProducts', 'discountedProducts', 'selectedCategory'));
+        // Calculate cart items and total price
+        $cartItems = Cart::where('user_id', Auth::id())->count();
+        $carts = Cart::where('user_id', Auth::id())->get();
+        $totalPrice = $carts->sum(function ($cart) {
+            return $cart->product->price * $cart->quantity;
+        });
+
+        return view('dashboard', compact('products', 'newProducts', 'categories', 'latestProducts', 'discountedProducts', 'selectedCategory', 'cartItems', 'totalPrice'));
     }
 
     public function productsDetails($id)

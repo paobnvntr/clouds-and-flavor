@@ -11,7 +11,7 @@ class OrderAddOn extends Model
 
     protected $table = 'orders_add_on';
 
-    protected $fillable = ['order_id', 'cart_id', 'add_on_id', 'price'];
+    protected $fillable = ['order_id', 'add_on_id', 'price', 'quantity'];
 
     // Relationship with Order model
     public function order()
@@ -23,5 +23,10 @@ class OrderAddOn extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function addOn()
+    {
+        return $this->belongsTo(AddOn::class, 'add_on_id');
     }
 }

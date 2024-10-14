@@ -157,10 +157,6 @@ class CartController extends Controller
         }
     }
 
-
-
-
-
     public function getCartCount()
     {
         $cartCount = Session::get('cart_count', 0);
@@ -324,6 +320,8 @@ class CartController extends Controller
             'grandTotal' => number_format($grandTotal, 2),
         ];
 
+        // dd($totals['subtotal']);
+
         // Get the authenticated user
         $user = Auth::user();
 
@@ -335,9 +333,6 @@ class CartController extends Controller
         // Return the checkout view with necessary data
         return view('user.cart.checkout', compact('carts', 'totals', 'user', 'appliedVoucher'));
     }
-
-
-
 
     // Helper method to calculate discount
     private function calculateDiscount($total, $voucher)

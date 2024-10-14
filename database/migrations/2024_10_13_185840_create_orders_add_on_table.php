@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('orders_add_on', function (Blueprint $table) {
         $table->id();
         $table->foreignId('order_id')->constrained()->onDelete('cascade');
-        $table->foreignId('cart_id')->constrained()->onDelete('cascade');
         $table->foreignId('add_on_id')->constrained()->onDelete('cascade');
         $table->decimal('price', 10, 2);
+        $table->integer('quantity');
         $table->timestamps();
         });
     }

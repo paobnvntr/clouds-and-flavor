@@ -47,19 +47,20 @@
                 <h4>Billing Details</h4>
                 <form action="{{ route('user.cart.placeOrder') }}" method="POST">
                     @csrf
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <div class="row">
                         <div class="col-lg-8 col-md-6">
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="checkout__input">
-                                        <p>Name<span>*</span></p>
-                                        <input type="text" readonly value="{{ $user->name ?? '' }}">
+                                        <p>Name <span>*</span></p>
+                                        <input type="text" name="name" readonly value="{{ $user->name ?? '' }}" >
                                     </div>
                                 </div>
 
                                 <div class="col-lg-6">
                                     <div class="checkout__input">
-                                        <p>Phone Number<span>*</span></p>
+                                        <p>Phone Number <span>*</span></p>
                                         <input type="text" name="phone_number" readonly
                                             value="{{ $user->phone_number ?? '' }}" required>
                                     </div>
@@ -67,13 +68,13 @@
                             </div>
 
                             <div class="checkout__input">
-                                <p>Address<span>*</span></p>
+                                <p>Address <span>*</span></p>
                                 <input type="text" name="address" class="checkout__input__add" readonly
                                     value="{{ $user->address ?? '' }}" required>
                             </div>
 
                             <div class="checkout__input">
-                                <p>Order notes<span>*</span></p>
+                                <p>Order notes</p>
                                 <input type="text" name="order_notes"
                                     placeholder="Notes about your order, e.g. special notes for delivery.">
                             </div>
@@ -94,6 +95,14 @@
                                             {{ $cart->quantity }}x {{ $cart->product->product_name }}
                                             <span>₱{{ number_format((float) $cart->price * $cart->quantity, 2) }}</span>
                                         </li>
+                                    @endforeach
+                                </ul>
+                                <div class="checkout__order__subtotal">Subtotal
+                                    <span>₱{{ $totals['subtotal'] }}</span>
+                                </div>
+
+                                <ul>
+                                    @foreach ($carts as $cart)  
                                         @if ($cart->addOns->isNotEmpty())
                                             <li class="add-ons">
                                                 Add-ons:
@@ -107,9 +116,6 @@
                                         @endif
                                     @endforeach
                                 </ul>
-                                <div class="checkout__order__subtotal">Subtotal
-                                    <span>₱{{ number_format((float) $totals['subtotal'], 2) }}</span>
-                                </div>
 
                                 @if (isset($totals['addons']) && $totals['addons'] > 0)
                                     <div class="checkout__order__subtotal">Add-ons Total
@@ -122,7 +128,7 @@
                                 </div>
 
                                 <div class="checkout__order__total">Total
-                                    <span id="grandTotal">₱{{ number_format((float) $totals['grandTotal'], 2) }}</span>
+                                    <span id="grandTotal">₱{{ $totals['grandTotal'] }}</span>
                                 </div>
                                 <input type="hidden" name="grand_total" id="grandTotalInput"
                                     value="{{ $totals['grandTotal'] }}">

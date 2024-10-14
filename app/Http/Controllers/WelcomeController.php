@@ -13,7 +13,6 @@ class WelcomeController extends Controller
         $categories = Category::where('status', 0)->get();
         $latestProducts = Product::orderBy('created_at', 'desc')->take(6)->get();
 
-
         $selectedCategory = $request->input('category');
         // If a category is selected, fetch products from that category; otherwise, fetch the latest new products
         if ($selectedCategory) {
@@ -38,7 +37,7 @@ class WelcomeController extends Controller
 
         $products = $productsQuery->where('status', 0)->paginate(6);
 
-        return view('welcome', compact('products', 'newProducts', 'categories', 'latestProducts', 'discountedProducts', 'selectedCategory'));
+        return view('dashboard', compact('products', 'newProducts', 'categories', 'latestProducts', 'discountedProducts', 'selectedCategory'));
     }
 
 
@@ -74,6 +73,12 @@ class WelcomeController extends Controller
         $products = $productsQuery->paginate(9); // Adjust the number of products per page
 
         // Pass data to the view
-        return view('landing-page-shop', compact('products', 'categories', 'latestProducts', 'discountedProducts'));
+        return view('shop', compact('products', 'categories', 'latestProducts', 'discountedProducts'));
+    }
+
+    public function contact()
+    {
+        $categories = Category::where('status', 0)->get();
+        return view('contact', compact('categories'));
     }
 }

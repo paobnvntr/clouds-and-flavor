@@ -4,33 +4,38 @@
 			<div class="col-6">
 				<div class="footer__about">
 					<div class="footer__about__logo" style="width: 50%;">
-						<img src="{{asset('assets/img/cnfhomepage.png')}}"/>
+						<img src="{{asset('assets/img/cnfhomepage.png')}}" />
 					</div>
 					<ul>
-						<li><strong>Address: </strong><span class="text-muted">Block 23 Acacia Cor Tanguile Street, Calendola San Pedro, Laguna</span></li>
+						<li><strong>Address: </strong><span class="text-muted">Block 23 Acacia Cor Tanguile Street,
+								Calendola San Pedro, Laguna</span></li>
 						<li><strong>Phone: </strong><span class="text-muted">0906 587 2891</span></li>
 						<li><strong>Email Address: </strong><span class="text-muted">cloudsnflavor@gmail.com</span></li>
 					</ul>
 				</div>
-			</div>
-			<div class="col-4">
-				<div class="footer__widget">
-					<h6>Useful Links</h6>
-					<ul>
-						<li><a href="{{url('dashboard')}}">Home</a></li>
-						<li><a href="{{url('/products')}}">Shop</a></li>
-						<li><a href="{{url('/my-cart')}}">Cart</a></li>
-						<li><a href="{{url('/my-order')}}">Order</a></li>
-					</ul>
 
-				</div>
-			</div>
-			<div class="col-2">
 				<div class="footer__widget">
 					<div class="footer__widget__social">
 						<a href="https://www.facebook.com/profile.php?id=100078434664934" target="_blank"><i
 								class="fa fa-facebook"></i></a>
 					</div>
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="footer__widget">
+					<h6>Quick Links</h6>
+					<ul>
+						@if (Auth::check() && Auth::user()->role == '0')
+							<li><a href="{{url('dashboard')}}">Home</a></li>
+							<li><a href="{{url('/products')}}">Shop</a></li>
+							<li><a href="{{url('/my-order')}}">My Order</a></li>
+							<li><a href="{{url('/contact')}}">Contact Us</a></li>
+						@else
+							<li><a href="{{url('/')}}">Home</a></li>
+							<li><a href="{{url('/landing-page-shop')}}">Shop</a></li>
+							<li><a href="{{url('/contact')}}">Contact Us</a></li>
+						@endif
+					</ul>
 				</div>
 			</div>
 			<div class="col-12">

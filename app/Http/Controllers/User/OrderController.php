@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
@@ -57,16 +58,29 @@ class OrderController extends Controller
 
     public function placeOrder(Request $request)
     {
-        // Validate the incoming request data
-        $request->validate([
-            'address' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:15',
-            'payment_method' => 'required|string',
-            'grand_total' => 'required|numeric|min:0',
+        $request->merge([
+            'grand_total' => str_replace(',', '', $request->input('grand_total'))
         ]);
 
+        // dd($request->all()); // This will output the modified request data
+
+        // Validate the incoming request data
+        $validator = Validator::make($request->all(), [
+            '_token' => 'required',
+            'name' => 'required|string|max:255',
+            'phone_number' => 'required|regex:/^09[0-9]{9}$/i',
+            'address' => 'required|string|max:255',
+            'grand_total' => 'required|numeric|min:0', // Ensure grand_total is numeric
+            'payment_method' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            // return redirect()->route('user.cart.index')->with('error', 'Invalid input.');
+            dd($validator->errors());
+        }
+
         // Log the incoming request data for debugging
-        Log::info('Order Request Data:', $request->all());
+        // Log::info('Order Request Data:', $request->all());
 
         // Retrieve the user's carts with products and add-ons
         $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
@@ -99,7 +113,7 @@ class OrderController extends Controller
         // Calculate discount if a voucher is applied
         $discount = 0;
         if ($appliedVoucher) {
-            $voucher = Voucher::find($appliedVoucher->id);
+            $voucher = Voucher::find($appliedVoucher->getKey());
             if ($voucher && $voucher->is_active) {
                 $discount = $this->calculateDiscount($totalBeforeDiscount, $voucher);
                 $discount = round($discount, 2); // Ensure discount is rounded
@@ -135,7 +149,7 @@ class OrderController extends Controller
 
             // Check if a voucher was applied
             if ($appliedVoucher) {
-                $voucher = Voucher::find($appliedVoucher->id);
+                $voucher = Voucher::find($appliedVoucher->getKey());
                 if ($voucher) {
                     $orderData['voucher_id'] = $voucher->id;
                     $voucher->increment('times_used');
@@ -162,22 +176,33 @@ class OrderController extends Controller
                 $product->save();
 
                 // Create an order item
-                OrderItem::create([
+                $addOrder = OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $cart->product_id,
                     'quantity' => $cart->quantity,
                     'price' => round($product->price, 2), // Ensure price is rounded
                 ]);
 
-                // Save add-ons to the orders_add_on table
-                foreach ($cart->addOns as $addOn) {
-                    OrderAddOn::create([
-                        'order_id' => $order->id,
-                        'cart_id' => $cart->id,
-                        'add_on_id' => $addOn->id,
-                        'price' => round($addOn->price, 2), // Ensure add-on price is rounded
-                        'quantity' => $cart->quantity, // Use the cart quantity for add-ons
-                    ]);
+                if (!$addOrder) {
+                    throw new \Exception('Failed to add order item for ' . $product->product_name);
+                }
+
+                // Check if there are add-ons associated with the cart item
+                if ($cart->addOns && $cart->addOns->isNotEmpty()) {
+                    foreach ($cart->addOns as $addOn) {
+                        $addAddOn = OrderAddOn::create([
+                            'order_id' => $order->id,
+                            'add_on_id' => $addOn->id,
+                            'price' => round($addOn->price, 2), // Ensure add-on price is rounded
+                            'quantity' => $cart->quantity, // Use the cart quantity for add-ons
+                        ]);
+
+                        if (!$addAddOn) {
+                            throw new \Exception('Failed to add order add-on for ' . $addOn->add_on_name);
+                        }
+                    }
+                } else {
+                    dd('No add-ons');
                 }
             }
 

@@ -21,18 +21,15 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 
 // });
+
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::get('/landing-page-shop', [WelcomeController::class, 'shop'])->name('landing-page-shop');
-
-
-
+Route::get('/contact', [WelcomeController::class, 'contact'])->name('contact');
 
 //NOT AUTH
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
-
-
 
 //Group Admin routes role = 2
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
@@ -89,6 +86,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
         Route::get('admin/total-earnings', 'showTotalEarnings')->name('admin.total_earnings');
     });
+
     Route::controller(VoucherController::class)->group(function () {
         Route::get('admin/vouchers', 'index')->name('admin.vouchers.index');
         Route::get('admin/vouchers/create', 'create')->name('admin.vouchers.create');
@@ -99,13 +97,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     });
 });
 
-
-
 //Group Staff routes role = 1
 Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
     Route::get('/staff/dashboard', [StaffController::class, 'index'])->name('staff.dashboard');
-
-
 
     Route::controller(POSController::class)->group(function () {
         Route::get('/staff/pos', 'index')->name('staff.pos.index');
@@ -134,12 +128,8 @@ Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
     Route::post('/staff/orders/complete/{id}', [StaffController::class, 'dORpComplete'])->name('staff.orders.dORpcomplete');
 });
 
-
-
-
 //Group User routes role = 0
 Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
-
     // Route for User Dashboard
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -162,21 +152,18 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
         Route::post('/cart/remove', 'removeItem')->name('user.cart.remove');
         Route::get('/cart/checkout', 'checkout')->name('user.cart.checkout');
         Route::post('/cart/place-order', [OrderController::class, 'placeOrder'])->name('user.cart.placeOrder');
-        Route::post('/cart/remove-voucher',  'removeVoucher')->name('user.cart.remove-voucher');
+        Route::post('/cart/remove-voucher', 'removeVoucher')->name('user.cart.remove-voucher');
         Route::post('/cart/apply-voucher', 'applyVoucher')->name('user.cart.apply-voucher');
         Route::get('/cart/get-totals', 'getTotals')->name('user.cart.get-totals');
         Route::get('/products/{product}/addons', 'getAddons')->name('products.addons');
         // Route::post('/cart/place-order', 'placeOrder')->name('user.cart.placeOrder');
     });
 
-
     Route::controller(OrderController::class)->group(function () {
         Route::get('/my-order', 'index')->name('user.order.index');
         Route::post('/orders/pay', 'payOrder')->name('user.orders.pay');
     });
 });
-
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
