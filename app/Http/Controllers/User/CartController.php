@@ -279,29 +279,49 @@ class CartController extends Controller
 
         // Calculate subtotal for products
         $subtotal = $carts->sum(function ($cart) {
-            return $cart->product->price * $cart->quantity; // Adjusted to access the product price
+            $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
+            // Return the product total for this cart item
+            return round($productPrice * $cart->quantity, 2);
         });
 
         // Calculate total for add-ons
         $addonsTotal = $carts->sum(function ($cart) {
-            return $cart->addOns->sum(function ($addOn) {
-                return $addOn->price; // Each add-on price does not depend on quantity
+            return $cart->addOns->sum(function ($addOn) use ($cart) {
+                // Calculate the total for add-ons associated with this cart item
+                return round($addOn->price * $cart->quantity, 2);
             });
         });
 
+        // Combine subtotal and add-ons total to get the total before discount
+        $totalBeforeDiscount = round($subtotal + $addonsTotal, 2);
+
         // Get the applied voucher from the session
         $appliedVoucher = session('applied_voucher');
+
         // Calculate discount if a voucher is applied
-        $discount = $appliedVoucher ? $this->calculateDiscount($subtotal + $addonsTotal, $appliedVoucher) : 0;
-        // Calculate grand total
-        $grandTotal = $subtotal + $addonsTotal - $discount;
+        $discount = 0;
+        if ($appliedVoucher) {
+            $voucher = Voucher::find($appliedVoucher->id);
+            if ($voucher && $voucher->is_active) {
+                // Calculate discount based on the total before discount
+                $discount = $this->calculateDiscount($totalBeforeDiscount, $voucher);
+                $discount = round($discount, 2); // Ensuring 2 decimal precision
+            } else {
+                // If the voucher is no longer valid, remove it from the session
+                session()->forget('applied_voucher');
+                $appliedVoucher = null;
+            }
+        }
+
+        // Calculate grand total, ensuring it doesn't fall below 0
+        $grandTotal = round(max($totalBeforeDiscount - $discount, 0), 2);
 
         // Prepare totals for the view
         $totals = [
-            'subtotal' => $subtotal,
-            'addons' => $addonsTotal,
-            'discount' => $discount,
-            'grandTotal' => $grandTotal,
+            'subtotal' => number_format($subtotal, 2),
+            'addons' => number_format($addonsTotal, 2),
+            'discount' => number_format($discount, 2),
+            'grandTotal' => number_format($grandTotal, 2),
         ];
 
         // Get the authenticated user
@@ -316,20 +336,16 @@ class CartController extends Controller
         return view('user.cart.checkout', compact('carts', 'totals', 'user', 'appliedVoucher'));
     }
 
+
+
+
+    // Helper method to calculate discount
     private function calculateDiscount($total, $voucher)
     {
-        // Calculate discount based on voucher type
-        if ($voucher->type === 'percentage') {
-            $discount = $total * ($voucher->discount / 100);
-        } else {
-            $discount = $voucher->discount;
+        if ($voucher->discount_type == 'percentage') {
+            return $total * ($voucher->discount_value / 100);
+        } else { // fixed amount
+            return min($voucher->discount_value, $total); // Ensure discount doesn't exceed total
         }
-
-        // Ensure discount does not exceed the maximum limit
-        if ($voucher->max_discount !== null) {
-            $discount = min($discount, $voucher->max_discount);
-        }
-
-        return $discount;
     }
 }

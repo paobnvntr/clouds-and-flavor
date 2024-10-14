@@ -18,7 +18,7 @@ class OrderController extends Controller
     public function index()
     {
         // Fetch orders along with order items, products, and the voucher if applied
-        $orders = Order::with(['orderItems.product', 'voucher'])
+        $orders = Order::with(['orderItems.product', 'orderAddOns.addOn', 'voucher'])
             ->where('user_id', Auth::id())
             ->get();
 
@@ -45,6 +45,15 @@ class OrderController extends Controller
         return response()->json(['success' => false]);
     }
 
+    private function calculateDiscount($total, $voucher)
+    {
+        if ($voucher->discount_type == 'percentage') {
+            return $total * ($voucher->discount_value / 100);
+        } else { // fixed amount
+            return min($voucher->discount_value, $total); // Ensure discount doesn't exceed total
+        }
+    }
+
 
     public function placeOrder(Request $request)
     {
@@ -54,26 +63,59 @@ class OrderController extends Controller
             'phone_number' => 'required|string|max:15',
             'payment_method' => 'required|string',
             'grand_total' => 'required|numeric|min:0',
-            'add_ons.*.cart_id' => 'sometimes|required|exists:carts,id', // Update to match cart_id
-            'add_ons.*.add_on_id' => 'sometimes|required|exists:products,id', // Update to match add_on_id
-            'add_ons.*.price' => 'sometimes|required|numeric|min:0',
-            'add_ons.*.quantity' => 'sometimes|required|integer|min:1', // Keeping quantity if needed
         ]);
 
         // Log the incoming request data for debugging
         Log::info('Order Request Data:', $request->all());
 
-        // Retrieve the user's carts
-        $carts = Cart::where('user_id', Auth::id())->get();
+        // Retrieve the user's carts with products and add-ons
+        $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
 
         // Check if the cart is empty
         if ($carts->isEmpty()) {
             return redirect()->route('user.cart.index')->with('error', 'Your cart is empty.');
         }
 
-        $subtotal = $carts->sum('total_price'); // Calculate subtotal from carts
-        $grandTotal = $request->grand_total; // Get grand total from request
-        $discount = $subtotal - $grandTotal; // Calculate discount
+        // Calculate subtotal for products
+        $subtotal = $carts->sum(function ($cart) {
+            // Determine the product price based on sales
+            $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
+            return round($productPrice * $cart->quantity, 2);
+        });
+
+        // Calculate total for add-ons
+        $addonsTotal = $carts->sum(function ($cart) {
+            return $cart->addOns->sum(function ($addOn) use ($cart) {
+                return round($addOn->price * $cart->quantity, 2);
+            });
+        });
+
+        // Combine subtotal and add-ons total to get the total before discount
+        $totalBeforeDiscount = round($subtotal + $addonsTotal, 2);
+
+        // Get the applied voucher from the session
+        $appliedVoucher = session('applied_voucher');
+
+        // Calculate discount if a voucher is applied
+        $discount = 0;
+        if ($appliedVoucher) {
+            $voucher = Voucher::find($appliedVoucher->id);
+            if ($voucher && $voucher->is_active) {
+                $discount = $this->calculateDiscount($totalBeforeDiscount, $voucher);
+                $discount = round($discount, 2); // Ensure discount is rounded
+            } else {
+                // If the voucher is no longer valid, remove it from the session
+                session()->forget('applied_voucher');
+            }
+        }
+
+        // Calculate grand total
+        $grandTotal = round(max($totalBeforeDiscount - $discount, 0), 2); // Ensure it doesn't fall below 0
+
+        // Verify that the calculated grand total matches the one from the request
+        if (abs($grandTotal - $request->grand_total) > 0.01) { // Allow for small floating-point discrepancies
+            return redirect()->route('user.cart.index')->with('error', 'Order total mismatch. Please try again.');
+        }
 
         // Start a database transaction
         DB::beginTransaction();
@@ -92,7 +134,6 @@ class OrderController extends Controller
             ];
 
             // Check if a voucher was applied
-            $appliedVoucher = session('applied_voucher');
             if ($appliedVoucher) {
                 $voucher = Voucher::find($appliedVoucher->id);
                 if ($voucher) {
@@ -125,25 +166,18 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'product_id' => $cart->product_id,
                     'quantity' => $cart->quantity,
-                    'price' => $cart->product->price,
+                    'price' => round($product->price, 2), // Ensure price is rounded
                 ]);
 
-                // Save add-ons to the orders_add_on table if they exist for this cart item
-                if (isset($request->add_ons) && is_array($request->add_ons)) {
-                    foreach ($request->add_ons as $addOn) {
-                        // Ensure the add-on is valid and associated with the cart
-                        if ($addOn['cart_id'] == $cart->id) {
-                            Log::info('Adding Add-On:', $addOn);
-                            OrderAddOn::create([
-                                'order_id' => $order->id,
-                                'cart_id' => $cart->id, // Associate add-on with the cart
-                                'add_on_id' => $addOn['add_on_id'], // Product ID for the add-on
-                                'price' => $addOn['price'], // Price of the add-on
-                            ]);
-                        }
-                    }
-                } else {
-                    Log::info('No add-ons to add.');
+                // Save add-ons to the orders_add_on table
+                foreach ($cart->addOns as $addOn) {
+                    OrderAddOn::create([
+                        'order_id' => $order->id,
+                        'cart_id' => $cart->id,
+                        'add_on_id' => $addOn->id,
+                        'price' => round($addOn->price, 2), // Ensure add-on price is rounded
+                        'quantity' => $cart->quantity, // Use the cart quantity for add-ons
+                    ]);
                 }
             }
 

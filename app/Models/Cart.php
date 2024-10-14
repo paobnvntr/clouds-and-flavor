@@ -25,4 +25,9 @@ class Cart extends Model
     {
         return $this->belongsToMany(AddOn::class, 'cart_add_on')->withPivot('price');
     }
+
+    public function OrderaddOns()
+    {
+        return $this->hasMany(OrderAddOn::class, 'cart_id'); 
+    }
 }

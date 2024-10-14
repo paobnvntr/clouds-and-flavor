@@ -86,14 +86,13 @@
                                 <div class="checkout__order__products">
                                     Products
                                     <span>Total</span>
-                                   
+
                                 </div>
                                 <ul>
                                     @foreach ($carts as $cart)
                                         <li>
                                             {{ $cart->quantity }}x {{ $cart->product->product_name }}
-                                            <span>₱{{ number_format($cart->price * $cart->quantity, 2) }}</span>
-
+                                            <span>₱{{ number_format((float) $cart->price * $cart->quantity, 2) }}</span>
                                         </li>
                                         @if ($cart->addOns->isNotEmpty())
                                             <li class="add-ons">
@@ -101,8 +100,7 @@
                                                 @foreach ($cart->addOns as $addOn)
                                                     <div>
                                                         {{ $cart->quantity }}x {{ $addOn->name }}
-                                                        <span>₱{{ number_format($addOn->price, 2) }}</span>
-                                                        <span></span>
+                                                        <span>₱{{ number_format((float) $addOn->price * $cart->quantity, 2) }}</span>
                                                     </div>
                                                 @endforeach
                                             </li>
@@ -110,18 +108,21 @@
                                     @endforeach
                                 </ul>
                                 <div class="checkout__order__subtotal">Subtotal
-                                    <span>₱{{ number_format($totals['subtotal'], 2) }}</span>
+                                    <span>₱{{ number_format((float) $totals['subtotal'], 2) }}</span>
                                 </div>
+
                                 @if (isset($totals['addons']) && $totals['addons'] > 0)
                                     <div class="checkout__order__subtotal">Add-ons Total
-                                        <span>₱{{ number_format($totals['addons'], 2) }}</span>
+                                        <span>₱{{ number_format((float) $totals['addons'], 2) }}</span>
                                     </div>
                                 @endif
+
                                 <div class="checkout__order__total">Discount
-                                    <span>-₱{{ number_format($totals['discount'], 2) }}</span>
+                                    <span>-₱{{ number_format((float) $totals['discount'], 2) }}</span>
                                 </div>
+
                                 <div class="checkout__order__total">Total
-                                    <span id="grandTotal">₱{{ number_format($totals['grandTotal'], 2) }}</span>
+                                    <span id="grandTotal">₱{{ number_format((float) $totals['grandTotal'], 2) }}</span>
                                 </div>
                                 <input type="hidden" name="grand_total" id="grandTotalInput"
                                     value="{{ $totals['grandTotal'] }}">

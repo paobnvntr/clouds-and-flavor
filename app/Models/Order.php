@@ -38,4 +38,9 @@ class Order extends Model
     {
         return $this->belongsTo(Voucher::class, 'voucher_id');
     }
+
+    public function orderAddOns()
+    {
+        return $this->hasMany(OrderAddOn::class);
+    }
 }
