@@ -10,7 +10,7 @@
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
                 <li class="nav-item">
                     <a href="{{ url('admin/dashboard') }}" class="nav-link">
-                        <i class="nav-icon bi bi-speedometer2"></i>
+                        <i class="nav-icon bi bi-bar-chart-line"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
@@ -77,7 +77,7 @@
                     <a href="#" class="nav-link">
                         <i class="nav-icon bi bi-person-lines-fill"></i>
                         <p>
-                            List
+                            Users
                             <i class="nav-arrow bi bi-chevron-right"></i>
                         </p>
                     </a>
@@ -91,7 +91,7 @@
                         <li class="nav-item">
                             <a href="{{url('admin/user-list')}}" class="nav-link">
                                 <i class="nav-icon bi bi-person"></i>
-                                <p>User</p>
+                                <p>User (Customer)</p>
                             </a>
                         </li>
                     </ul>

@@ -24,55 +24,72 @@
     <div class="app-content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-sm-12">
-                    @if (session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
+                <div class="col-lg-8 offset-lg-2">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">Staff Information</h5>
                         </div>
-                    @endif
-                    @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul>
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
+                        <div class="card-body">
+                            @if (session('success'))
+                                <div class="alert alert-success">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul>
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
 
-                    <form action="{{ route('admin.staff.store') }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" value="{{old('name')}}" name="name" required>
+                            <form action="{{ route('admin.staff.store') }}" method="POST">
+                                @csrf
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                        value="{{ old('name') }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email <span
+                                            class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                        value="{{ old('email') }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="address" name="address"
+                                        value="{{ old('address') }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone_number" class="form-label">Phone Number (e.g.,
+                                        09999999999)</label>
+                                    <input type="text" class="form-control" id="phone_number" name="phone_number"
+                                        value="{{ old('phone_number') }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password <span
+                                            class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password_confirmation" class="form-label">Confirm Password <span
+                                            class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="password_confirmation"
+                                        name="password_confirmation" required>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-success">Create Staff</button>
+                                    <a href="{{ route('admin.staff.index') }}" class="btn btn-danger">Cancel</a>
+                                </div>
+                            </form>
                         </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" value="{{old('email')}}" name="email" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Address</label>
-                            <input type="text" class="form-control" id="address" value="{{old('address')}}" name="address">
-                        </div>
-                        <div class="mb-3">
-                            <label for="phone_number" class="form-label">Phone Number (eg. 09999999999)</label>
-                            <input type="text" class="form-control" id="phone_number" value="{{old('phone_number')}}" name="phone_number">
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Create Staff</button>
-                        <a href="{{ route('admin.staff.index') }}" class="btn btn-secondary">Cancel</a>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </main>
-
 @endsection
