@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
@@ -13,7 +14,14 @@ class AdminController extends Controller
     {
         $totalUsers = User::where('role', 0)->count();
         $pendingOrdersCount = Order::where('status', 'pending')->count();
-        $totalEarnings = Order::sum('total_price');
+        $totalEarningsFromOrders = Order::where('status', 'completed')->sum('total_price');
+        $totalEarningsFromAddOns = DB::table('orders_add_on')
+            ->join('orders', 'orders_add_on.order_id', '=', 'orders.id')
+            ->join('add_ons', 'orders_add_on.add_on_id', '=', 'add_ons.id') // Join to get the add-on price
+            ->where('orders.status', 'completed')
+            ->sum(DB::raw('add_ons.price * orders_add_on.quantity'));
+        
+        $totalEarnings = $totalEarningsFromOrders + $totalEarningsFromAddOns;
         $formattedEarnings = number_format($totalEarnings, 2);
         $totalOrders = Order::where('status', 'completed')->count();
 

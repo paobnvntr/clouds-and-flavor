@@ -1,13 +1,8 @@
 <footer class="py-4 bg-light mt-auto">
 
     <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">Copyright &copy; CNFVAPE</div>
-            <div>
-                <a href="#">Privacy Policy</a>
-                &middot;
-                <a href="#">Terms &amp; Conditions</a>
-            </div>
+        <div class="d-flex align-items-center justify-content-end small">
+            <div class="text-muted">Copyright &copy; Cloud N Flavor</div>
         </div>
     </div>
 </footer>
