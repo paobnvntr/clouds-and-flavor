@@ -1,121 +1,107 @@
 @extends('layouts.admin.app')
 
-@section('title', 'Users')
+@section('title', 'Admin | Users')
 
 @section('content')
-
-    <!--begin::App Main-->
-    <main class="app-main">
-        <!--begin::App Content Header-->
-        <div class="app-content-header">
-            <!--begin::Container-->
-            <div class="container-fluid">
-                <!--begin::Row-->
-                <div class="row">
-                    
-                    @if (session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-                    <script>
-                        // Function to hide alert after 5 seconds
-                        setTimeout(function() {
-                            const alerts = document.querySelectorAll('.alert');
-                            alerts.forEach(alert => {
-                                alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
-                                alert.style.opacity = 0; // Fade out the alert
-                                setTimeout(() => alert.remove(), 500); // Remove after fade out
-                            });
-                        }, 3000); // 5000 milliseconds = 5 seconds
-                    </script>
-                    <div class="col-sm-6">
-                        <h3 class="mb-0">Users</h3>
-                    </div>
-
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Users</li>
-                        </ol>
-                    </div>
+<main class="app-main">
+    <div class="app-content-header bg-light py-3">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-sm-6">
+                    <h3 class="mb-0 text-dark">Users</h3>
                 </div>
-                <!--end::Row-->
+                <div class="col-sm-6 text-end">
+                    <a href="{{ route('admin.user.create') }}" class="btn btn-primary">Add New User</a>
+                </div>
             </div>
-            <!--end::Container-->
         </div>
-        <!--end::App Content Header-->
+    </div>
 
-        <!--begin::App Content-->
-        <div class="app-content">
-            <!--begin::Container-->
-            <div class="container-fluid">
-                <!--begin::Row-->
-                <div class="row">
-                    <div class="col-sm-12 mb-3">
-                        <a href="{{ route('admin.user.create') }}" class="btn btn-primary">Add User</a>
-                    </div>
-                    <table id="datatablesSimple" class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone Number</th>
-                                <th>Address</th>
-                                <th>Role</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($users as $user)
+    <div class="app-content">
+        <div class="container-fluid">
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="table-responsive shadow-sm bg-white p-3 rounded">
+                        <table id="usersTable" class="table table-hover align-middle">
+                            <thead class="table-light">
                                 <tr>
-                                    <td>{{ $user->id }}</td>
-                                    <td>{{ $user->name }}</td>
-                                    <td>{{ $user->email }}</td>
-                                    <td>{{ $user->phone_number }}</td>
-                                    <td>{{ $user->address }}</td>
-                                    <td>
-                                        <!-- Display the role of the user -->
-                                        @if ($user->role == 0)
-                                            <span class="badge bg-info">User</span>
-                                        @else
-                                            <span class="badge bg-warning">Other Role</span>
-                                        @endif
-                                    </td>
-                                    
-                                    <td>
-                                        <a href="{{ route('admin.user.edit', $user->id) }}" class="btn btn-warning">Edit</a>
-                                        <form action="{{ route('admin.user.destroy', $user->id) }}" method="POST"
-                                            style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                        </form>
-                                    </td>
+                                    <th class="text-center">ID</th>
+                                    <th class="text-start">Name</th>
+                                    <th class="text-start">Email</th>
+                                    <th class="text-center">Phone Number</th>
+                                    <th class="text-start">Address</th>
+                                    <th class="text-center">Role</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach ($users as $user)
+                                    <tr>
+                                        <td class="text-center">{{ $user->id }}</td>
+                                        <td class="text-start">{{ $user->name }}</td>
+                                        <td class="text-start">{{ $user->email }}</td>
+                                        <td class="text-center">{{ $user->phone_number }}</td>
+                                        <td class="text-start">{{ $user->address }}</td>
+                                        <td class="text-center">
+                                            <span class="badge {{ $user->role == 0 ? 'bg-info' : 'bg-warning' }}">
+                                                {{ $user->role == 0 ? 'User' : 'Other Role' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{{ route('admin.user.edit', $user->id) }}"
+                                                class="btn btn-warning btn-sm">Edit</a>
+                                            <form action="{{ route('admin.user.destroy', $user->id) }}" method="POST"
+                                                class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Are you sure you want to delete this user?')">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <!--end::Row-->
             </div>
-            <!--end::Container-->
         </div>
-        <!--end::App Content-->
+    </div>
+</main>
 
-    </main>
-    <!--end::App Main-->
-    
-    <script>
-        $(document).ready(function() {
-            $('#datatablesSimple').DataTable({
-                responsive: true,
-                paging: true,
-                searching: true,
-                ordering: true,
-            });
+<script>
+    new DataTable('#usersTable', {
+        layout: {
+            bottomEnd: {
+                paging: {
+                    firstLast: false
+                }
+            }
+        },
+        lengthMenu: [5, 10, 20, 50, 100],
+    });
+
+    setTimeout(function () {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = "opacity 0.5s ease";
+            alert.style.opacity = 0;
+            setTimeout(() => alert.remove(), 500);
         });
-    </script>
-
+    }, 5000);
+</script>
 @endsection

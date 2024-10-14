@@ -1,36 +1,34 @@
 @extends('layouts.admin.app')
 
-@section('title', 'Order List')
+@section('title', 'Admin | Completed Orders')
 
 @section('content')
 
-    <main class="app-main">
-        <div class="app-content-header">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <h3 class="mb-0">Completed Order List</h3>
-                    </div>
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item active" aria-current="page">Orders</li>
-                        </ol>
-                    </div>
+<main class="app-main">
+    <div class="app-content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h3 class="mb-0">Completed Order List</h3>
+                </div>
+                <div class="col-sm-6">
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="app-content">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-sm-12">
-                        @if (session('success'))
-                            <div class="alert alert-success">
-                                {{ session('success') }}
-                            </div>
-                        @endif
+    <div class="app-content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12">
+                    @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
 
-                        <table id="datatablesSimple" class="table table-hover">
+                    <div class="table-responsive shadow-sm bg-white p-3 rounded">
+                        <table id="completedTable" class="table table-hover">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -52,7 +50,7 @@
                                         <td>₱{{ number_format($order->total_price, 2) }}</td>
                                         <td>{{ $order->status }}</td>
                                         <td>{{ $order->payment_method ?? 'N/A' }}</td>
-                                        <td>{{ $order->created_at->format('Y-m-d H:i:s') }}
+                                        <td>{{ $order->created_at->format('Y-m-d H:i:s') }}</td>
                                         <td>
                                             <button class="btn btn-info" data-bs-toggle="modal"
                                                 data-bs-target="#orderModal{{ $order->id }}">
@@ -64,54 +62,96 @@
                                     <!-- Order Modal -->
                                     <div class="modal fade" id="orderModal{{ $order->id }}" tabindex="-1"
                                         aria-labelledby="orderModalLabel{{ $order->id }}" aria-hidden="true">
-                                        <div class="modal-dialog">
+                                        <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="orderModalLabel{{ $order->id }}">Order
-                                                        Details - Order For: <strong>{{ $order->user->name }}</strong></h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
+                                                <div class="modal-header bg-primary text-white">
+                                                    <h5 class="modal-title" id="orderModalLabel{{ $order->id }}">
+                                                        Order Details - Order For: <strong>{{ $order->user->name }}</strong>
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                        data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <p><strong>{{ $order->created_at->format('Y-m-d H:i:s') ?? 'N/A' }}</strong>
-                                                    </p>
-                                                    <p><strong>Status:</strong>
-                                                        {{ $order->status ?? 'N/A' }}
-                                                    </p>
-                                                    <p><strong>Payment Method:</strong>
-                                                        {{ $order->payment_method ?? 'N/A' }}
-                                                    </p>
-                                                    <p><strong>Address:</strong>
-                                                        {{ $order->address ?? 'N/A' }}
-                                                    </p>
-                                                    <p><strong>Phone Number:</strong>
-                                                        {{ $order->phone_number ?? 'N/A' }}
-                                                    </p>
-                                                    <hr>
-                                                    <ul>
-                                                        <p><strong>Total Items:</strong>
-                                                            {{ $order->orderItems->sum('quantity') }}
-                                                        </p>
-                                                        @php $totalAmount = 0; @endphp
+                                                    <div class="row mb-3">
+                                                        <div class="col-sm-6">
+                                                            <p><strong>Date & Time:</strong>
+                                                                {{ $order->created_at->format('Y-m-d H:i:s') ?? 'N/A' }}</p>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <p><strong>Status:</strong>
+                                                                <span
+                                                                    class="badge bg-success">{{ $order->status ?? 'N/A' }}</span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row mb-3">
+                                                        <div class="col-sm-6">
+                                                            <p><strong>Payment Method:</strong>
+                                                                {{ $order->payment_method ?? 'N/A' }}</p>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <p><strong>Phone Number:</strong>
+                                                                {{ $order->phone_number ?? 'N/A' }}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row mb-3">
+                                                        <div class="col-sm-12">
+                                                            <p><strong>Address:</strong> {{ $order->address ?? 'N/A' }}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <hr class="my-3">
+
+                                                    <p><strong>Total Items:</strong>
+                                                        {{ $order->orderItems->sum('quantity') }}</p>
+                                                    <ul class="list-group list-group-flush mb-3">
+                                                        @php    $totalAmount = 0; @endphp
                                                         @foreach ($order->orderItems as $item)
                                                             @php
                                                                 $itemTotal = $item->quantity * $item->price;
                                                                 $totalAmount += $itemTotal;
                                                             @endphp
-                                                            <li>{{ $item->product->product_name ?? 'N/A' }}
+                                                            <li
+                                                                class="list-group-item d-flex justify-content-between align-items-center">
+                                                                {{ $item->product->product_name ?? 'N/A' }}
                                                                 ({{ $item->quantity }})
-                                                                -
-                                                                ₱{{ number_format($item->price, 2) }} =
-                                                                ₱{{ number_format($itemTotal, 2) }}</li>
+                                                                <span>₱{{ number_format($item->price, 2) }} =
+                                                                    ₱{{ number_format($itemTotal, 2) }}</span>
+                                                            </li>
                                                         @endforeach
                                                     </ul>
-                                                    <hr>
-                                                    <p><strong>Total Amount:</strong> ₱{{ number_format($totalAmount, 2) }}
-                                                    </p>
+
+                                                    @if ($order->orderAddOns->isNotEmpty())
+                                                        <hr>
+                                                        <p><strong>Add-Ons:</strong></p>
+                                                        <ul class="list-group list-group-flush mb-3">
+                                                            @foreach ($order->orderAddOns as $addOn)
+                                                                <li
+                                                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                                                    {{ $addOn->addOn->name }} ({{ $addOn->quantity }})
+                                                                    <span>₱{{ number_format($addOn->price, 2) }}</span>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
+
+                                                    @if ($order->voucher_id)
+                                                        <hr>
+                                                        <p><strong>Applied Voucher:</strong>
+                                                            {{ $order->voucher->code ?? 'N/A' }}</p>
+                                                        <p><strong>Discount:</strong> ₱{{ number_format($order->discount, 2) }}
+                                                        </p>
+                                                    @endif
+
+                                                    <div class="text-center py-3">
+                                                        <strong>Total Amount:
+                                                            ₱{{ number_format($order->total_price, 2) }}</strong>
+                                                    </div>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Close</button>
+                                                    <button type="button" class="btn btn-primary">Print Invoice</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -123,6 +163,26 @@
                 </div>
             </div>
         </div>
-    </main>
+    </div>
+</main>
 
+<script>
+    $(document).ready(function () {
+        $('#completedTable').DataTable({
+            responsive: true,
+            paging: true,
+            searching: true,
+            ordering: true,
+        });
+    });
+
+    setTimeout(function () {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = "opacity 0.5s ease";
+            alert.style.opacity = 0;
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 3000);
+</script>
 @endsection

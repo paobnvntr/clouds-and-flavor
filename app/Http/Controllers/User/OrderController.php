@@ -197,7 +197,7 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'product_id' => $cart->product_id,
                     'quantity' => $cart->quantity,
-                    'price' => round($product->price, 2), // Ensure price is rounded
+                    'price' => round($product->on_sale ? $product->sale_price : $product->price, 2), // Ensure price is rounded
                 ]);
 
                 if (!$addOrder) {

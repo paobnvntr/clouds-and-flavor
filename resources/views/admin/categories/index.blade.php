@@ -1,122 +1,104 @@
 @extends('layouts.admin.app')
 
-@section('title', 'Category')
+@section('title', 'Admin | Category')
 
 @section('content')
-
-    <!--begin::App Main-->
-    <main class="app-main">
-        <!--begin::App Content Header-->
-        <div class="app-content-header">
-            <!--begin::Container-->
-            <div class="container-fluid">
-                <!--begin::Row-->
-                <div class="row">
-                    @if (session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-                    <script>
-                        // Function to hide alert after 5 seconds
-                        setTimeout(function() {
-                            const alerts = document.querySelectorAll('.alert');
-                            alerts.forEach(alert => {
-                                alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
-                                alert.style.opacity = 0; // Fade out the alert
-                                setTimeout(() => alert.remove(), 500); // Remove after fade out
-                            });
-                        }, 3000); // 5000 milliseconds = 5 seconds
-                    </script>
-                    <div class="col-sm-6">
-                        <h3 class="mb-0">Categories</h3>
-                    </div>
-
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Categories</li>
-                        </ol>
-                    </div>
+<main class="app-main">
+    <div class="app-content-header bg-light py-3">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-sm-6">
+                    <h3 class="mb-0 text-dark">Categories</h3>
                 </div>
-                <!--end::Row-->
+                <div class="col-sm-6 text-end">
+                    <a href="{{ route('admin.categories.create') }}" class="btn btn-primary">Add New Category</a>
+                </div>
             </div>
-            <!--end::Container-->
         </div>
-        <!--end::App Content Header-->
+    </div>
 
-        <!--begin::App Content-->
-        <div class="app-content">
-            <!--begin::Container-->
-            <div class="container-fluid">
-                <!--begin::Row-->
-                <div class="row">
-                    <!-- Add Category Button -->
-                    <div class="col-sm-12 mb-3">
-                        <a href="{{ route('admin.categories.create') }}" class="btn btn-primary">Add Category</a>
+    <div class="app-content">
+        <div class="container-fluid">
+            <div class="row">
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
+                @endif
 
-                    <table id="datatablesSimple" class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Image</th>
-                                <th>Name</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($categories as $category)
+                <div class="col-sm-12">
+                    <div class="table-responsive shadow-sm bg-white p-3 rounded">
+                        <table id="categoriesTable" class="table table-hover align-middle">
+                            <thead class="table-light">
                                 <tr>
-                                    <td>{{ $category->id }}</td>
-                                    <td>
-                                        <!-- Check if the category has an image, else use a default image -->
-                                        <img src="{{ asset($category->image ?? 'assets/category_image/unknown.jpg') }}" 
-                                             alt="{{ $category->name }}" width="50">
-                                    </td>
-                                    <td>{{ $category->name }}</td>
-                                    <td>
-                                        <!-- Check status and display "Available" or "Unavailable" -->
-                                        @if ($category->status == 0)
-                                            <span class="badge bg-success">Available</span>
-                                        @else
-                                            <span class="badge bg-danger">Unavailable</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('admin.categories.edit', $category->id) }}"
-                                            class="btn btn-warning">Edit</a>
-                                        <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST"
-                                            style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                        </form>
-                                    </td>
+                                    <th class="text-center">ID</th>
+                                    <th class="text-center">Image</th>
+                                    <th class="text-start">Name</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach ($categories as $category)
+                                    <tr>
+                                        <td class="text-center">{{ $category->id }}</td>
+                                        <td class="text-center">
+                                            <img src="{{ asset($category->image ?? 'assets/category_image/unknown.jpg') }}"
+                                                alt="{{ $category->name }}" class="img-thumbnail"
+                                                style="width: 50px; height: 50px;">
+                                        </td>
+                                        <td class="text-start">{{ $category->name }}</td>
+                                        <td class="text-center">
+                                            <span class="badge {{ $category->status == 0 ? 'bg-success' : 'bg-danger' }}">
+                                                {{ $category->status == 0 ? 'Available' : 'Unavailable' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{{ route('admin.categories.edit', $category->id) }}"
+                                                class="btn btn-warning btn-sm">
+                                                Edit
+                                            </a>
+                                            <form action="{{ route('admin.categories.destroy', $category->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Are you sure you want to delete this category?')">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <!--end::Row-->
             </div>
-            <!--end::Container-->
         </div>
-        <!--end::App Content-->
+    </div>
+</main>
 
-    </main>
-    <!--end::App Main-->
-    
-    <script>
-        $(document).ready(function() {
-            $('#datatablesSimple').DataTable({
-                responsive: true,
-                paging: true,
-                searching: true,
-                ordering: true,
-            });
+<script>
+    new DataTable('#categoriesTable', {
+        layout: {
+            bottomEnd: {
+                paging: {
+                    firstLast: false
+                }
+            }
+        },
+        lengthMenu: [5, 10, 20, 50, 100],
+    });
+
+    setTimeout(function () {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = "opacity 0.5s ease";
+            alert.style.opacity = 0;
+            setTimeout(() => alert.remove(), 500);
         });
-    </script>
-
+    }, 5000);
+</script>
 @endsection
