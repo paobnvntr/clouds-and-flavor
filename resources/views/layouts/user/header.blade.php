@@ -55,7 +55,11 @@
 		<div class="row">
 			<div class="col-lg-3">
 				<div class="header__logo">
-					<a href="dashboard"><img src="{{ asset('assets/img/cnfhomepage.png') }}" alt="" /></a>
+					@if (Auth::check() && Auth::user()->role == '0')
+						<a href="dashboard"><img src="{{ asset('assets/img/cnfhomepage.png') }}" alt="" /></a>
+					@else
+						<a href="{{ url('/') }}"><img src="{{ asset('assets/img/cnfhomepage.png') }}" alt="" /></a>
+					@endif
 				</div>
 			</div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\AddOn;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Models\Product;
@@ -22,7 +23,24 @@ class CartController extends Controller
         $totals = $this->calculateTotals();
         $appliedVoucher = session('applied_voucher');
 
-        return view('user.cart.index', compact('carts', 'totals', 'appliedVoucher'));
+        $categories = Category::where('status', 0)->get();
+        $cartItems = Cart::where('user_id', Auth::id())->count();
+        $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
+
+        $subtotal = $carts->sum(function ($cart) {
+            $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
+            return round($productPrice * $cart->quantity, 2);
+        });
+
+        $addonsTotal = $carts->sum(function ($cart) {
+            return $cart->addOns->sum(function ($addOn) use ($cart) {
+                return round($addOn->price * $cart->quantity, 2);
+            });
+        });
+
+        $totalPrice = round($subtotal + $addonsTotal, 2);
+
+        return view('user.cart.index', compact('carts', 'totals', 'appliedVoucher', 'categories', 'cartItems', 'totalPrice'));
     }
 
 
@@ -150,8 +168,7 @@ class CartController extends Controller
                 }
             }
 
-            session()->flash('message', 'Product added to cart successfully.');
-            return redirect()->back();
+            return redirect()->route('user.products.index')->with('message', 'Product added to cart.');
         } else {
             return redirect()->back()->with('error', 'Product is out of stock.');
         }
@@ -256,8 +273,6 @@ class CartController extends Controller
             return response()->json(['success' => false, 'message' => 'Cart item not found.'], 404);
         }
 
-        $product = Product::findOrFail($cart->product_id);
-        $product->increment('stock', $cart->quantity);
         $cart->delete();
 
         return response()->json(['success' => true, 'message' => 'Item removed and stock updated.']);
@@ -330,8 +345,11 @@ class CartController extends Controller
             session()->flash('warning', 'Please update your address and phone number in your profile.');
         }
 
+        $categories = Category::where('status', 0)->get();
+        $cartItems = Cart::where('user_id', Auth::id())->count();
+
         // Return the checkout view with necessary data
-        return view('user.cart.checkout', compact('carts', 'totals', 'user', 'appliedVoucher'));
+        return view('user.cart.checkout', compact('carts', 'totals', 'user', 'appliedVoucher', 'totalBeforeDiscount', 'categories', 'cartItems'));
     }
 
     // Helper method to calculate discount

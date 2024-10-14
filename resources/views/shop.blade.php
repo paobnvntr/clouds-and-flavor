@@ -8,7 +8,6 @@
 @endsection
 
 @section('content')
-<!-- Hero Section Begin -->
 <section class="hero hero-normal">
     <div class="container">
         <div class="row">
@@ -34,30 +33,56 @@
             </div>
 
             <div class="col-lg-9">
-                <div class="hero__search">
-                    <div class="hero__search__form">
-                        <form action="{{ route('user.products.index') }}" method="GET">
-                            <input type="text" name="search" placeholder="Search products"
-                                value="{{ request('search') }}">
-                            <button type="submit" class="site-btn">SEARCH</button>
-                        </form>
+                <div class="row">
+                    <div class="hero__search col-8">
+                        <div class="hero__search__form col-12">
+                            <form action="{{ route('user.products.index') }}" method="GET">
+                                <input type="text" name="search" placeholder="Search products" />
+                                <button type="submit" class="site-btn">SEARCH</button>
+                            </form>
+                        </div>
                     </div>
+
+                    @if (Auth::check() && Auth::user()->role == '0')
+                        <div class="header__cart col-4">
+                            <ul>
+                                <li>
+                                    <a href="{{ url('/my-cart') }}">
+                                        <i class="fa fa-shopping-cart"></i>
+                                        <span>{{ $cartItems }}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="header__cart__price">Total: <span>₱ {{ number_format($totalPrice, 2) }}</span></div>
+                        </div>
+                    @else
+                        <div class="header__cart col-4">
+                            <ul>
+                                <li>
+                                    <a href="{{ url('/my-cart') }}">
+                                        <i class="fa fa-shopping-cart"></i>
+                                        <span>0</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="header__cart__price">Total: <span>₱ 0.00</span></div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 </section>
-<!-- Hero Section End -->
 
 <!-- Breadcrumb Section Begin -->
 <section class="breadcrumb-section set-bg" data-setbg="{{ asset('assets/img/deviceseries.jpg') }}">
     <div class="container">
         <div class="row">
-            <div class="col-lg-12 text-center">
+            <div class="col-lg-12 text-center">  
                 <div class="breadcrumb__text">
                     <h2>Shop</h2>
                     <div class="breadcrumb__option">
-                        <a href="dashboard">Home</a>
+                        <a href="/">Home</a>
                         <span>Shop</span>
                     </div>
                 </div>

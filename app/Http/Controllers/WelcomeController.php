@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class WelcomeController extends Controller
 {
@@ -79,6 +81,22 @@ class WelcomeController extends Controller
     public function contact()
     {
         $categories = Category::where('status', 0)->get();
-        return view('contact', compact('categories'));
+        $cartItems = Cart::where('user_id', Auth::id())->count();
+        $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
+
+        $subtotal = $carts->sum(function ($cart) {
+            $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
+            return round($productPrice * $cart->quantity, 2);
+        });
+
+        $addonsTotal = $carts->sum(function ($cart) {
+            return $cart->addOns->sum(function ($addOn) use ($cart) {
+                return round($addOn->price * $cart->quantity, 2);
+            });
+        });
+
+        $totalPrice = round($subtotal + $addonsTotal, 2);
+
+        return view('contact', compact('categories', 'cartItems', 'totalPrice'));
     }
 }

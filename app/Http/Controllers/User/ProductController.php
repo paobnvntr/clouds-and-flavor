@@ -39,10 +39,20 @@ class ProductController extends Controller
 
         // Calculate cart items and total price
         $cartItems = Cart::where('user_id', Auth::id())->count();
-        $carts = Cart::where('user_id', Auth::id())->get();
-        $totalPrice = $carts->sum(function ($cart) {
-            return $cart->product->price * $cart->quantity;
+        $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
+
+        $subtotal = $carts->sum(function ($cart) {
+            $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
+            return round($productPrice * $cart->quantity, 2);
         });
+
+        $addonsTotal = $carts->sum(function ($cart) {
+            return $cart->addOns->sum(function ($addOn) use ($cart) {
+                return round($addOn->price * $cart->quantity, 2);
+            });
+        });
+
+        $totalPrice = round($subtotal + $addonsTotal, 2);
 
         return view('user.products.index', compact('products', 'categories', 'cartItems', 'latestProducts', 'discountedProducts', 'totalPrice'));
     }
@@ -88,10 +98,20 @@ class ProductController extends Controller
 
         // Calculate cart items and total price
         $cartItems = Cart::where('user_id', Auth::id())->count();
-        $carts = Cart::where('user_id', Auth::id())->get();
-        $totalPrice = $carts->sum(function ($cart) {
-            return $cart->product->price * $cart->quantity;
+        $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
+
+        $subtotal = $carts->sum(function ($cart) {
+            $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
+            return round($productPrice * $cart->quantity, 2);
         });
+
+        $addonsTotal = $carts->sum(function ($cart) {
+            return $cart->addOns->sum(function ($addOn) use ($cart) {
+                return round($addOn->price * $cart->quantity, 2);
+            });
+        });
+
+        $totalPrice = round($subtotal + $addonsTotal, 2);
 
         return view('dashboard', compact('products', 'newProducts', 'categories', 'latestProducts', 'discountedProducts', 'selectedCategory', 'cartItems', 'totalPrice'));
     }
@@ -100,11 +120,23 @@ class ProductController extends Controller
     {
         // Use camelCase for the relationship method name
         $product = Product::with('addOns')->findOrFail($id);
+        $categories = Category::where('status', 0)->get();
         $cartItems = Cart::where('user_id', Auth::id())->count();
-        $carts = Cart::where('user_id', Auth::id())->get();
-        $totalPrice = $carts->sum(function ($cart) {
-            return $cart->product->price * $cart->quantity;
+        $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
+
+        $subtotal = $carts->sum(function ($cart) {
+            $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
+            return round($productPrice * $cart->quantity, 2);
         });
-        return view('user.products.product-details', compact('product', 'cartItems', 'totalPrice'));
+
+        $addonsTotal = $carts->sum(function ($cart) {
+            return $cart->addOns->sum(function ($addOn) use ($cart) {
+                return round($addOn->price * $cart->quantity, 2);
+            });
+        });
+
+        $totalPrice = round($subtotal + $addonsTotal, 2);
+
+        return view('user.products.product-details', compact('product', 'cartItems', 'totalPrice', 'categories'));
     }
 }

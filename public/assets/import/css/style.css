@@ -2360,6 +2360,20 @@ ol {
 	padding-left: 20px;
 }
 
+.checkout__order .checkout__order__discount {
+	font-size: 18px;
+	color: #1c1c1c;
+	font-weight: 700;
+	border-bottom: 1px solid #e1e1e1;
+	padding-bottom: 15px;
+	margin-bottom: 25px;
+}
+
+.checkout__order .checkout__order__discount span {
+	float: right;
+	color: #dd2222;
+}
+
 .checkout__order .checkout__order__total {
 	font-size: 18px;
 	color: #1c1c1c;
@@ -2371,7 +2385,7 @@ ol {
 
 .checkout__order .checkout__order__total span {
 	float: right;
-	color: #dd2222;
+	color: #3CC032;
 }
 
 .checkout__order button {

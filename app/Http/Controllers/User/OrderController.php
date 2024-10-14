@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderAddOn;
 use App\Models\OrderItem;
@@ -18,12 +19,29 @@ class OrderController extends Controller
 {
     public function index()
     {
+        $categories = Category::where('status', 0)->get();
+        $cartItems = Cart::where('user_id', Auth::id())->count();
+        $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
+
+        $subtotal = $carts->sum(function ($cart) {
+            $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
+            return round($productPrice * $cart->quantity, 2);
+        });
+
+        $addonsTotal = $carts->sum(function ($cart) {
+            return $cart->addOns->sum(function ($addOn) use ($cart) {
+                return round($addOn->price * $cart->quantity, 2);
+            });
+        });
+
+        $totalPrice = round($subtotal + $addonsTotal, 2);
+
         // Fetch orders along with order items, products, and the voucher if applied
         $orders = Order::with(['orderItems.product', 'orderAddOns.addOn', 'voucher'])
             ->where('user_id', Auth::id())
             ->get();
 
-        return view('user.order.index', compact('orders'));
+        return view('user.order.index', compact('orders', 'categories', 'cartItems', 'totalPrice'));
     }
 
     public function payOrder(Request $request)
@@ -54,7 +72,6 @@ class OrderController extends Controller
             return min($voucher->discount_value, $total); // Ensure discount doesn't exceed total
         }
     }
-
 
     public function placeOrder(Request $request)
     {
@@ -201,8 +218,6 @@ class OrderController extends Controller
                             throw new \Exception('Failed to add order add-on for ' . $addOn->add_on_name);
                         }
                     }
-                } else {
-                    dd('No add-ons');
                 }
             }
 
@@ -215,7 +230,7 @@ class OrderController extends Controller
             // Commit the transaction
             DB::commit();
 
-            return redirect()->route('user.order.index')->with('success', 'Order placed successfully.');
+            return redirect()->route('user.order.index')->with('message', 'Order placed successfully.');
         } catch (\Exception $e) {
             // Rollback the transaction on error
             DB::rollBack();
