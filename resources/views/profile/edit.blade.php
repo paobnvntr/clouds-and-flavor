@@ -3,43 +3,121 @@
 @section('title', 'Clouds N Flavor | Profile')
 
 @section('content')
-
-    {{-- <x-app-layout> --}}
-        <x-slot name="header">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Profile') }}
-            </h2>
-        </x-slot>
-
-        <!-- Display success message -->
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
+<section class="hero hero-normal">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="hero__categories">
+                    <div class="hero__categories__all">
+                        <i class="fa fa-bars"></i>
+                        <span>Categories</span>
+                    </div>
+                    <ul>
+                        <li>
+                            <a href="{{ route('user.products.index') }}">All Products</a>
+                        </li>
+                        @foreach ($categories as $category)
+                            <li>
+                                <a href="{{ route('user.products.index', ['category_id' => $category->id]) }}">
+                                    {{ $category->name }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
-        @endif
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <div class="max-w-xl">
-                        @include('profile.partials.update-profile-information-form')
+            <div class="col-lg-9">
+                <div class="row">
+                    <div class="hero__search col-8">
+                        <div class="hero__search__form col-12">
+                            <form action="{{ route('user.products.index') }}" method="GET">
+                                <input type="text" name="search" placeholder="Search products" />
+                                <button type="submit" class="site-btn">SEARCH</button>
+                            </form>
+                        </div>
                     </div>
-                </div>
 
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <div class="max-w-xl">
-                        @include('profile.partials.update-password-form')
-                    </div>
-                </div>
-
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <div class="max-w-xl">
-                        @include('profile.partials.delete-user-form')
+                    <div class="header__cart col-4">
+                        <ul>
+                            <li>
+                                <a href="{{ url('/my-cart') }}">
+                                    <i class="fa fa-shopping-cart"></i>
+                                    <span>{{ $cartItems }}</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="header__cart__price">Total: <span>₱ {{ number_format($totalPrice, 2) }}</span></div>
                     </div>
                 </div>
             </div>
         </div>
-    {{-- </x-app-layout> --}}
+    </div>
+</section>
 
+<div class="container py-5 pt-0">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Profile Title -->
+            <h2 class="text-center mb-4 font-weight-bold text-dark">{{ __('Update Profile') }}</h2>
+
+            <!-- Success Message -->
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+
+            <!-- Error Messages -->
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+
+            <!-- Update Profile Information Section -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    @include('profile.partials.update-profile-information-form')
+                </div>
+            </div>
+
+            <!-- Update Password Section -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    @include('profile.partials.update-password-form')
+                </div>
+            </div>
+
+            <!-- Delete Account Section -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    @include('profile.partials.delete-user-form')
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    setTimeout(function () {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = "opacity 0.5s ease";
+            alert.style.opacity = 0;
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 3000);
+</script>
 
 @endsection

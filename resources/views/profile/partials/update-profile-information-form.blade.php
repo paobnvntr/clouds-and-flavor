@@ -1,10 +1,10 @@
-<section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">
+<section class="mb-4">
+    <header class="mb-4">
+        <h2 class="h4 font-weight-bold text-dark">
             {{ __('Profile Information') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="text-muted">
             {{ __("Update your account's profile information.") }}
         </p>
     </header>
@@ -13,36 +13,45 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}">
         @csrf
         @method('patch')
 
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)"
-                required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        <!-- Name -->
+        <div class="form-group">
+            <label for="name" class="font-weight-bold">{{ __('Name') }}</label>
+            <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror"
+                value="{{ old('name', $user->name) }}" required autofocus autocomplete="name">
+            @error('name')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
         </div>
 
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)"
-                required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+        <!-- Email -->
+        <div class="form-group">
+            <label for="email" class="font-weight-bold">{{ __('Email') }}</label>
+            <input id="email" name="email" type="email" class="form-control @error('email') is-invalid @enderror"
+                value="{{ old('email', $user->email) }}" required autocomplete="username">
+            @error('email')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800">
+                <div class="mt-2">
+                    <p class="text-muted">
                         {{ __('Your email address is unverified.') }}
 
-                        <button form="send-verification"
-                            class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button form="send-verification" class="btn btn-link p-0">
                             {{ __('Click here to re-send the verification email.') }}
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
+                        <p class="text-success mt-2">
                             {{ __('A new verification link has been sent to your email address.') }}
                         </p>
                     @endif
@@ -50,26 +59,37 @@
             @endif
         </div>
 
-        <div>
-            <x-input-label for="address" :value="__('Address')" />
-            <x-text-input id="address" name="address" type="text" class="mt-1 block w-full" :value="old('address', $user->address)"
-                required autocomplete="address" />
-            <x-input-error class="mt-2" :messages="$errors->get('address')" />
+        <!-- Address -->
+        <div class="form-group">
+            <label for="address" class="font-weight-bold">{{ __('Address') }}</label>
+            <input id="address" name="address" type="text" class="form-control @error('address') is-invalid @enderror"
+                value="{{ old('address', $user->address) }}" required autocomplete="address">
+            @error('address')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
         </div>
 
-        <div>
-            <x-input-label for="number" :value="__('Phone Number')" />
-            <x-text-input id="number" name="number" type="text" class="mt-1 block w-full" :value="old('number', $user->phone_number)"
-                required autocomplete="tel" />
-            <x-input-error class="mt-2" :messages="$errors->get('phone_number')" />
+        <!-- Phone Number -->
+        <div class="form-group">
+            <label for="number" class="font-weight-bold">{{ __('Phone Number') }}</label>
+            <input id="number" name="number" type="text"
+                class="form-control @error('phone_number') is-invalid @enderror"
+                value="{{ old('number', $user->phone_number) }}" required autocomplete="tel">
+            @error('phone_number')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <!-- Save Button -->
+        <div class="form-group">
+            <button type="submit" class="btn btn-success">{{ __('Save') }}</button>
 
             @if (session('status') === 'profile-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600">{{ __('Saved.') }}</p>
+                <span class="text-success ml-3">{{ __('Saved.') }}</span>
             @endif
         </div>
     </form>

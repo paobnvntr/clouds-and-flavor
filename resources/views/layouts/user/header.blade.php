@@ -20,9 +20,9 @@
                             <div class="header__top__right__logout">
                                 <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
                                     <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#"
-                                            role="button" data-bs-toggle="dropdown" aria-expanded="false"><i
-                                                class="fa fa-user"></i> {{ Auth::user()->name }}</a>
+                                        <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button"
+                                            data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-user"></i>
+                                            {{ Auth::user()->name }}</a>
                                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                             <li>
                                                 <a class="dropdown-item" href="{{route('profile.edit')}}">Profile</a>
@@ -31,9 +31,8 @@
                                                 <form method="POST" action="{{ route('logout') }}">
                                                     @csrf
 
-                                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                                        onclick="event.preventDefault();
-															  this.closest('form').submit();">
+                                                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
+                                                                  this.closest('form').submit();">
                                                         {{ __('Log Out') }}
                                                     </a>
                                                 </form>
@@ -44,8 +43,8 @@
                             </div>
                         @else
                             <div class="header__top__right__auth">
-                                <a href="{{ url('/register') }}" style="margin-right: 10px;"><i
-                                        class="fa fa-user-plus"></i> Register</a>
+                                <a href="{{ url('/register') }}" style="margin-right: 10px;"><i class="fa fa-user-plus"></i>
+                                    Register</a>
                             </div>
                             <div class="header__top__right__auth ">
                                 <a href="{{ url('/login') }}"><i class="fa fa-user"></i> Login</a>
@@ -64,8 +63,7 @@
                     @if (Auth::check() && Auth::user()->role == '0')
                         <a href="dashboard"><img src="{{ asset('assets/img/cnfhomepage.png') }}" alt="" /></a>
                     @else
-                        <a href="{{ url('/') }}"><img src="{{ asset('assets/img/cnfhomepage.png') }}"
-                                alt="" /></a>
+                        <a href="{{ url('/') }}"><img src="{{ asset('assets/img/cnfhomepage.png') }}" alt="" /></a>
                     @endif
                 </div>
             </div>
@@ -102,12 +100,38 @@
                 style="width: 80px; height: auto;" /></a>
     </div>
 
-    <div class="humberger__menu__widget">
-        <div class="header__top__right__auth d-flex align-items-center">
-            <a href="{{ url('/register') }}" style="margin-right: 20px;"><i class="fa fa-user-plus"></i> Register</a>
-            <a href="{{ url('/login') }}"><i class="fa fa-user"></i> Login</a>
+    @if (Auth::check() && Auth::user()->role == '0')
+        <div class="header__top__right__logout">
+            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false"><i class="fa fa-user"></i> {{ Auth::user()->name }}</a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li>
+                            <a class="dropdown-item" href="{{route('profile.edit')}}">Profile</a>
+                            </a>
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+
+                                <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
+                                                                  this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </a>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </div>
-    </div>
+    @else
+        <div class="humberger__menu__widget">
+            <div class="header__top__right__auth d-flex align-items-center">
+                <a href="{{ url('/register') }}" style="margin-right: 20px;"><i class="fa fa-user-plus"></i> Register</a>
+                <a href="{{ url('/login') }}"><i class="fa fa-user"></i> Login</a>
+            </div>
+        </div>
+    @endif
 
     <nav class="humberger__menu__nav mobile-menu">
         <ul>
