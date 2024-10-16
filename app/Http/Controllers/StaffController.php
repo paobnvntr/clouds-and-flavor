@@ -8,57 +8,28 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Twilio\Rest\Client;
+use Illuminate\Support\Facades\DB;
 
 class StaffController extends Controller
 {
-    public function index()
-    {
-        // Fetch total orders, pending orders, and completed orders for the staff
-        $totalOrders = Order::count();
-        $pendingOrders = Order::where('status', 'pending')->count();
-        $completedOrders = Order::where('status', 'completed')->count();
-
-        return view('staff.dashboard', compact('totalOrders', 'pendingOrders', 'completedOrders'));
-    }
-
     public function dashboard()
     {
-        // Fetch total orders, pending orders, and completed orders for the staff
-        $userOrders = Order::all();
-        $posOrders = POSOrder::all();
+        $pendingOrdersCount = Order::where('status', 'pending')->count();
+        $pendingPOSOrdersCount = POSOrder::where('status', 'pending')->count();
+        $totalEarningsFromOrders = Order::where('status', 'completed')->sum('total_price');
+        $totalEarningsFromAddOns = DB::table('orders_add_on')
+            ->join('orders', 'orders_add_on.order_id', '=', 'orders.id')
+            ->join('add_ons', 'orders_add_on.add_on_id', '=', 'add_ons.id')
+            ->where('orders.status', 'completed')
+            ->sum(DB::raw('add_ons.price * orders_add_on.quantity'));
 
+        $totalEarnings = $totalEarningsFromOrders + $totalEarningsFromAddOns;
+        $formattedEarnings = number_format($totalEarnings, 2);
+        $totalOrders = Order::where('status', 'completed')->count();
+        $totalPOSOrders = POSOrder::where('status', 'completed')->count();
 
-        $OLpendingOrders = Order::where('status', 'pending')
-            ->where('payment_status', 'paid')
-            ->count();
-        $POSpendingOrders = POSOrder::where('status', 'pending')->count();
-        $completedOrders = Order::where('status', 'completed')->count();
-        $completedOrdersCount = Order::where('status', 'completed')->count() + PosOrder::where('status', 'completed')->count();
-
-
-        // Fetch orders with 'pending' status, 'paid' payment status, and 'to-deliver' delivery option
-        $toDeliverOrders = Order::where('status', 'pending')
-            ->where('payment_status', 'paid')
-            ->where('delivery_option', 'to-deliver')
-            ->count();
-
-        // Fetch orders with 'pending' status, 'paid' payment status, and 'pick-up' delivery option
-        $pickUpOrders = Order::where('status', 'pending')
-            ->where('payment_status', 'paid')
-            ->where('delivery_option', 'pick-up')
-            ->count();
-
-        $toDeliverOrdersCount = Order::where('status', 'completed')
-            ->where('delivery_option', 'to-deliver')
-            ->count();
-
-        $pickUpOrdersCount = Order::where('status', 'completed')
-            ->where('delivery_option', 'pick-up')
-            ->count();
-
-        return view('staff.orders.dashboard', compact('OLpendingOrders', 'completedOrdersCount', 'toDeliverOrdersCount', 'toDeliverOrders', 'pickUpOrders', 'pickUpOrdersCount', 'POSpendingOrders', 'completedOrders'));
+        return view('staff.dashboard', compact('pendingOrdersCount', 'totalPOSOrders', 'formattedEarnings', 'pendingPOSOrdersCount', 'totalOrders'));
     }
-
 
     public function pendingList()
     {

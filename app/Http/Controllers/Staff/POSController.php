@@ -129,16 +129,20 @@ class POSController extends Controller
         }
     }
 
-    public function showCheckoutPage()
+    public function showCheckoutPage(Request $request)
     {
         $cartItems = StaffCart::with('product')->where('staff_id', Auth::id())->get();
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('staff.pos.index')->with('error', 'No items in the cart.');
+        } else {
+        
+            // Calculate total considering sale price
+            $cartTotal = $cartItems->sum(function ($item) {
+                return $item->product->on_sale ? $item->product->sale_price * $item->quantity : $item->product->price * $item->quantity;
+            });
 
-        // Calculate total considering sale price
-        $cartTotal = $cartItems->sum(function ($item) {
-            return $item->product->on_sale ? $item->product->sale_price * $item->quantity : $item->product->price * $item->quantity;
-        });
-
-        return view('staff.pos.checkout', compact('cartItems', 'cartTotal'));
+            return view('staff.pos.checkout', compact('cartItems', 'cartTotal'));
+        }
     }
 
     public function placeOrder(Request $request)
@@ -261,17 +265,5 @@ class POSController extends Controller
             'cartItems' => $cartItems,
             'cartTotal' => $cartTotal,
         ]);
-    }
-
-    public function filterProducts(Request $request)
-    {
-        $categoryId = $request->input('category_id');
-
-        // Fetch products based on category ID
-        $products = Product::when($categoryId, function ($query) use ($categoryId) {
-            return $query->where('category_id', $categoryId);
-        })->get();
-
-        return response()->json(['products' => $products]);
     }
 }

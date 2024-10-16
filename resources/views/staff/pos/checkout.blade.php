@@ -1,10 +1,10 @@
 @extends('layouts.staff.app')
 
-@section('title', 'Checkout')
+@section('title', 'Order Checkout')
 
 @section('content')
-    <div class="container">
-        <h2>Checkout</h2>
+    <div class="container my-2">
+        <h2 class="mb-4">Order Checkout</h2>
 
         <!-- Flash Message Area -->
         <div id="flash-message">
