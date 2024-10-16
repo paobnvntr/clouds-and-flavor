@@ -28,7 +28,7 @@
                 <div class="row">
                     <div class="hero__search col-8">
                         <div class="hero__search__form col-12">
-                            <form action="{{ route('user.products.index') }}" method="GET">
+                            <form action="{{ url('/landing-page-shop') }}" method="GET">
                                 <input type="text" name="search" placeholder="Search products" />
                                 <button type="submit" class="site-btn">SEARCH</button>
                             </form>

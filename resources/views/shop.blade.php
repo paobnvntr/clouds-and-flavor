@@ -19,11 +19,11 @@
                     </div>
                     <ul>
                         <li>
-                            <a href="{{ route('user.products.index') }}">All Products</a>
+                            <a href="{{ url('/landing-page-shop') }}">All Products</a>
                         </li>
                         @foreach ($categories as $category)
                             <li>
-                                <a href="{{ route('user.products.index', ['category_id' => $category->id]) }}">
+                                <a href="{{ route('landing-page-shop', ['category_id' => $category->id]) }}">
                                     {{ $category->name }}
                                 </a>
                             </li>
@@ -36,7 +36,7 @@
                 <div class="row">
                     <div class="hero__search col-8">
                         <div class="hero__search__form col-12">
-                            <form action="{{ route('user.products.index') }}" method="GET">
+                            <form action="{{ url('/landing-page-shop') }}" method="GET">
                                 <input type="text" name="search" placeholder="Search products" />
                                 <button type="submit" class="site-btn">SEARCH</button>
                             </form>
