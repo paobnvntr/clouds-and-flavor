@@ -67,9 +67,9 @@ class OrderController extends Controller
     private function calculateDiscount($total, $voucher)
     {
         if ($voucher->discount_type == 'percentage') {
-            return $total * ($voucher->discount_value / 100);
+            return $total * ($voucher->discount / 100);
         } else { // fixed amount
-            return min($voucher->discount_value, $total); // Ensure discount doesn't exceed total
+            return min($voucher->discount, $total); // Ensure discount doesn't exceed total
         }
     }
 
@@ -79,7 +79,7 @@ class OrderController extends Controller
             'grand_total' => str_replace(',', '', $request->input('grand_total'))
         ]);
 
-        // dd($request->all()); // This will output the modified request data
+        // dd($request->all());
 
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [

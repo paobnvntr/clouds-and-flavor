@@ -307,12 +307,12 @@ class CartController extends Controller
         $totalBeforeDiscount = round($subtotal + $addonsTotal, 2);
 
         // Get the applied voucher from the session
-        $appliedVoucher = session('applied_voucher');
+        $appliedVoucher = session('applied_voucher');;
 
         // Calculate discount if a voucher is applied
         $discount = 0;
         if ($appliedVoucher) {
-            $voucher = Voucher::find($appliedVoucher->id);
+            $voucher = Voucher::where('id', $appliedVoucher->getKey())->first();
             if ($voucher && $voucher->is_active) {
                 // Calculate discount based on the total before discount
                 $discount = $this->calculateDiscount($totalBeforeDiscount, $voucher);
@@ -335,8 +335,6 @@ class CartController extends Controller
             'grandTotal' => number_format($grandTotal, 2),
         ];
 
-        // dd($totals['subtotal']);
-
         // Get the authenticated user
         $user = Auth::user();
 
@@ -356,9 +354,9 @@ class CartController extends Controller
     private function calculateDiscount($total, $voucher)
     {
         if ($voucher->discount_type == 'percentage') {
-            return $total * ($voucher->discount_value / 100);
+            return $total * ($voucher->discount / 100);
         } else { // fixed amount
-            return min($voucher->discount_value, $total); // Ensure discount doesn't exceed total
+            return min($voucher->discount, $total); // Ensure discount doesn't exceed total
         }
     }
 }

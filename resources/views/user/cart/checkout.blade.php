@@ -110,7 +110,6 @@
                 <h4>Billing Details</h4>
                 <form action="{{ route('user.cart.placeOrder') }}" method="POST">
                     @csrf
-                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <div class="row">
                         <div class="col-lg-8 col-md-6">
                             <div class="row">
