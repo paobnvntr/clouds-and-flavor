@@ -137,7 +137,7 @@
                     style="background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
                     <h3 style="font-size: 28px; font-weight: 700; color: #333;">WELCOME TO CLOUDS AND FLAVOR!</h3>
                     <p style="font-size: 16px; color: #555; margin-top: 20px;">
-                        At CAF, we are passionate about providing high-quality vaping products and accessories to our
+                        At Clouds and Flavor, we are passionate about providing high-quality vaping products and accessories to our
                         community. <br>
                         Our mission is to offer a safe, enjoyable, and informative experience for both
                         newcomers and seasoned vapers.
