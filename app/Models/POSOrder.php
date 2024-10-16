@@ -26,7 +26,7 @@ class POSOrder extends Model
         return $this->belongsTo(User::class, 'staff_id');
     }
 
-    public function items()
+    public function orderItems()
     {
         return $this->hasMany(POSOrderItem::class, 'pos_order_id');
     }
@@ -34,5 +34,5 @@ class POSOrder extends Model
     public function getCustomerName()
     {
         return $this->customer_name;
-    }
+    }   
 }

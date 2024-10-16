@@ -7,7 +7,7 @@
         <div class="row">
             <!-- Online Pending Orders Card -->
             <div class="col-lg-4 my-3">
-                <a href="{{ url('/staff/online-orders') }}" class="text-decoration-none text-dark">
+                <a href="{{ url('/staff/online-pending') }}" class="text-decoration-none text-dark">
                     <div class="card">
                         <div class="card-body">
                             <h4>Online Pending Orders</h4>
@@ -19,7 +19,7 @@
 
             <!-- POS Pending Orders Card -->
             <div class="col-lg-4 my-3">
-                <a href="{{ url('/staff/pos-orders') }}" class="text-decoration-none text-dark">
+                <a href="{{ url('/staff/pos/pending-orders') }}" class="text-decoration-none text-dark">
                     <div class="card">
                         <div class="card-body">
                             <h4>POS Pending Orders</h4>

@@ -1,9 +1,9 @@
 @extends('layouts.staff.app')
 
-@section('title', 'Order List')
+@section('title', 'Staff | Pending Orders')
 
 @section('content')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <main class="app-main">
         <div class="app-content-header">
             <div class="container-fluid">
@@ -12,9 +12,6 @@
                         <h3 class="mb-0">Pending Order List</h3>
                     </div>
                     <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item active" aria-current="page">Orders</li>
-                        </ol>
                     </div>
                 </div>
             </div>
@@ -30,134 +27,145 @@
                             </div>
                         @endif
 
-                        <table id="datatablesSimple" class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>User Name</th>
-                                    <th>Total Items</th>
-                                    <th>Total Price</th>
-                                    <th>Status</th>
-                                    <th>Payment Method</th>
-                                    <th>Payment Status</th>
-                                    <th>Reference #</th>
-                                    <th>Delivery Option</th>
-                                    <th>Date & Time</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($orders as $order)
+                        <div class="table-responsive shadow-sm bg-white p-3 rounded">
+                            <table id="completedTable" class="table table-hover">
+                                <thead>
                                     <tr>
-                                        <td>{{ $order->id }}</td>
-                                        <td>{{ $order->user->name ?? 'N/A' }}</td>
-                                        <td>{{ $order->orderItems->sum('quantity') }}</td>
-                                        <td>₱{{ number_format($order->total_price, 2) }}</td>
-                                        <td class="order-status">{{ $order->status }}</td>
-                                        <td>{{ $order->payment_method ?? 'N/A' }}</td>
-                                        <td>{{ $order->payment_status }}</td>
-                                        <td>{{ $order->reference_number }}</td>
-                                        <td>{{ $order->delivery_option }}</td>
-                                        <td>{{ $order->created_at->format('Y-m-d H:i:s') }}</td>
-                                        <td>
-                                            <button class="btn btn-info" data-bs-toggle="modal"
-                                                data-bs-target="#orderModal{{ $order->id }}">
-                                                View
-                                            </button>
-                                        </td>
+                                        <th>ID</th>
+                                        <th>User Name</th>
+                                        <th>Total Items</th>
+                                        <th>Total Price</th>
+                                        <th>Status</th>
+                                        <th>Payment Method</th>
+                                        <th>Date & Time</th>
+                                        <th>Action</th>
                                     </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($orders as $order)
+                                        <tr>
+                                            <td>{{ $order->id }}</td>
+                                            <td>{{ $order->user->name ?? 'N/A' }}</td>
+                                            <td>{{ $order->orderItems->sum('quantity') }}</td>
+                                            <td>₱{{ number_format($order->total_price, 2) }}</td>
+                                            <td>{{ $order->status }}</td>
+                                            <td>{{ $order->payment_method ?? 'N/A' }}</td>
+                                            <td>{{ $order->created_at->format('Y-m-d H:i:s') }}</td>
+                                            <td>
+                                                <button class="btn btn-info" data-bs-toggle="modal"
+                                                    data-bs-target="#orderModal{{ $order->id }}">
+                                                    View
+                                                </button>
+                                            </td>
+                                        </tr>
 
-                                    <!-- Order Modal -->
-                                    <div class="modal fade" id="orderModal{{ $order->id }}" tabindex="-1"
-                                        aria-labelledby="orderModalLabel{{ $order->id }}" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="orderModalLabel{{ $order->id }}">Order
-                                                        Details - Order For: <strong>{{ $order->user->name }}</strong></h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <p><strong>Order Date:</strong>
-                                                        {{ $order->created_at->format('Y-m-d H:i:s') ?? 'N/A' }}</p>
-                                                    <p><strong>Status:</strong> {{ $order->status ?? 'N/A' }}</p>
-                                                    <p><strong>Payment Method:</strong>
-                                                        {{ $order->payment_method ?? 'N/A' }}</p>
-                                                    <p><strong>Address:</strong> {{ $order->address ?? 'N/A' }}</p>
-                                                    <p><strong>Phone Number:</strong> {{ $order->phone_number ?? 'N/A' }}
-                                                    </p>
-                                                    <hr>
+                                        <!-- Order Modal -->
+                                        <div class="modal fade" id="orderModal{{ $order->id }}" tabindex="-1"
+                                            aria-labelledby="orderModalLabel{{ $order->id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-primary text-white">
+                                                        <h5 class="modal-title" id="orderModalLabel{{ $order->id }}">
+                                                            Order Details - Order For:
+                                                            <strong>{{ $order->user->name }}</strong>
+                                                        </h5>
+                                                        <button type="button" class="btn-close btn-close-white"
+                                                            data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body" id="printableArea{{ $order->id }}">
+                                                        <div class="row mb-3">
+                                                            <div class="col-sm-6">
+                                                                <p><strong>Date & Time:</strong>
+                                                                    {{ $order->created_at->format('Y-m-d H:i:s') ?? 'N/A' }}
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <p><strong>Status:</strong>
+                                                                    <span
+                                                                        class="badge bg-success">{{ $order->status ?? 'N/A' }}</span>
+                                                                </p>
+                                                            </div>
+                                                        </div>
 
-                                                    <p><strong>Total Items:</strong>
-                                                        {{ $order->orderItems->sum('quantity') }}</p>
-                                                    @php
-                                                        $totalAmount = 0;
-                                                        $discountAmount = 0;
-                                                    @endphp
+                                                        <div class="row mb-3">
+                                                            <div class="col-sm-6">
+                                                                <p><strong>Payment Method:</strong>
+                                                                    {{ $order->payment_method ?? 'N/A' }}</p>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <p><strong>Phone Number:</strong>
+                                                                    {{ $order->phone_number ?? 'N/A' }}</p>
+                                                            </div>
+                                                        </div>
 
-                                                    <ul>
-                                                        @foreach ($order->orderItems as $item)
-                                                            @php
-                                                                // Check if the product is on sale
-                                                                $itemPrice = $item->product->on_sale
-                                                                    ? $item->product->sale_price
-                                                                    : $item->price;
-                                                                $itemTotal = $item->quantity * $itemPrice;
-                                                                $totalAmount += $itemTotal;
-                                                            @endphp
-                                                            <li>
-                                                                {{ $item->product->product_name ?? 'N/A' }}
-                                                                ({{ $item->quantity }}) -
-                                                                ₱{{ number_format($itemPrice, 2) }} =
-                                                                ₱{{ number_format($itemTotal, 2) }}
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                    <hr>
+                                                        <div class="row mb-3">
+                                                            <div class="col-sm-12">
+                                                                <p><strong>Address:</strong> {{ $order->address ?? 'N/A' }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
 
-                                                    <!-- Vouchers Applied Section -->
-                                                    <p><strong>Vouchers Applied:</strong>
-                                                        @if ($order->voucher_id)
-                                                            <!-- Check if a voucher_id exists -->
-                                                            @php
-                                                                $voucher = $order->voucher; // Fetch the voucher related to this order
-                                                            @endphp
-                                                            <ul>
-                                                                <li>
-                                                                    {{ $voucher->code }} -
-                                                                    ₱{{ number_format($voucher->discount, 2) }}
-                                                                    @php
-                                                                        $discountAmount += $voucher->discount; // Add to total discount
-                                                                    @endphp
+                                                        <hr class="my-3">
+
+                                                        <p><strong>Total Items:</strong>
+                                                            {{ $order->orderItems->sum('quantity') }}</p>
+                                                        <ul class="list-group list-group-flush mb-3">
+                                                            @php    $totalAmount = 0; @endphp
+                                                            @foreach ($order->orderItems as $item)
+                                                                @php
+                                                                    $itemTotal = $item->quantity * $item->price;
+                                                                    $totalAmount += $itemTotal;
+                                                                @endphp
+                                                                <li
+                                                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                                                    {{ $item->product->product_name ?? 'N/A' }}
+                                                                    ({{ $item->quantity }})
+                                                                    <span>₱{{ number_format($item->price, 2) }} =
+                                                                        ₱{{ number_format($itemTotal, 2) }}</span>
                                                                 </li>
-                                                            </ul>
-                                                        @else
-                                                            None
-                                                        @endif
-                                                    </p>
-                                                    <hr>
+                                                            @endforeach
+                                                        </ul>
 
-                                                    <p><strong>Total Amount Before Discount:</strong>
-                                                        ₱{{ number_format($totalAmount, 2) }}</p>
-                                                    <p><strong>Discount:</strong> ₱{{ number_format($discountAmount, 2) }}
-                                                    </p>
-                                                    <p><strong>Total Amount:</strong>
-                                                        ₱{{ number_format($totalAmount - $discountAmount, 2) }}</p>
-                                                    <!-- Display total amount after discount -->
-                                                </div>  
-                                                @if ($order->status != 'completed')
-                                                    <button class="btn btn-success complete-order-btn"
-                                                        data-id="{{ $order->id }}">
-                                                        Complete Order
-                                                    </button>
-                                                @endif
+                                                        @if ($order->orderAddOns->isNotEmpty())
+                                                            <hr>
+                                                            <p><strong>Add-Ons:</strong></p>
+                                                            <ul class="list-group list-group-flush mb-3">
+                                                                @foreach ($order->orderAddOns as $addOn)
+                                                                    <li
+                                                                        class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        {{ $addOn->addOn->name }} ({{ $addOn->quantity }})
+                                                                        <span>₱{{ number_format($addOn->price, 2) }}</span>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        @endif
+
+                                                        @if ($order->voucher_id)
+                                                            <hr>
+                                                            <p><strong>Applied Voucher:</strong>
+                                                                {{ $order->voucher->code ?? 'N/A' }}</p>
+                                                            <p><strong>Discount:</strong>
+                                                                ₱{{ number_format($order->voucher->discount, 2) }}
+                                                            </p>
+                                                        @endif
+
+                                                        <div class="text-center py-3">
+                                                            <strong>Total Amount:
+                                                                ₱{{ number_format($order->total_price, 2) }}</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-primary"
+                                                            onclick="printInvoice({{ $order->id }})">Print
+                                                            Invoice</button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -165,51 +173,40 @@
     </main>
 
     <script>
+        function printInvoice(orderId) {
+            // Get only the modal body content for printing
+            var content = document.getElementById('printableArea' + orderId).innerHTML;
+
+            // Open a new window
+            var printWindow = window.open('', '', 'height=600,width=800');
+
+            // Write the modal body content to the print window
+            printWindow.document.write('<html><head><title>Invoice</title>');
+            printWindow.document.write('<style>/* Add any print-specific styles here */</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(content);
+            printWindow.document.write('</body></html>');
+
+            // Print the content
+            printWindow.document.close();
+            printWindow.print();
+        }
         $(document).ready(function() {
-            // Handle the click event on the Complete Order button
-            $('.complete-order-btn').on('click', function() {
-                var orderId = $(this).data('id');
-
-                // Confirm completion
-                if (confirm('Are you sure you want to mark this order as completed?')) {
-                    $.ajax({
-                        url: '{{ route('staff.orders.complete') }}', // URL to the route for completing the order
-                        method: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}', // Include CSRF token
-                            order_id: orderId
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                // Update the order status in the table
-                                $('button[data-id="' + orderId + '"]').closest('tr').find(
-                                    '.order-status').text('completed');
-
-                                // Hide the Complete Order button
-                                $('button[data-id="' + orderId + '"]').hide();
-
-                                // Update modal status and close modal
-                                $('#orderModal' + orderId).find('.modal-status').text(
-                                    'completed');
-                                $('#orderModal' + orderId).modal('hide');
-
-                                alert('Order completed successfully!');
-                            } else {
-                                alert('Something went wrong!');
-                            }
-                        },
-                        error: function() {
-                            alert('Error completing the order.');
-                        }
-                    });
-                }
-            });
-
-            // Refresh the table without a page reload after the modal is closed
-            $('.modal').on('hidden.bs.modal', function() {
-                location.reload();
+            $('#completedTable').DataTable({
+                responsive: true,
+                paging: true,
+                searching: true,
+                ordering: true,
             });
         });
-    </script>
 
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = "opacity 0.5s ease";
+                alert.style.opacity = 0;
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 3000);
+    </script>
 @endsection

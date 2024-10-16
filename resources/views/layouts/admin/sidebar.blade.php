@@ -47,25 +47,55 @@
                     <a href="#" class="nav-link">
                         <i class="nav-icon bi bi-cart-fill"></i>
                         <p>
-                            Orders
+                            Online Orders
                             <i class="nav-arrow bi bi-chevron-right"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview ms-4">
                         <li class="nav-item">
-                            <a href="{{url('admin/all-order')}}" class="nav-link">
+                            <a href="{{ url('admin/all-order') }}" class="nav-link">
                                 <i class="nav-icon bi bi-circle"></i>
                                 <p>All Orders</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{url('admin/pending-order')}}" class="nav-link">
+                            <a href="{{ url('admin/pending-order') }}" class="nav-link">
                                 <i class="nav-icon bi bi-hourglass-split"></i>
                                 <p>Pending Orders</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{url('admin/completed-order')}}" class="nav-link">
+                            <a href="{{ url('admin/completed-order') }}" class="nav-link">
+                                <i class="nav-icon bi bi-check-circle"></i>
+                                <p>Completed Orders</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-cart-fill"></i>
+                        <p>
+                            POS Orders
+                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview ms-4">
+                        <li class="nav-item">
+                            <a href="{{ url('admin/pos/all-order') }}" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>All Orders</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('admin/pos/pending-order') }}" class="nav-link">
+                                <i class="nav-icon bi bi-hourglass-split"></i>
+                                <p>Pending Orders</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('admin/pos/completed-order') }}" class="nav-link">
                                 <i class="nav-icon bi bi-check-circle"></i>
                                 <p>Completed Orders</p>
                             </a>
@@ -83,18 +113,24 @@
                     </a>
                     <ul class="nav nav-treeview ms-4">
                         <li class="nav-item">
-                            <a href="{{url('admin/staff-list')}}" class="nav-link">
+                            <a href="{{ url('admin/staff-list') }}" class="nav-link">
                                 <i class="nav-icon bi bi-people-fill"></i>
                                 <p>Staff</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{url('admin/user-list')}}" class="nav-link">
+                            <a href="{{ url('admin/user-list') }}" class="nav-link">
                                 <i class="nav-icon bi bi-person"></i>
                                 <p>User (Customer)</p>
                             </a>
                         </li>
                     </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url('admin/contact-us') }}" class="nav-link">
+                        <i class="nav-icon bi bi-receipt"></i>
+                        <p>Contact Us</p>
+                    </a>
                 </li>
             </ul>
         </nav>

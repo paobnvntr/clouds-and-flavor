@@ -55,7 +55,7 @@
                     <tr>
                         <td>{{ $order->id }}</td>
                         <td>{{ $order->customer_name }}</td>
-                        <td>{{ $order->items->count() }}</td>
+                        <td>{{ $order->orderItems->count() }}</td>
                         <td>₱{{ number_format($order->total_price, 2) }}</td>
                         <td>{{ ucfirst($order->status) }}</td>
                         <td>
@@ -133,8 +133,8 @@
                         });
                     }
 
-                    if (order.items) {
-                        order.items.forEach(item => {
+                    if (order.orderItems) {
+                        order.orderItems.forEach(item => {
                             const productName = item.product ? item.product.product_name : 'Unknown Product';
                             orderDetailsHtml += `
                                 <li class="list-group-item">

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ContactMessage;
 use App\Models\Order;
+use App\Models\POSOrder;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,18 +16,20 @@ class AdminController extends Controller
     {
         $totalUsers = User::where('role', 0)->count();
         $pendingOrdersCount = Order::where('status', 'pending')->count();
+        $pendingPOSOrdersCount = POSOrder::where('status', 'pending')->count();
         $totalEarningsFromOrders = Order::where('status', 'completed')->sum('total_price');
         $totalEarningsFromAddOns = DB::table('orders_add_on')
             ->join('orders', 'orders_add_on.order_id', '=', 'orders.id')
             ->join('add_ons', 'orders_add_on.add_on_id', '=', 'add_ons.id') // Join to get the add-on price
             ->where('orders.status', 'completed')
             ->sum(DB::raw('add_ons.price * orders_add_on.quantity'));
-        
+
         $totalEarnings = $totalEarningsFromOrders + $totalEarningsFromAddOns;
         $formattedEarnings = number_format($totalEarnings, 2);
         $totalOrders = Order::where('status', 'completed')->count();
+        $totalPOSOrders = POSOrder::where('status', 'completed')->count();
 
-        return view('admin.dashboard', compact('pendingOrdersCount', 'formattedEarnings', 'totalUsers', 'totalOrders'));
+        return view('admin.dashboard', compact('pendingOrdersCount', 'totalPOSOrders', 'formattedEarnings', 'pendingPOSOrdersCount', 'totalUsers', 'totalOrders'));
     }
 
 
@@ -234,4 +238,18 @@ class AdminController extends Controller
     }
 
 
+
+    public function contact()
+    {
+        $messages = ContactMessage::all();
+        return view('admin.contact.index', compact('messages'));
+    }
+
+    public function destroy($id)
+    {
+        $message = ContactMessage::findOrFail($id);
+        $message->delete();
+
+        return redirect()->route('admin.contact.index')->with('success', 'Message deleted successfully');
+    }
 }

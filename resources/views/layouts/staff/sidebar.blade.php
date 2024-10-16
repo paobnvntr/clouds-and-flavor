@@ -56,9 +56,8 @@
                     <a href="#" class="nav-link">
                         <i class="nav-icon bi bi-clipboard-fill"></i>
                         <p>
-                            Orders
-                            <span class="nav-badge badge text-bg-secondary me-3">6</span> <i
-                                class="nav-arrow bi bi-chevron-right"></i>
+                            Online Orders
+                        <i class="nav-arrow bi bi-chevron-right"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
@@ -68,15 +67,45 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('staff/pending-orders') }}" class="nav-link"> <i
+                            <a href="{{ url('staff/online-pending') }}" class="nav-link"> <i
                                     class="nav-icon bi bi-circle"></i>
-                                <p>All Pending Orders</p>
+                                <p>Pending Orders</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{{ url('staff/completed-orders') }}" class="nav-link"> <i
                                     class="nav-icon bi bi-circle"></i>
-                                <p>All Completed Orders</p>
+                                <p>Completed Orders</p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-clipboard-fill"></i>
+                        <p>
+                            POS Orders
+                        <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ url('/staff/pos/orders') }}" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                <p>All Orders</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('staff/pos/pending-orders') }}" class="nav-link"> <i
+                                    class="nav-icon bi bi-circle"></i>
+                                <p>Pending Orders</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('staff/pos/completed-orders') }}" class="nav-link"> <i
+                                    class="nav-icon bi bi-circle"></i>
+                                <p>Completed Orders</p>
                             </a>
                         </li>
 

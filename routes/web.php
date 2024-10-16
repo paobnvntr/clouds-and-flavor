@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Staff\POSController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\User\CartController;
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::get('/landing-page-shop', [WelcomeController::class, 'shop'])->name('landing-page-shop');
 Route::get('/contact', [WelcomeController::class, 'contact'])->name('contact');
-
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 //NOT AUTH
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
@@ -61,6 +62,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/all-order', 'index')->name('admin.orders.index');
         Route::get('admin/pending-order', 'pendingOrder')->name('admin.orders.pending');
         Route::get('admin/completed-order', 'completedOrder')->name('admin.orders.completed');
+    
+        Route::get('admin/pos/all-order', 'posAllOrder')->name('admin.orders.pos.index');
+        Route::get('admin/pos/pending-order', 'posPendingOrder')->name('admin.orders.pos.pending');
+        Route::get('admin/pos/completed-order', 'posCompletedOrder')->name('admin.orders.pos.completed');
+
+        Route::put('admin/orders/{id}/online-complete', 'OnlinecompleteOrder')->name('admin.orders.online-complete');
+        Route::put('admin/orders/{id}/complete', 'completeOrder')->name('admin.orders.complete');
     });
 
     Route::prefix('admin')->group(function () {
@@ -85,6 +93,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::delete('admin/staff/delete/{id}', 'staffDestroy')->name('admin.staff.destroy');
 
         Route::get('admin/total-earnings', 'showTotalEarnings')->name('admin.total_earnings');
+    
+        Route::get('admin/contact-us', 'contact')->name('admin.contact.index');
+        Route::delete('/admin/messages/{id}', 'destroy')->name('admin.messages.destroy');
     });
 
     Route::controller(VoucherController::class)->group(function () {
@@ -95,6 +106,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::patch('admin/vouchers/{id}', 'update')->name('admin.vouchers.update');
         Route::delete('admin/vouchers/delete/{id}', 'destroy')->name('admin.vouchers.destroy');
     });
+    
+
+
 });
 
 //Group Staff routes role = 1
@@ -117,15 +131,19 @@ Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
     });
     Route::get('/staff/order-dashboard', [StaffController::class, 'dashboard'])->name('staff.orders.dashboard');
     Route::get('/staff/orders', [StaffController::class, 'orderList'])->name('staff.orders.index');
+    Route::get('/staff/pos/orders', [StaffController::class, 'posOrderList'])->name('staff.orders.pos.posOrder');
     Route::get('/staff/pending-orders', [StaffController::class, 'pendingList'])->name('staff.orders.pending-order');
     Route::get('/staff/completed-orders', [StaffController::class, 'completedList'])->name('staff.orders.completed-order');
-    Route::get('/staff/online-orders', [StaffController::class, 'onlinePending'])->name('staff.orders.online-pending');
-    Route::get('/staff/pos-orders', [StaffController::class, 'posPending'])->name('staff.orders.pos-pending');
+    Route::get('/staff/online-pending', [StaffController::class, 'onlinePending'])->name('staff.orders.online-pending');
+    Route::get('/staff/pos/pending-orders', [StaffController::class, 'posPending'])->name('staff.orders.pos.pos-pending');
+    Route::get('/staff/pos/completed-orders', [StaffController::class, 'posCompleted'])->name('staff.orders.pos.pos-completed');
     Route::get('/staff/deliver-or-pickup', [StaffController::class, 'dORp'])->name('staff.orders.deliver-or-pickup');
     Route::get('/staff/deliver-or-pickup-completed', [StaffController::class, 'dORpCompleted'])->name('staff.orders.deliver-or-pickup-completed');
     Route::post('/staff/orders/complete', [StaffController::class, 'completeOrder'])->name('staff.orders.complete');
     Route::post('/staff/posorders/complete', [StaffController::class, 'completePosOrder'])->name('staff.orders.pos-complete');
     Route::post('/staff/orders/complete/{id}', [StaffController::class, 'dORpComplete'])->name('staff.orders.dORpcomplete');
+    Route::put('/staff/orders/{id}/online-complete', [StaffController::class, 'OnlinecompleteOrder'])->name('staff.orders.online-complete');
+
 });
 
 //Group User routes role = 0
