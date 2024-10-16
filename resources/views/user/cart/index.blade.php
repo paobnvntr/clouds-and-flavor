@@ -39,7 +39,7 @@
                     </div>
 
                     <div class="header__cart col-4">
-                        <ul>
+                        <!-- <ul>
                             <li>
                                 <a href="{{ url('/my-cart') }}">
                                     <i class="fa fa-shopping-cart"></i>
@@ -47,7 +47,7 @@
                                 </a>
                             </li>
                         </ul>
-                        <div class="header__cart__price">Total: <span>₱ {{ number_format($totalPrice, 2) }}</span></div>
+                        <div class="header__cart__price">Total: <span>₱ {{ number_format($totalPrice, 2) }}</span></div> -->
                     </div>
                 </div>
             </div>
@@ -124,32 +124,35 @@
                             @else
                                 @foreach ($carts as $cart)
                                     <tr>
-                                        <td class="shoping__cart__item">
+                                        <td class="shoping__cart__item text-center">
                                             <img src="{{ asset('/' . $cart->product->image) }}" alt=""
-                                                class="cart-product-image">
-                                            <h5>{{ $cart->product->product_name }}</h5>
+                                                class="cart-product-image img-thumbnail">
+                                            <br>
+                                            <h5 class="font-weight-bolder">{{ $cart->product->product_name }}</h5>
                                             @if ($cart->product->on_sale)
                                                 <span style="color:red;">On Sale!</span>
                                                 <br>
-                                                <del>₱{{ number_format($cart->product->price, 2) }}</del>
+                                                <del style="color:red;">₱{{ number_format($cart->product->price, 2) }}</del>
                                                 <br>
                                                 <strong>₱{{ number_format($cart->product->sale_price, 2) }}</strong>
                                             @else
-                                                <span>₱{{ number_format($cart->product->price, 2) }}</span>
+                                                <span></span>
+                                                <br>
+                                                <strong>₱{{ number_format($cart->product->price, 2) }}</strong>
                                             @endif
                                         </td>
                                         <td class="shoping__cart__item">
                                             <div class="add-ons-section">
                                                 @if ($cart->addOns->count() > 0)
-                                                    <ul>
+                                                    <ul style="list-style-type: none;">
                                                         @foreach ($cart->addOns as $addon)
-                                                            <li>{{ $addon->name }}
-                                                                (+₱{{ number_format($addon->price, 2) }})
+                                                            <li class="font-weight-bolder text-center">{{ $addon->name }}
+                                                                (₱{{ number_format($addon->price, 2) }})
                                                             </li>
                                                         @endforeach
                                                     </ul>
                                                 @else
-                                                    <p>No add-ons added.</p>
+                                                    <p class="font-weight-bolder text-center">No add-ons added.</p>
                                                 @endif
                                             </div>
                                         </td>
@@ -188,7 +191,7 @@
         </div>
         <div class="row">
             <div class="col-lg-12">
-                <div class="shoping__cart__btns">
+                <div class="shoping__cart__btns d-flex justify-content-end">
                     <a href="/products" class="primary-btn cart-btn">CONTINUE SHOPPING</a>
                 </div>
             </div>
@@ -206,21 +209,25 @@
             </div>
             <div class="col-lg-6">
                 <div class="shoping__checkout">
-                    <h5>Cart Total</h5>
+                    <h5>Cart Total Summary</h5>
                     <ul>
-                        <li>Subtotal <span>₱<span
-                                    id="subtotal">{{ number_format($totals['subtotal'], 2) }}</span></span></li>
-                        <li>Add-ons <span>₱<span
-                                    id="addons-total">{{ number_format($totals['addons'], 2) }}</span></span></li>
+                        <li>Subtotal <span class="text-secondary">₱<span
+                                    id="subtotal" class="text-secondary">{{ number_format($totals['subtotal'], 2) }}</span></span></li>
+                        <li>Add-ons <span class="text-secondary">₱<span
+                                    id="addons-total" class="text-secondary">{{ number_format($totals['addons'], 2) }}</span></span></li>
                         <li id="discount-row" style="display: none;">Discount <span>-₱<span
                                     id="discount">0.00</span></span></li>
-                        <li>Total <span>₱<span
-                                    id="grand-total">{{ number_format($totals['grandTotal'], 2) }}</span></span></li>
+                        <li>Total <span class="text-success">₱<span
+                                    id="grand-total" class="text-success">{{ number_format($totals['grandTotal'], 2) }}</span></span></li>
                     </ul>
                     <div id="voucher-info" style="display: none;">
-                        <p>Voucher applied: <span id="applied-voucher-code"></span>
-                            <button id="remove-voucher" class="btn btn-sm btn-danger">Remove</button>
-                        </p>
+                        <hr>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <p>
+                                <strong class="text-dark">Voucher applied:</strong> <span id="applied-voucher-code"></span> 
+                            </p>
+                            <button id="remove-voucher" class="btn btn-sm btn-danger mb-3">Remove</button>
+                        </div>
                     </div>
                     <a href="{{ route('user.cart.checkout') }}" class="primary-btn">PROCEED TO CHECKOUT</a>
                 </div>
@@ -266,6 +273,12 @@
             let newVal = $(this).hasClass('inc') ? currentVal + 1 : (currentVal > 1 ? currentVal - 1 :
                 1);
             $input.val(newVal).trigger('change');
+
+            let price = $(this).closest('tr').find('.price').text();
+            let total = newVal * parseFloat(price.replace(/,/g, ''));
+            $(this).closest('tr').find('.total').text(formatCurrency(total));
+
+            
         });
 
         $('input[name="quantity"]').on('change', function () {
