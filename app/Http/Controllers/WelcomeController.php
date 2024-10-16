@@ -13,6 +13,22 @@ class WelcomeController extends Controller
     public function index(Request $request)
     {
         $categories = Category::where('status', 0)->get();
+        $cartItems = Cart::where('user_id', Auth::id())->count();
+        $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
+
+        $subtotal = $carts->sum(function ($cart) {
+            $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
+            return round($productPrice * $cart->quantity, 2);
+        });
+
+        $addonsTotal = $carts->sum(function ($cart) {
+            return $cart->addOns->sum(function ($addOn) use ($cart) {
+                return round($addOn->price * $cart->quantity, 2);
+            });
+        });
+
+        $totalPrice = round($subtotal + $addonsTotal, 2);
+        
         $latestProducts = Product::orderBy('created_at', 'desc')->take(6)->get();
 
         $selectedCategory = $request->input('category');
