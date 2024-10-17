@@ -135,11 +135,11 @@
                                     value="{{ $user->address ?? '' }}" required>
                             </div>
 
-                            <div class="checkout__input">
+                            {{-- <div class="checkout__input">
                                 <p>Order notes</p>
                                 <input type="text" name="order_notes"
                                     placeholder="Notes about your order, e.g. special notes for delivery.">
-                            </div>
+                            </div> --}}
                         </div>
 
                         {{-- Your Order --}}
