@@ -135,7 +135,7 @@ class POSController extends Controller
         if ($cartItems->isEmpty()) {
             return redirect()->route('staff.pos.index')->with('error', 'No items in the cart.');
         } else {
-        
+
             // Calculate total considering sale price
             $cartTotal = $cartItems->sum(function ($item) {
                 return $item->product->on_sale ? $item->product->sale_price * $item->quantity : $item->product->price * $item->quantity;
@@ -203,6 +203,9 @@ class POSController extends Controller
             // Commit the transaction
             DB::commit();
 
+            // Store the order ID in the session
+            session(['order_id' => $order->id]); // Store order ID in session
+
             // Return a JSON response indicating success
             return response()->json([
                 'message' => 'Order placed successfully!',
@@ -217,10 +220,22 @@ class POSController extends Controller
     }
 
 
-    public function orderSuccess()
+
+    public function orderSuccess(Request $request)
     {
-        return view('staff.pos.order-success');
+        // Fetch the order ID from the session or redirect back if not available
+        $orderId = session('order_id'); // Store the order ID in the session after placing the order
+
+        if (!$orderId) {
+            return redirect()->route('staff.pos.index')->with('error', 'Order ID not found.');
+        }
+
+        // Fetch the POS order and its items
+        $order = POSOrder::with('orderItems.product')->findOrFail($orderId);
+
+        return view('staff.pos.order-success', compact('order'));
     }
+
 
     public function updateCartItem(Request $request)
     {
