@@ -307,14 +307,12 @@
             }
         });
 
-
         // Payment modal setup
         $('#paymentModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var paymentMethod = button.data('payment-method');
             var orderId = button.data('order-id');
 
-            // Populate payment modal fields
             $('#paymentMethod').text(paymentMethod);
             $('#orderId').val(orderId);
             $('#payNowBtn').prop('disabled', true);
@@ -348,12 +346,13 @@
                 },
                 success: function (response) {
                     $('#paymentModal').modal('hide');
-                    alert('Payment sent Successfully.');
-                    location.reload(); // Refresh the page to see updated order status
+
+                    alert('Payment successful!');
+
+                    location.reload();
                 },
                 error: function (xhr) {
-                    // Handle error
-                    alert('Payment could not be processed. Please try again.');
+                    alert('Payment failed! Please try again.');
                 }
             });
         });

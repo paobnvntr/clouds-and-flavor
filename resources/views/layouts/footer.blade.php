@@ -8,7 +8,7 @@
 					</div>
 					<ul>
 						<li><strong>Address: </strong><span class="text-muted">Block 23 Acacia Cor Tanguile Street,
-								Calendola San Pedro, Laguna</span></li>
+								Calendola, San Pedro City, Laguna</span></li>
 						<li><strong>Phone: </strong><span class="text-muted">0906 587 2891</span></li>
 						<li><strong>Email Address: </strong><span class="text-muted">cloudsnflavor@gmail.com</span></li>
 					</ul>

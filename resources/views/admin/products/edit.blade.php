@@ -35,26 +35,37 @@
 
                                 <!-- On Sale Checkbox and Sale Price -->
                                 <div class="mb-3">
-                                    <input type="checkbox" id="on_sale" name="on_sale" value="1" {{ $product->on_sale ? 'checked' : '' }} onclick="toggleSalePrice()">
+                                    <input type="checkbox" id="on_sale" name="on_sale" value="1" 
+                                        {{ old('on_sale', $product->on_sale) ? 'checked' : '' }} onclick="toggleSalePrice()">
                                     <label for="on_sale">On Sale</label>
                                 </div>
-                                <div class="mb-3" style="display: none;" id="sale_price_container">
+                                <div class="mb-3" style="display: {{ old('on_sale', $product->on_sale) ? 'block' : 'none' }};" id="sale_price_container">
                                     <label for="sale_price">Sale Price</label>
-                                    <input type="number" step="0.01" id="sale_price" name="sale_price" class="form-control"
-                                        value="{{ old('sale_price', $product->sale_price) }}" {{ $product->on_sale ? '' : 'disabled' }}>
+                                    <input type="number" step="0.01" id="sale_price" name="sale_price" class="form-control @error('sale_price') is-invalid @enderror"
+                                        value="{{ old('sale_price', $product->sale_price) }}">
+                                    @error('sale_price')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <!-- Product Name -->
                                 <div class="mb-3">
                                     <label for="product_name" class="form-label">Product Name</label>
-                                    <input type="text" class="form-control" id="product_name" name="product_name" 
+                                    <input type="text" class="form-control @error('product_name') is-invalid @enderror" id="product_name" name="product_name" 
                                         value="{{ old('product_name', $product->product_name) }}" required>
+                                    @error('product_name')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <!-- Category -->
                                 <div class="mb-3">
                                     <label for="category_id" class="form-label">Category</label>
-                                    <select class="form-select" id="category_id" name="category_id" required>
+                                    <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id" required>
                                         @foreach ($categories as $category)
                                             @if ($category->status == 0)
                                                 <option value="{{ $category->id }}" 
@@ -64,12 +75,17 @@
                                             @endif
                                         @endforeach
                                     </select>
+                                    @error('category_id')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <!-- Add-ons Selection -->
                                 <div class="mb-3">
                                     <label for="addons" class="form-label">Select Add-ons</label>
-                                    <select class="form-control" id="addons" name="addons[]" multiple>
+                                    <select class="form-control @error('addons') is-invalid @enderror" id="addons" name="addons[]" multiple>
                                         @foreach ($addons as $addOn)
                                             <option value="{{ $addOn->id }}" 
                                                 {{ in_array($addOn->id, $product->addOns->pluck('id')->toArray()) ? 'selected' : '' }}>
@@ -77,47 +93,77 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    @error('addons')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                     <small class="form-text text-muted">Hold down Ctrl (Windows) or Command (Mac) to select multiple options.</small>
                                 </div>
 
                                 <!-- Price -->
                                 <div class="mb-3">
                                     <label for="price" class="form-label">Price</label>
-                                    <input type="number" step="0.01" class="form-control" id="price" name="price" 
+                                    <input type="number" step="0.01" class="form-control @error('price') is-invalid @enderror" id="price" name="price" 
                                         value="{{ old('price', $product->price) }}" required>
+                                    @error('price')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <!-- Description -->
                                 <div class="mb-3">
                                     <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description" name="description" required>{{ old('description', $product->description) }}</textarea>
+                                    <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" required>{{ old('description', $product->description) }}</textarea>
+                                    @error('description')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <!-- Stock -->
                                 <div class="mb-3">
                                     <label for="stock" class="form-label">Stock</label>
-                                    <input type="number" class="form-control" id="stock" name="stock" 
+                                    <input type="number" class="form-control @error('stock') is-invalid @enderror" id="stock" name="stock" 
                                         value="{{ old('stock', $product->stock) }}" required>
+                                    @error('stock')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <!-- Status -->
                                 <div class="mb-3">
                                     <label for="status" class="form-label">Status</label>
-                                    <select class="form-select" id="status" name="status">
+                                    <select class="form-select @error('status') is-invalid @enderror" id="status" name="status">
                                         <option value="0" {{ $product->status == 0 ? 'selected' : '' }}>Available</option>
                                         <option value="1" {{ $product->status == 1 ? 'selected' : '' }}>Unavailable</option>
                                     </select>
+                                    @error('status')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <!-- Product Image -->
                                 <div class="mb-3">
                                     <label for="image" class="form-label">Product Image</label>
-                                    <input type="file" class="form-control" id="image" name="image">
+                                    <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image">
                                     @if ($product->image)
                                         <img src="{{ asset($product->image) }}" alt="Product Image" class="img-thumbnail mt-2" width="150">
                                     @else
                                         <img src="{{ asset('assets/product_image/unknown.jpg') }}" alt="Default Image" class="img-thumbnail mt-2" width="150">
                                     @endif
+                                    @error('image')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <div class="d-flex justify-content-between">

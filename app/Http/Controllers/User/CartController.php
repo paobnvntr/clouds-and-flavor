@@ -18,7 +18,6 @@ class CartController extends Controller
 {
     public function index()
     {
-        // Fetch the carts with their associated products and add-ons
         $carts = Cart::with(['product', 'addOns'])->where('user_id', Auth::id())->get();
         $totals = $this->calculateTotals();
         $appliedVoucher = session('applied_voucher');
@@ -116,31 +115,26 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'addons' => 'nullable|array',  // Assuming add-ons are an array
-            'addons.*' => 'exists:add_ons,id',  // Validate each add-on exists
+            'addons' => 'nullable|array',
+            'addons.*' => 'exists:add_ons,id',
         ]);
 
         $product = Product::findOrFail($request->product_id);
         $price = $product->on_sale ? $product->sale_price : $product->price;
-
-        // Calculate add-ons price
         $addons = $request->input('addons', []);
         $addonsPrice = AddOn::whereIn('id', $addons)->sum('price');
         $totalPrice = $price + $addonsPrice;
 
         if ($product->stock > 0) {
-            // Check if the cart item already exists
             $cartItem = Cart::where('user_id', Auth::id())
                 ->where('product_id', $product->id)
                 ->first();
 
             if ($cartItem) {
-                // If it exists, increment the quantity and update total price
                 $cartItem->increment('quantity');
                 $cartItem->update(['total_price' => $cartItem->total_price + $totalPrice]);
-                $cartId = $cartItem->id; // Get the cart item ID
+                $cartId = $cartItem->id;
             } else {
-                // Insert a new cart item and get its ID
                 $cartId = DB::table('carts')->insertGetId([
                     'user_id' => Auth::id(),
                     'product_id' => $product->id,
@@ -153,13 +147,11 @@ class CartController extends Controller
                 ]);
             }
 
-            // Attach add-ons to the cart item in the pivot table
             if (!empty($addons)) {
                 foreach ($addons as $addonId) {
-                    // Get the add-on price to store
                     $addonPrice = AddOn::find($addonId)->price;
                     DB::table('cart_add_on')->insert([
-                        'cart_id' => $cartId, // Reference the cart item ID
+                        'cart_id' => $cartId,
                         'add_on_id' => $addonId,
                         'price' => $addonPrice,
                         'created_at' => now(),
@@ -168,15 +160,16 @@ class CartController extends Controller
                 }
             }
 
-            return redirect()->route('user.products.index')->with('message', 'Product added to cart.');
+            return redirect()->route('user.products.index')->with('success', 'Product added to cart.');
         } else {
-            return redirect()->back()->with('error', 'Product is out of stock.');
+            return redirect()->back()->with('failed', 'Product is out of stock.');
         }
     }
 
     public function getCartCount()
     {
         $cartCount = Session::get('cart_count', 0);
+
         return response()->json(['count' => $cartCount]);
     }
 
@@ -275,59 +268,46 @@ class CartController extends Controller
 
         $cart->delete();
 
-        return response()->json(['success' => true, 'message' => 'Item removed and stock updated.']);
+        return response()->json(['success' => true, 'message' => 'Item removed.']);
     }
 
     public function checkout()
     {
-        // Fetch the user's carts with products and add-ons
         $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
 
-        // Check if the cart is empty
         if ($carts->isEmpty()) {
             return redirect()->route('user.cart.index')->with('error', 'Your cart is empty.');
         }
 
-        // Calculate subtotal for products
         $subtotal = $carts->sum(function ($cart) {
             $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
-            // Return the product total for this cart item
             return round($productPrice * $cart->quantity, 2);
         });
 
-        // Calculate total for add-ons
         $addonsTotal = $carts->sum(function ($cart) {
             return $cart->addOns->sum(function ($addOn) use ($cart) {
-                // Calculate the total for add-ons associated with this cart item
                 return round($addOn->price * $cart->quantity, 2);
             });
         });
 
-        // Combine subtotal and add-ons total to get the total before discount
         $totalBeforeDiscount = round($subtotal + $addonsTotal, 2);
+        $appliedVoucher = session('applied_voucher');
+        ;
 
-        // Get the applied voucher from the session
-        $appliedVoucher = session('applied_voucher');;
-
-        // Calculate discount if a voucher is applied
         $discount = 0;
         if ($appliedVoucher) {
             $voucher = Voucher::where('id', $appliedVoucher->getKey())->first();
             if ($voucher && $voucher->is_active) {
-                // Calculate discount based on the total before discount
                 $discount = $this->calculateDiscount($totalBeforeDiscount, $voucher);
-                $discount = round($discount, 2); // Ensuring 2 decimal precision
+                $discount = round($discount, 2);
             } else {
-                // If the voucher is no longer valid, remove it from the session
                 session()->forget('applied_voucher');
                 $appliedVoucher = null;
             }
         }
 
-        // Calculate grand total, ensuring it doesn't fall below 0
         $grandTotal = round(max($totalBeforeDiscount - $discount, 0), 2);
 
-        // Prepare totals for the view
         $totals = [
             'subtotal' => number_format($subtotal, 2),
             'addons' => number_format($addonsTotal, 2),
@@ -335,10 +315,8 @@ class CartController extends Controller
             'grandTotal' => number_format($grandTotal, 2),
         ];
 
-        // Get the authenticated user
         $user = Auth::user();
 
-        // Check if the user has filled in their address and phone number
         if (empty($user->address) || empty($user->phone_number)) {
             session()->flash('warning', 'Please update your address and phone number in your profile.');
         }
@@ -346,17 +324,15 @@ class CartController extends Controller
         $categories = Category::where('status', 0)->get();
         $cartItems = Cart::where('user_id', Auth::id())->count();
 
-        // Return the checkout view with necessary data
         return view('user.cart.checkout', compact('carts', 'totals', 'user', 'appliedVoucher', 'totalBeforeDiscount', 'categories', 'cartItems'));
     }
 
-    // Helper method to calculate discount
     private function calculateDiscount($total, $voucher)
     {
         if ($voucher->discount_type == 'percentage') {
             return $total * ($voucher->discount / 100);
-        } else { // fixed amount
-            return min($voucher->discount, $total); // Ensure discount doesn't exceed total
+        } else {
+            return min($voucher->discount, $total);
         }
     }
 }

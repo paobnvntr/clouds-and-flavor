@@ -162,46 +162,32 @@
 <style>
     .hero__categories {
         height: 515px;
-        /* Set the height you want for the container */
         overflow-y: auto;
-        /* Enable vertical scrolling */
-        /* Optional: add a border for better visibility */
         padding: 10px;
-        /* Optional: add some padding */
         position: relative;
-        /* Ensures that the scrollbar appears inside */
     }
 
     .category-list {
         list-style: none;
-        /* Remove default list styles */
         padding: 0;
-        /* Remove padding */
         margin: 0;
-        /* Remove margin */
     }
 
     .category-list li {
         padding: 5px 0;
-        /* Add some spacing between items */
     }
 
-    /* Optional: styling for scrollbar */
     .hero__categories::-webkit-scrollbar {
         width: 8px;
-        /* Width of the scrollbar */
     }
 
     .hero__categories::-webkit-scrollbar-thumb {
         background-color: #888;
-        /* Color of the scrollbar thumb */
         border-radius: 10px;
-        /* Rounded corners for the scrollbar thumb */
     }
 
     .hero__categories::-webkit-scrollbar-thumb:hover {
         background-color: #555;
-        /* Darker color on hover */
     }
 
     .hero__item {
@@ -217,14 +203,12 @@
         width: 100%;
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
-        /* Adjust the 0.5 value to control darkness */
         z-index: 1;
     }
 
     .hero__text {
         position: relative;
         z-index: 2;
-        /* Make sure the text is above the overlay */
     }
 </style>
 @endsection

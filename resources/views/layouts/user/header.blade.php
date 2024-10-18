@@ -9,6 +9,19 @@
                         </ul>
                     </div>
                 </div>
+
+                @if(Session::has('success'))
+                    <div class="alert alert-success floating-alert fw-bold" id="alert-success" role="alert">
+                        {{ Session::get('success') }}
+                    </div>
+                @endif
+
+                @if(Session::has('failed'))
+                    <div class="alert alert-danger floating-alert fw-bold" id="alert-failed" role="alert">
+                        {{ Session::get('failed') }}
+                    </div>
+                @endif
+                
                 <div class="col-lg-6 col-md-6">
                     <div class="header__top__right">
                         <div class="header__top__right__social">
@@ -32,7 +45,7 @@
                                                     @csrf
 
                                                     <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
-                                                                  this.closest('form').submit();">
+                                                                      this.closest('form').submit();">
                                                         {{ __('Log Out') }}
                                                     </a>
                                                 </form>
@@ -115,7 +128,7 @@
                                 @csrf
 
                                 <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
-                                                                  this.closest('form').submit();">
+                                                                      this.closest('form').submit();">
                                     {{ __('Log Out') }}
                                 </a>
                             </form>

@@ -10,27 +10,20 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $products = Product::all();
+
         return view('admin.products.index', compact('products'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $categories = Category::where('status', 0)->get(); // Fetch only categories with status 0
+        $categories = Category::where('status', 0)->get();
+
         return view('admin.products.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -51,15 +44,13 @@ class ProductController extends Controller
         $product->status = $request->status;
         $product->category_id = $request->category_id;
 
-        // Handle the image upload
         if ($request->hasFile('image')) {
-            // Define the path where the image should be stored
             $imagePath = 'assets/product_image/';
-            $imageName = time() . '_' . $request->file('image')->getClientOriginalName(); // Create a unique image name
-            $request->file('image')->move(public_path($imagePath), $imageName); // Move the image to the public/assets/product_image directory
-            $product->image = $imagePath . $imageName; // Save the relative path to the database
+            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
+            $request->file('image')->move(public_path($imagePath), $imageName);
+            $product->image = $imagePath . $imageName;
         } else {
-            $product->image = 'assets/product_image/unknown.jpg'; // Set to default image if no upload
+            $product->image = 'assets/product_image/unknown.jpg';
         }
 
         $product->save();
@@ -67,21 +58,15 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
-        $product = Product::with('addOns')->findOrFail($id); // Load the product with its add-ons
-        $categories = Category::where('status', 0)->get(); // Fetch only available categories
-        $addons = AddOn::all(); // Fetch only available add-ons
+        $product = Product::with('addOns')->findOrFail($id);
+        $categories = Category::where('status', 0)->get();
+        $addons = AddOn::all();
 
         return view('admin.products.edit', compact('product', 'categories', 'addons'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Product $product)
     {
         $request->validate([
@@ -98,7 +83,12 @@ class ProductController extends Controller
             'addons.*' => 'exists:add_ons,id', 
         ]);
 
-        // Update product details
+        $request->validate([
+            'sale_price' => ['required_if:on_sale,1', 'numeric'],
+        ], [
+            'sale_price.required_if' => 'The sale price field is required when on sale is checked.',
+        ]);
+
         $product->product_name = $request->product_name;
         $product->price = $request->price;
         $product->description = $request->description;
@@ -108,37 +98,28 @@ class ProductController extends Controller
         $product->status = $request->status;
         $product->category_id = $request->category_id;
 
-        // Handle the image upload
         if ($request->hasFile('image')) {
-            // Define the path where the image should be stored
             $imagePath = 'assets/product_image/';
             $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
             $request->file('image')->move(public_path($imagePath), $imageName);
             $product->image = $imagePath . $imageName;
         }
-        // If no new image is uploaded, retain the existing image in the database
-        // No need to assign $product->image here
 
-        // Save the product
         $product->save();
 
-        // Sync the selected add-ons
         if ($request->has('addons')) {
-            $product->addOns()->sync($request->addons); // Assuming you have a many-to-many relationship
+            $product->addOns()->sync($request->addons);
         } else {
-            $product->addOns()->sync([]); // Clear all if no add-ons are selected
+            $product->addOns()->sync([]);
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
     }
 
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Product $product)
     {
         $product->delete();
+
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
     }
 
@@ -153,13 +134,13 @@ class ProductController extends Controller
             $product = Product::findOrFail($request->product_id);
             $product->stock = $request->stock;
             $product->save();
-
-            // Check if the stock is 0 to determine status
             $status = $product->stock == 0 ? 'Unavailable' : 'Available';
+
             return response()->json([
                 'success' => 'Stock updated successfully.',
                 'status' => $status,
             ]);
+            
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error updating stock'], 500);
         }

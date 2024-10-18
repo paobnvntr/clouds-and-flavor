@@ -3,7 +3,6 @@
 @section('title', 'Add Category')
 
 @section('content')
-
 <main class="app-main">
     <div class="app-content-header">
         <div class="container-fluid">
@@ -37,24 +36,42 @@
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Category Name <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="name" name="name" required>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                        id="name" name="name" required>
+                                    @error('name')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="status" class="form-label">Status <span
                                             class="text-danger">*</span></label>
-                                    <select class="form-select" id="status" name="status" required>
+                                    <select class="form-select @error('status') is-invalid @enderror" id="status"
+                                        name="status" required>
                                         <option value="" disabled selected>--Select Status--</option>
                                         <option value="0">Available</option>
                                         <option value="1">Unavailable</option>
                                     </select>
+                                    @error('status')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="image" class="form-label">Category Image</label>
-                                    <input type="file" class="form-control" id="image" name="image">
+                                    <input type="file" class="form-control @error('image') is-invalid @enderror"
+                                        id="image" name="image" accept=".jpg, .jpeg, .png">
                                     <small class="form-text text-muted">If no image is uploaded, a default image will be
                                         used.</small>
+                                    @error('image')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <div class="d-flex justify-content-between">

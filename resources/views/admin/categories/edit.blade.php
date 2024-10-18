@@ -37,24 +37,41 @@
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Category Name <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="name" name="name"
-                                        value="{{ $category->name }}" required>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                        id="name" name="name" value="{{ old('name', $category->name) }}" required>
+                                    @error('name')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="status" class="form-label">Status <span
                                             class="text-danger">*</span></label>
-                                    <select class="form-select" id="status" name="status" required>
+                                    <select class="form-select @error('status') is-invalid @enderror" id="status"
+                                        name="status" required>
                                         <option value="0" {{ $category->status == 0 ? 'selected' : '' }}>Available
                                         </option>
                                         <option value="1" {{ $category->status == 1 ? 'selected' : '' }}>Unavailable
                                         </option>
                                     </select>
+                                    @error('status')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="image" class="form-label">Category Image</label>
-                                    <input type="file" class="form-control" id="image" name="image">
+                                    <input type="file" class="form-control @error('image') is-invalid @enderror"
+                                        id="image" name="image">
+                                    @error('image')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
 
                                     @if ($category->image && file_exists(public_path($category->image)))
                                         <img src="{{ asset($category->image) }}" alt="Category Image"

@@ -9,21 +9,9 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('password.update') }}">
+    <form method="post" action="{{ route('profile.update-password') }}">
         @csrf
-        @method('put')
-
-        <!-- Current Password -->
-        <div class="form-group">
-            <label for="update_password_current_password" class="font-weight-bold">{{ __('Current Password') }}</label>
-            <input id="update_password_current_password" name="current_password" type="password"
-                class="form-control @error('current_password') is-invalid @enderror" autocomplete="current-password">
-            @error('current_password')
-                <div class="invalid-feedback">
-                    {{ $message }}
-                </div>
-            @enderror
-        </div>
+        @method('patch')
 
         <!-- New Password -->
         <div class="form-group">

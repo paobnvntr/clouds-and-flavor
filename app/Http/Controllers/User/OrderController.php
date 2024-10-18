@@ -36,7 +36,6 @@ class OrderController extends Controller
 
         $totalPrice = round($subtotal + $addonsTotal, 2);
 
-        // Fetch orders along with order items, products, and the voucher if applied
         $orders = Order::with(['orderItems.product', 'orderAddOns.addOn', 'voucher'])
             ->where('user_id', Auth::id())
             ->get();
@@ -49,15 +48,15 @@ class OrderController extends Controller
         $order = Order::find($request->order_id);
 
         if ($order && $order->payment_status == 'unpaid') {
-            // Update payment status to paid and save reference number
             $order->payment_status = 'paid';
             $order->reference_number = $request->reference_number;
-            // Update the delivery option if provided
+
             if ($request->has('delivery_option')) {
                 $order->delivery_option = $request->delivery_option;
             }
 
             $order->save();
+
             return response()->json(['success' => true]);
         }
 
@@ -68,8 +67,8 @@ class OrderController extends Controller
     {
         if ($voucher->discount_type == 'percentage') {
             return $total * ($voucher->discount / 100);
-        } else { // fixed amount
-            return min($voucher->discount, $total); // Ensure discount doesn't exceed total
+        } else {
+            return min($voucher->discount, $total);
         }
     }
 
@@ -79,80 +78,59 @@ class OrderController extends Controller
             'grand_total' => str_replace(',', '', $request->input('grand_total'))
         ]);
 
-        // dd($request->all());
-
-        // Validate the incoming request data
         $validator = Validator::make($request->all(), [
             '_token' => 'required',
             'name' => 'required|string|max:255',
             'phone_number' => 'required|regex:/^09[0-9]{9}$/i',
             'address' => 'required|string|max:255',
-            'grand_total' => 'required|numeric|min:0', // Ensure grand_total is numeric
+            'grand_total' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
         ]);
 
         if ($validator->fails()) {
-            // return redirect()->route('user.cart.index')->with('error', 'Invalid input.');
-            dd($validator->errors());
+            return redirect()->route('user.cart.index')->with('failed', 'Invalid input.');
         }
 
-        // Log the incoming request data for debugging
-        // Log::info('Order Request Data:', $request->all());
-
-        // Retrieve the user's carts with products and add-ons
         $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
 
-        // Check if the cart is empty
         if ($carts->isEmpty()) {
-            return redirect()->route('user.cart.index')->with('error', 'Your cart is empty.');
+            return redirect()->route('user.cart.index')->with('failed', 'Your cart is empty.');
         }
 
-        // Calculate subtotal for products
         $subtotal = $carts->sum(function ($cart) {
-            // Determine the product price based on sales
             $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
             return round($productPrice * $cart->quantity, 2);
         });
 
-        // Calculate total for add-ons
         $addonsTotal = $carts->sum(function ($cart) {
             return $cart->addOns->sum(function ($addOn) use ($cart) {
                 return round($addOn->price * $cart->quantity, 2);
             });
         });
 
-        // Combine subtotal and add-ons total to get the total before discount
         $totalBeforeDiscount = round($subtotal + $addonsTotal, 2);
-
-        // Get the applied voucher from the session
         $appliedVoucher = session('applied_voucher');
 
-        // Calculate discount if a voucher is applied
         $discount = 0;
         if ($appliedVoucher) {
             $voucher = Voucher::find($appliedVoucher->getKey());
             if ($voucher && $voucher->is_active) {
                 $discount = $this->calculateDiscount($totalBeforeDiscount, $voucher);
-                $discount = round($discount, 2); // Ensure discount is rounded
+                $discount = round($discount, 2);
             } else {
-                // If the voucher is no longer valid, remove it from the session
                 session()->forget('applied_voucher');
             }
         }
 
-        // Calculate grand total
-        $grandTotal = round(max($totalBeforeDiscount - $discount, 0), 2); // Ensure it doesn't fall below 0
+        $grandTotal = round(max($totalBeforeDiscount - $discount, 0), 2);
 
-        // Verify that the calculated grand total matches the one from the request
-        if (abs($grandTotal - $request->grand_total) > 0.01) { // Allow for small floating-point discrepancies
-            return redirect()->route('user.cart.index')->with('error', 'Order total mismatch. Please try again.');
+        if (abs($grandTotal - $request->grand_total) > 0.01) {
+            return redirect()->route('user.cart.index')->with('failed', 'Order total mismatch. Please try again.');
         }
 
-        // Start a database transaction
         DB::beginTransaction();
 
         try {
-            // Prepare the order data
             $orderData = [
                 'user_id' => Auth::id(),
                 'address' => $request->address,
@@ -164,7 +142,6 @@ class OrderController extends Controller
                 'status' => 'pending',
             ];
 
-            // Check if a voucher was applied
             if ($appliedVoucher) {
                 $voucher = Voucher::find($appliedVoucher->getKey());
                 if ($voucher) {
@@ -176,42 +153,36 @@ class OrderController extends Controller
                 }
             }
 
-            // Create the order
             $order = Order::create($orderData);
 
-            // Process each cart item
             foreach ($carts as $cart) {
                 $product = $cart->product;
 
-                // Check stock availability
                 if ($product->stock < $cart->quantity) {
                     throw new \Exception('Insufficient stock for ' . $product->product_name);
                 }
 
-                // Decrease the stock and save the product
                 $product->stock -= $cart->quantity;
                 $product->save();
 
-                // Create an order item
                 $addOrder = OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $cart->product_id,
                     'quantity' => $cart->quantity,
-                    'price' => round($product->on_sale ? $product->sale_price : $product->price, 2), // Ensure price is rounded
+                    'price' => round($product->on_sale ? $product->sale_price : $product->price, 2),
                 ]);
 
                 if (!$addOrder) {
                     throw new \Exception('Failed to add order item for ' . $product->product_name);
                 }
 
-                // Check if there are add-ons associated with the cart item
                 if ($cart->addOns && $cart->addOns->isNotEmpty()) {
                     foreach ($cart->addOns as $addOn) {
                         $addAddOn = OrderAddOn::create([
                             'order_id' => $order->id,
                             'add_on_id' => $addOn->id,
-                            'price' => round($addOn->price, 2), // Ensure add-on price is rounded
-                            'quantity' => $cart->quantity, // Use the cart quantity for add-ons
+                            'price' => round($addOn->price, 2),
+                            'quantity' => $cart->quantity,
                         ]);
 
                         if (!$addAddOn) {
@@ -221,21 +192,15 @@ class OrderController extends Controller
                 }
             }
 
-            // Clear the user's cart
             Cart::where('user_id', Auth::id())->delete();
-
-            // Clear the applied voucher from the session
             session()->forget('applied_voucher');
-
-            // Commit the transaction
             DB::commit();
 
-            return redirect()->route('user.order.index')->with('message', 'Order placed successfully.');
+            return redirect()->route('user.order.index')->with('success', 'Order placed successfully.');
         } catch (\Exception $e) {
-            // Rollback the transaction on error
             DB::rollBack();
-            Log::error('Order Placement Error:', ['error' => $e->getMessage()]); // Log error message
-            return redirect()->route('user.cart.index')->with('error', $e->getMessage());
+            Log::error('Order Placement Error:', ['error' => $e->getMessage()]);
+            return redirect()->route('user.cart.index')->with('failed', $e->getMessage());
         }
     }
 }

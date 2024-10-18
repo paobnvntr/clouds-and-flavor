@@ -74,9 +74,9 @@
         <!-- Phone Number -->
         <div class="form-group">
             <label for="number" class="font-weight-bold">{{ __('Phone Number') }}</label>
-            <input id="number" name="number" type="text"
+            <input id="phone_number" name="phone_number" type="text"
                 class="form-control @error('phone_number') is-invalid @enderror"
-                value="{{ old('number', $user->phone_number) }}" required autocomplete="tel">
+                value="{{ old('phone_number', $user->phone_number) }}" required autocomplete="tel">
             @error('phone_number')
                 <div class="invalid-feedback">
                     {{ $message }}
