@@ -83,6 +83,12 @@ class ProductController extends Controller
             'addons.*' => 'exists:add_ons,id', 
         ]);
 
+        $request->validate([
+            'sale_price' => ['required_if:on_sale,1', 'numeric'],
+        ], [
+            'sale_price.required_if' => 'The sale price field is required when on sale is checked.',
+        ]);
+
         $product->product_name = $request->product_name;
         $product->price = $request->price;
         $product->description = $request->description;
