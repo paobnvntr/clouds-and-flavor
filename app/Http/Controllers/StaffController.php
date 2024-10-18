@@ -64,7 +64,18 @@ class StaffController extends Controller
     }
 
 
+    public function posCompleteOrder($id)
+    {
+        $order = POSOrder::findOrFail($id);
+        if ($order->status === 'pending') {
+            $order->status = 'completed';
+            $order->save();
 
+            return redirect()->back()->with('success', 'Order marked as completed successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Order cannot be completed.');
+    }
 
     public function completeOrder(Request $request)
     {
@@ -161,17 +172,21 @@ class StaffController extends Controller
 
     public function completePosOrder(Request $request)
     {
+        // Log the incoming order ID for debugging
+        Log::info('Completing POS order with ID: ' . $request->order_id);
+
         $order = PosOrder::find($request->order_id); // Adjust to your model
 
         if ($order && $order->status !== 'completed') {
             $order->status = 'completed';
             $order->save();
 
-            return response()->json(['success' => true]);
+            return redirect()->back()->with('success', 'Order marked as completed successfully.');
         }
 
         return response()->json(['success' => false, 'message' => 'Order not found or already completed.']);
     }
+
 
 
     public function onlinePending()

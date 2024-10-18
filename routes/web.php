@@ -140,7 +140,7 @@ Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
     Route::get('/staff/deliver-or-pickup', [StaffController::class, 'dORp'])->name('staff.orders.deliver-or-pickup');
     Route::get('/staff/deliver-or-pickup-completed', [StaffController::class, 'dORpCompleted'])->name('staff.orders.deliver-or-pickup-completed');
     Route::post('/staff/orders/complete', [StaffController::class, 'completeOrder'])->name('staff.orders.complete');
-    Route::post('/staff/posorders/complete', [StaffController::class, 'completePosOrder'])->name('staff.orders.pos-complete');
+    Route::post('/staff/pos/complete', [StaffController::class, 'completePosOrder'])->name('staff.orders.pos-complete');
     Route::post('/staff/orders/complete/{id}', [StaffController::class, 'dORpComplete'])->name('staff.orders.dORpcomplete');
     Route::put('/staff/orders/{id}/online-complete', [StaffController::class, 'OnlinecompleteOrder'])->name('staff.orders.online-complete');
 

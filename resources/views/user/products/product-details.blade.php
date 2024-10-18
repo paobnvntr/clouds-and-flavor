@@ -4,6 +4,32 @@
 
 @section('content')
 
+@if (session('error'))
+    <div class="alert alert-danger"
+        style="position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+        {{ session('error') }}
+    </div>
+@endif
+
+@if (session('message'))
+    <div class="alert alert-success"
+        style="position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+        {{ session('message') }}
+    </div>
+@endif
+
+<script>
+    // Function to hide alert after 5 seconds
+    setTimeout(function () {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = "opacity 0.5s ease"; // Add a fade effect
+            alert.style.opacity = 0; // Fade out the alert
+            setTimeout(() => alert.remove(), 500); // Remove after fade out
+        });
+    }, 3000); // 3000 milliseconds = 3 seconds
+</script>
+
 <!-- Hero Section Begin -->
 <section class="hero hero-normal">
     <div class="container">
