@@ -293,10 +293,12 @@
             var orderAddonsList = modal.find('#orderAddonsList');
             orderAddonsList.empty();
 
-            if (order.addons && order.addons.length > 0) {
-                $.each(order.addons, function (index, addon) {
+            console.log(order.order_add_ons.length);
+            if (order.order_add_ons && order.order_add_ons.length > 0) {
+                $.each(order.order_add_ons, function (index, addon) {
                     orderAddonsList.append('<li class="list-group-item">' +
-                        addon.name +
+                        addon.add_on.name +
+                        ' - x' + addon.quantity +
                         ' - ₱' + number_format(addon.price, 2) +
                         '</li>');
                 });
