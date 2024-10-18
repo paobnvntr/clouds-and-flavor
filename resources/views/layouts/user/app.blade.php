@@ -40,11 +40,30 @@
 		<div class="loader"></div>
 	</div>
 
-	<!-- Bootstrap JS (Bundle with Popper.js included) -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
+	<script>
+		document.addEventListener('DOMContentLoaded', (event) => {
+			let successAlert = document.getElementById('alert-success');
+			if (successAlert) {
+				setTimeout(() => {
+					successAlert.style.transition = "opacity 0.5s ease";
+					successAlert.style.opacity = 0;
+					setTimeout(() => { successAlert.remove(); }, 500);
+				}, 4000);
+			}
+
+			let failedAlert = document.getElementById('alert-failed');
+			if (failedAlert) {
+				setTimeout(() => {
+					failedAlert.style.transition = "opacity 0.5s ease";
+					failedAlert.style.opacity = 0;
+					setTimeout(() => { failedAlert.remove(); }, 500);
+				}, 4000);
+			}
+		});
 	</script>
 
-	<!-- Js Plugins -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+		crossorigin="anonymous"></script>
 	<script src="{{ asset('assets/import/js/jquery-3.3.1.min.js') }}"></script>
 	<script src="{{ asset('assets/import/js/bootstrap.min.js') }}"></script>
 	<script src="{{ asset('assets/import/js/jquery.nice-select.min.js') }}"></script>

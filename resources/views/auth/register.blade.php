@@ -1,17 +1,6 @@
 <x-guest-layout>
     @section('title', 'Register')
 
-    <!-- Flash Message Area -->
-    <div id="flash-message">
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
-        @endif
-    </div>
     <div class="text-center mb-6">
         <h2 class="text-2xl font-medium text-gray-600">
             Create an Account
@@ -49,7 +38,7 @@
 
         <div class="mt-4">
             <x-input-label for="phone_number">
-                {{ __('Phone Number') }} (09XXXXXXXXX)<span class="text-red-600">*</span>
+                {{ __('Phone Number') }} (09XXXXXXXXX) <span class="text-red-600">*</span>
             </x-input-label>
             <x-text-input id="phone_number" class="block mt-1 w-full" type="text" name="phone_number"
                 :value="old('phone_number')" required autocomplete="tel" />

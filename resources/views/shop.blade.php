@@ -74,7 +74,6 @@
     </div>
 </section>
 
-<!-- Breadcrumb Section Begin -->
 <section class="breadcrumb-section set-bg" data-setbg="{{ asset('assets/img/deviceseries.jpg') }}">
     <div class="container">
         <div class="row">
@@ -90,18 +89,12 @@
         </div>
     </div>
 </section>
-<!-- Breadcrumb Section End -->
 
-<!-- Product Section Begin -->
 <section class="product spad">
-
     <div class="container">
         <div class="row">
-
             <div class="col-lg-3 col-md-5">
                 <div class="sidebar">
-
-
                     <div class="sidebar__item">
                         <div class="latest-product__text">
                             <h4>Latest Products</h4>
@@ -135,44 +128,44 @@
                     <div class="row">
                         <div class="product__discount__slider owl-carousel">
                             @foreach ($discountedProducts as $product)
-                                                        <div class="col-lg-4">
-                                                            <div class="product__discount__item">
-                                                                <div class="product__discount__item__pic set-bg"
-                                                                    data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
-                                                                    @php
-                                                                        $discountPercentage = round(
-                                                                            (($product->price - $product->sale_price) / $product->price) *
-                                                                            100,
-                                                                        );
-                                                                    @endphp
-                                                                    <div class="product__discount__percent">-{{ $discountPercentage }}%</div>
-                                                                    <ul class="product__item__pic__hover">
-                                                                        <li>
-                                                                            <form action="{{ route('user.cart.add-to-cart') }}" method="POST">
-                                                                                @csrf
-                                                                                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                                                                <input type="hidden" name="price"
-                                                                                    value="{{ $product->sale_price }}">
-                                                                                <button type="submit" class="add-to-cart">
-                                                                                    <i class="fa fa-shopping-cart"></i>
-                                                                                </button>
-                                                                            </form>
-                                                                        </li>
-                                                                    </ul>
-                                                                </div>
-                                                                <div class="product__discount__item__text">
-                                                                    <h5><a href="#">{{ $product->product_name }}</a></h5>
-                                                                    <div class="product__item__price">
-                                                                        ₱{{ number_format($product->sale_price, 2) }}
-                                                                        <span>₱{{ number_format($product->price, 2) }}</span>
-                                                                    </div>
-                                                                    <p><strong>Stock:<span
-                                                                                id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
-                                                                    </p>
+                                <div class="col-lg-4">
+                                    <div class="product__discount__item">
+                                        <div class="product__discount__item__pic set-bg"
+                                            data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
+                                            @php
+                                                $discountPercentage = round(
+                                                    (($product->price - $product->sale_price) / $product->price) *
+                                                    100,
+                                                );
+                                            @endphp
+                                            <div class="product__discount__percent">-{{ $discountPercentage }}%</div>
+                                            <ul class="product__item__pic__hover">
+                                                <li>
+                                                    <form action="{{ route('user.cart.add-to-cart') }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                                        <input type="hidden" name="price"
+                                                            value="{{ $product->sale_price }}">
+                                                        <button type="submit" class="add-to-cart">
+                                                            <i class="fa fa-shopping-cart"></i>
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="product__discount__item__text">
+                                            <h5><a href="#">{{ $product->product_name }}</a></h5>
+                                            <div class="product__item__price">
+                                                ₱{{ number_format($product->sale_price, 2) }}
+                                                <span>₱{{ number_format($product->price, 2) }}</span>
+                                            </div>
+                                            <p><strong>Stock:<span
+                                                        id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
+                                            </p>
 
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
                             @endforeach
                         </div>
                     </div>
@@ -216,6 +209,7 @@
                             </div>
                         @endforeach
                     </div>
+                    
                     <div class="d-flex align-items-center justify-content-between">
                         <p class="mb-0">Showing {{ $products->firstItem() }} to {{ $products->lastItem() }} of
                             {{ $products->total() }} results
@@ -244,36 +238,4 @@
         </div>
     </div>
 </section>
-<!-- Product Section End -->
-
-<script>
-    document.querySelectorAll('.add-to-cart-form').forEach(form => {
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const formData = new FormData(form);
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                // Update the cart item count and total price
-                document.querySelector('.header__cart__price span').innerText = result.totalItems;
-                // Show the flash message
-                const flashMessage = document.querySelector('.alert');
-                if (flashMessage) {
-                    flashMessage.innerText = result.message;
-                    flashMessage.style.display = 'block';
-                    setTimeout(() => {
-                        flashMessage.style.display = 'none';
-                    }, 3000);
-                }
-            }
-        });
-    });
-</script>
 @endsection

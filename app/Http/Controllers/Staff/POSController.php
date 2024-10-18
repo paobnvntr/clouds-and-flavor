@@ -17,68 +17,50 @@ class POSController extends Controller
 {
     public function index(Request $request)
     {
-        // Get the search term from the request
         $searchTerm = $request->input('search');
-
-        // Fetch available products, filter by search term if provided
         $products = Product::where('stock', '>', 0)
             ->when($searchTerm, function ($query) use ($searchTerm) {
                 return $query->where('product_name', 'like', '%' . $searchTerm . '%');
             })
             ->get();
 
-        // Fetch current staff cart items with product data
         $cartItems = StaffCart::with('product')->where('staff_id', Auth::id())->get();
 
-        // Calculate cart total
         $cartTotal = $cartItems->sum(function ($item) {
             return $item->quantity * $item->price;
         });
 
-        // Fetch available categories
-        $categories = Category::where('status', 0)->get(); // Only fetch available categories
+        $categories = Category::where('status', 0)->get();
 
-        // Pass products, cart items, cart total, and categories to the view
         return view('staff.pos.index', compact('products', 'cartItems', 'cartTotal', 'categories', 'searchTerm'));
     }
 
-
-
     public function addToCart(Request $request)
     {
-        // Validate incoming request data
         $request->validate([
             'product_id' => 'required|exists:products,id',
         ]);
 
         try {
-            // Retrieve the product
             $product = Product::findOrFail($request->product_id);
-
-            // Determine the price to use (sale price if on sale, otherwise regular price)
             $price = $product->on_sale ? $product->sale_price : $product->price;
 
-            // Check if stock is available
             if ($product->stock > 0) {
-                // Check if the product already exists in the cart
                 $cartItem = StaffCart::where('staff_id', Auth::id())
                     ->where('product_id', $product->id)
                     ->first();
 
                 if ($cartItem) {
-                    // If the product is already in the cart, increment the quantity
                     $cartItem->increment('quantity');
                 } else {
-                    // Directly insert a new entry into the staff_carts table
                     StaffCart::create([
                         'staff_id' => Auth::id(),
                         'product_id' => $product->id,
-                        'quantity' => 1, // Default quantity is 1
-                        'price' => $price, // Use sale price if on sale
+                        'quantity' => 1,
+                        'price' => $price,
                     ]);
                 }
 
-                // Get updated cart items with eager loading
                 $cartItems = StaffCart::with('product')->where('staff_id', Auth::id())->get();
                 $cartTotal = $cartItems->sum(function ($item) {
                     return $item->quantity * $item->price;
@@ -88,7 +70,7 @@ class POSController extends Controller
                     'success' => true,
                     'message' => 'Product added to cart successfully.',
                     'cartItems' => $cartItems,
-                    'cartTotal' => number_format($cartTotal, 2), // Format cart total with commas
+                    'cartTotal' => number_format($cartTotal, 2),
                 ]);
             } else {
                 return response()->json(['success' => false, 'message' => 'Product is out of stock.']);
@@ -101,28 +83,23 @@ class POSController extends Controller
     public function getOrderDetails($type, $id)
     {
         try {
-            // Check if the provided ID is valid
             if (!is_numeric($id)) {
                 return response()->json(['error' => 'Invalid order ID'], 400);
             }
 
             if ($type === 'user') {
-                // Retrieve user order with related items and user
                 $order = Order::with(['orderItems.product', 'user'])->find($id);
             } else {
-                // Retrieve POS order with related items
                 $order = POSOrder::with('items.product')->find($id);
             }
 
-            // Check if order was found
             if (!$order) {
                 return response()->json(['error' => 'Order not found'], 404);
             }
 
-            // Return the order with its items
             return response()->json([
                 'order' => $order,
-                'items' => ($type === 'user') ? $order->orderItems : $order->items // Ensure correct items are returned
+                'items' => ($type === 'user') ? $order->orderItems : $order->items
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Internal Server Error'], 500);
@@ -135,8 +112,6 @@ class POSController extends Controller
         if ($cartItems->isEmpty()) {
             return redirect()->route('staff.pos.index')->with('error', 'No items in the cart.');
         } else {
-
-            // Calculate total considering sale price
             $cartTotal = $cartItems->sum(function ($item) {
                 return $item->product->on_sale ? $item->product->sale_price * $item->quantity : $item->product->price * $item->quantity;
             });
@@ -147,30 +122,24 @@ class POSController extends Controller
 
     public function placeOrder(Request $request)
     {
-        // Validate the incoming request data
         $request->validate([
             'customer_name' => 'required|string',
             'payment_method' => 'required|string',
         ]);
 
-        // Retrieve cart items for the staff
         $cartItems = DB::table('staff_carts')->where('staff_id', $request->user()->id)->get();
 
-        // Check if there are cart items
         if ($cartItems->isEmpty()) {
             return response()->json(['message' => 'No items in the cart.'], 400);
         }
 
-        // Calculate total price
         $totalPrice = $cartItems->sum(function ($item) {
             return $item->price * $item->quantity;
         });
 
-        // Start a database transaction
         DB::beginTransaction();
 
         try {
-            // Insert the order using the PosOrder model
             if ($request->payment_method == 'Cash') {
                 $order = POSOrder::create([
                     'customer_name' => $request->customer_name,
@@ -189,9 +158,7 @@ class POSController extends Controller
                 ]);
             }
 
-            // Insert each cart item into pos_order_items using the PosOrderItem model
             foreach ($cartItems as $item) {
-                // Create a new order item
                 POSOrderItem::create([
                     'pos_order_id' => $order->id,
                     'product_id' => $item->product_id,
@@ -199,69 +166,52 @@ class POSController extends Controller
                     'price' => $item->price,
                 ]);
 
-                // Decrement the stock of the product
                 $product = Product::find($item->product_id);
                 if ($product) {
                     $product->decrement('stock', $item->quantity);
                 }
             }
 
-            // Clear the cart after placing the order
             DB::table('staff_carts')->where('staff_id', $request->user()->id)->delete();
-
-            // Commit the transaction
             DB::commit();
 
-            // Store the order ID in the session
-            session(['order_id' => $order->id]); // Store order ID in session
+            session(['order_id' => $order->id]);
 
-            // Return a JSON response indicating success
             return response()->json([
                 'message' => 'Order placed successfully!',
                 'order_id' => $order->id,
             ]);
         } catch (\Exception $e) {
-            // Rollback the transaction if there is an error
             DB::rollBack();
 
             return response()->json(['message' => 'Error placing order. Please try again later.'], 500);
         }
     }
 
-
-
     public function orderSuccess(Request $request)
     {
-        // Fetch the order ID from the session or redirect back if not available
-        $orderId = session('order_id'); // Store the order ID in the session after placing the order
+        $orderId = session('order_id');
 
         if (!$orderId) {
             return redirect()->route('staff.pos.index')->with('error', 'Order ID not found.');
         }
 
-        // Fetch the POS order and its items
         $order = POSOrder::with('orderItems.product')->findOrFail($orderId);
 
         return view('staff.pos.order-success', compact('order'));
     }
 
-
     public function updateCartItem(Request $request)
     {
-        // Validate the request data
         $request->validate([
             'id' => 'required|exists:staff_carts,id',
             'quantity' => 'required|integer|min:1',
         ]);
 
-        // Find the cart item by ID
         $cartItem = StaffCart::find($request->id);
-
-        // Update the quantity
         $cartItem->quantity = $request->quantity;
-        $cartItem->save(); // Save changes to the database
+        $cartItem->save();
 
-        // Fetch updated cart items and total
         $cartItems = StaffCart::with('product')->where('staff_id', Auth::id())->get();
         $cartTotal = $cartItems->sum(function ($item) {
             return $item->price * $item->quantity;
@@ -275,12 +225,10 @@ class POSController extends Controller
 
     public function removeCartItem(Request $request)
     {
-        // Assuming you have a method to remove the item from the cart
         $cartItem = StaffCart::find($request->id);
-        $cartItem->delete(); // Remove the cart item
-
-        // Fetch updated cart items and total
+        $cartItem->delete();
         $cartItems = StaffCart::with('product')->where('staff_id', Auth::id())->get();
+        
         $cartTotal = $cartItems->sum(function ($item) {
             return $item->price * $item->quantity;
         });

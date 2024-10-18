@@ -211,20 +211,23 @@
                 <div class="shoping__checkout">
                     <h5>Cart Total Summary</h5>
                     <ul>
-                        <li>Subtotal <span class="text-secondary">₱<span
-                                    id="subtotal" class="text-secondary">{{ number_format($totals['subtotal'], 2) }}</span></span></li>
-                        <li>Add-ons <span class="text-secondary">₱<span
-                                    id="addons-total" class="text-secondary">{{ number_format($totals['addons'], 2) }}</span></span></li>
+                        <li>Subtotal <span class="text-secondary">₱<span id="subtotal"
+                                    class="text-secondary">{{ number_format($totals['subtotal'], 2) }}</span></span>
+                        </li>
+                        <li>Add-ons <span class="text-secondary">₱<span id="addons-total"
+                                    class="text-secondary">{{ number_format($totals['addons'], 2) }}</span></span></li>
                         <li id="discount-row" style="display: none;">Discount <span>-₱<span
                                     id="discount">0.00</span></span></li>
-                        <li>Total <span class="text-success">₱<span
-                                    id="grand-total" class="text-success">{{ number_format($totals['grandTotal'], 2) }}</span></span></li>
+                        <li>Total <span class="text-success">₱<span id="grand-total"
+                                    class="text-success">{{ number_format($totals['grandTotal'], 2) }}</span></span>
+                        </li>
                     </ul>
                     <div id="voucher-info" style="display: none;">
                         <hr>
                         <div class="d-flex align-items-center justify-content-between">
                             <p>
-                                <strong class="text-dark">Voucher applied:</strong> <span id="applied-voucher-code"></span> 
+                                <strong class="text-dark">Voucher applied:</strong> <span
+                                    id="applied-voucher-code"></span>
                             </p>
                             <button id="remove-voucher" class="btn btn-sm btn-danger mb-3">Remove</button>
                         </div>
@@ -278,7 +281,7 @@
             let total = newVal * parseFloat(price.replace(/,/g, ''));
             $(this).closest('tr').find('.total').text(formatCurrency(total));
 
-            
+
         });
 
         $('input[name="quantity"]').on('change', function () {

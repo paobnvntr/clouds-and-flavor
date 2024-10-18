@@ -48,21 +48,19 @@ class StaffController extends Controller
 
     public function posOrderList()
     {
-        $orders = POSOrder::all(); // Orders from POS
+        $orders = POSOrder::all();
 
         return view('staff.orders.pos.posOrder', compact('orders'));
     }
 
     public function orderList()
     {
-        // Fetch orders with status 'completed' or 'pending' and payment_status 'paid'
         $orders = Order::whereIn('status', ['completed', 'pending'])
             ->where('payment_status', 'paid')
-            ->get(); // Get all matching orders
+            ->get();
 
         return view('staff.orders.index', compact('orders'));
     }
-
 
     public function posCompleteOrder($id)
     {
@@ -83,72 +81,57 @@ class StaffController extends Controller
         $order = Order::find($request->order_id);
 
         if ($order && $order->status !== 'completed') {
-            // Mark the order as completed
             $order->status = 'completed';
             $order->save();
 
-            // Get the phone number from the 'phone_number' field in the orders table
             $phoneNumber = $order->phone_number;
 
             if ($phoneNumber) {
                 try {
                     $this->sendSmsNotification($phoneNumber, $order->id, $order->user_id);
                 } catch (\Exception $e) {
-                    // Handle any error from SMS sending
                     return response()->json(['success' => true, 'message' => 'Order completed, but SMS could not be sent.']);
                 }
             }
 
             return response()->json(['success' => true, 'message' => 'Order completed and SMS sent successfully!']);
         }
-
         return response()->json(['success' => false, 'message' => 'Order not found or already completed.']);
     }
 
     protected function formatPhoneNumber($phone_number)
     {
-        // Remove any non-numeric characters
         $number = preg_replace('/\D/', '', $phone_number);
 
-        // Check if it already starts with a country code (e.g., +63 for Philippines)
         if (substr($number, 0, 2) !== '63') {
-            // Assuming it's a local number, add the country code for the Philippines (+63)
-            $number = '63' . ltrim($phone_number, '0'); // Remove leading 0 and add country code
+            $number = '63' . ltrim($phone_number, '0');
         }
 
         return '+' . $number;
     }
 
-
     protected function sendSmsNotification($phoneNumber, $orderId, $userId)
     {
-        // Get user information
         $user = User::find($userId);
 
         if ($user && $user->phone_number) {
-            // Twilio credentials from .env
             $sid = env('TWILIO_SID');
             $token = env('TWILIO_AUTH_TOKEN');
             $twilio_number = env('TWILIO_PHONE_NUMBER');
             $client = new Client($sid, $token);
 
-            // Ensure phone number is in E.164 format (e.g., +63947252XXXX for the Philippines)
             $formattedNumber = $this->formatPhoneNumber($user->phone_number);
-
-            // Compose the SMS message
             $message = "Hi {$user->name}, your order has been successfully completed. Thank you for ordering!";
 
             try {
-                // Send the SMS
                 $client->messages->create(
-                    $formattedNumber, // User's formatted phone number
+                    $formattedNumber,
                     [
                         'from' => $twilio_number,
                         'body' => $message
                     ]
                 );
             } catch (\Exception $e) {
-                // Handle exception if SMS fails
                 Log::error("Failed to send SMS: " . $e->getMessage());
             }
         }
@@ -156,14 +139,12 @@ class StaffController extends Controller
 
     // private function sendSmsNotification($phoneNumber, $orderId)
     // {
-    //     // Twilio configuration from .env
     //     $sid = env('TWILIO_SID');
     //     $token = env('TWILIO_AUTH_TOKEN');
     //     $twilioNumber = env('TWILIO_PHONE_NUMBER');
 
     //     $client = new Client($sid, $token);
 
-    //     // Send the SMS
     //     $message = "Your order #$orderId has been marked as completed. Thank you for your purchase!";
     //     $client->messages->create($phoneNumber, [
     //         'from' => $twilioNumber,
@@ -173,10 +154,8 @@ class StaffController extends Controller
 
     public function completePosOrder(Request $request)
     {
-        // Log the incoming order ID for debugging
         Log::info('Completing POS order with ID: ' . $request->order_id);
-
-        $order = PosOrder::find($request->order_id); // Adjust to your model
+        $order = PosOrder::find($request->order_id);
 
         if ($order && $order->status !== 'completed') {
             $order->status = 'completed';
@@ -189,8 +168,6 @@ class StaffController extends Controller
         return response()->json(['success' => false, 'message' => 'Order not found or already completed.']);
     }
 
-
-
     public function onlinePending()
     {
         $orders = Order::where('status', 'pending')
@@ -200,7 +177,6 @@ class StaffController extends Controller
 
         return view('staff.orders.online-pending', compact('orders'));
     }
-
 
     public function posPending()
     {
@@ -216,10 +192,8 @@ class StaffController extends Controller
         return view('staff.orders.pos.pos-completed', compact('orders'));
     }
 
-
     public function dORp()
     {
-        // Fetch user orders with status 'pending' and payment status 'paid', filtered by delivery option
         $deliveryOrders = Order::where('status', 'pending')
             ->where('payment_status', 'paid')
             ->where('delivery_option', 'to-deliver')
@@ -232,25 +206,21 @@ class StaffController extends Controller
             ->with('user')
             ->get();
 
-
         return view('staff.orders.deliver-or-pickup', compact('deliveryOrders', 'pickupOrders'));
     }
 
     public function dORpCompleted()
     {
-        // Count completed delivery orders with status 'completed' and delivery option 'to-deliver'
         $toDeliverOrdersCount = Order::where('status', 'completed')
             ->where('delivery_option', 'to-deliver')
             ->with('user', 'voucher')
             ->get();
 
-        // Count completed pickup orders with status 'completed' and delivery option 'pick-up'
         $pickUpOrdersCount = Order::where('status', 'completed')
             ->where('delivery_option', 'pick-up')
             ->with('user', 'voucher')
             ->get();
 
-        // Ensure both variables are being passed to the view
         return view('staff.orders.deliver-or-pickup-completed', compact('toDeliverOrdersCount', 'pickUpOrdersCount'));
     }
 
@@ -262,7 +232,6 @@ class StaffController extends Controller
             return response()->json(['success' => false, 'message' => 'Order not found'], 404);
         }
 
-        // Update order status
         $order->status = 'completed';
         $order->save();
 

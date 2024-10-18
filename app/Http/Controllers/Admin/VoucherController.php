@@ -11,6 +11,7 @@ class VoucherController extends Controller
     public function index()
     {
         $vouchers = Voucher::all();
+
         return view('admin.vouchers.index', compact('vouchers'));
     }
 
@@ -43,12 +44,13 @@ class VoucherController extends Controller
     public function edit($id)
     {
         $voucher = Voucher::findOrFail($id);
+
         return view('admin.vouchers.edit', compact('voucher'));
     }
 
     public function update(Request $request, $id)
     {
-        $voucher = Voucher::findOrFail($id); // Fetch the voucher by ID
+        $voucher = Voucher::findOrFail($id);
 
         $request->validate([
             'code' => 'required|unique:vouchers,code,' . $voucher->id,
@@ -62,17 +64,16 @@ class VoucherController extends Controller
         ]);
 
         $data = $request->all();
-        $data['is_active'] = $request->has('is_active') ? 1 : 0; // Handle unchecked case
-
-        $voucher->update($data); // Update the voucher
+        $data['is_active'] = $request->has('is_active') ? 1 : 0;
+        $voucher->update($data);
 
         return redirect()->route('admin.vouchers.index')->with('success', 'Voucher updated successfully.');
     }
 
-
     public function destroy(Voucher $voucher)
     {
         $voucher->delete();
+
         return redirect()->route('admin.vouchers.index')->with('success', 'Voucher deleted successfully.');
     }
 }

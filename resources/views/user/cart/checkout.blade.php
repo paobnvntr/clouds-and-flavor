@@ -57,21 +57,6 @@
         </div>
     </section>
 
-
-
-    <!-- Flash message for success -->
-    @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    <!-- Breadcrumb Section Begin -->
     <section class="breadcrumb-section set-bg" data-setbg="{{ asset('assets/img/deviceseries.jpg') }}">
         <div class="container">
             <div class="row">
@@ -88,9 +73,7 @@
             </div>
         </div>
     </section>
-    <!-- Breadcrumb Section End -->
 
-    <!-- Floating flash message for missing address or phone number -->
     @if (empty($user->address) || empty($user->phone_number))
         <div class="alert alert-warning floating-alert" style="z-index: 9999;">
             <strong>Notice:</strong> Please update your address and phone number on your profile to place an order.
@@ -134,12 +117,6 @@
                                 <input type="text" name="address" class="checkout__input__add" readonly
                                     value="{{ $user->address ?? '' }}" required>
                             </div>
-
-                            {{-- <div class="checkout__input">
-                                <p>Order notes</p>
-                                <input type="text" name="order_notes"
-                                    placeholder="Notes about your order, e.g. special notes for delivery.">
-                            </div> --}}
                         </div>
 
                         {{-- Your Order --}}
@@ -288,9 +265,23 @@
                     .then(data => {
                         if (data.success) {
                             updateTotal(data);
-                            alert(data.message);
+                            const flashMessage = document.getElementById('alert-success');
+                            if (flashMessage) {
+                                flashMessage.innerText = data.message;
+                                flashMessage.style.display = 'block';
+                                setTimeout(() => {
+                                    flashMessage.style.display = 'none';
+                                }, 3000);
+                            }
                         } else {
-                            alert(data.message);
+                            const flashMessage = document.getElementById('alert-failed');
+                            if (flashMessage) {
+                                flashMessage.innerText = data.message;
+                                flashMessage.style.display = 'block';
+                                setTimeout(() => {
+                                    flashMessage.style.display = 'none';
+                                }, 3000);
+                            }
                         }
                     });
             });

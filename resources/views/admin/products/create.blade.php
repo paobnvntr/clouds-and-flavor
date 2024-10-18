@@ -76,7 +76,7 @@
 
                                 <div class="mb-3">
                                     <label for="image" class="form-label">Product Image</label>
-                                    <input type="file" class="form-control" id="image" name="image">
+                                    <input type="file" class="form-control" id="image" name="image" accept=".jpg, .jpeg, .png">
                                     <small class="form-text text-muted">If no image is uploaded, a default image will be
                                         used.</small>
                                 </div>
