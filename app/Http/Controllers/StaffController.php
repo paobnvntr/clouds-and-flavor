@@ -69,6 +69,7 @@ class StaffController extends Controller
         $order = POSOrder::findOrFail($id);
         if ($order->status === 'pending') {
             $order->status = 'completed';
+            $order->amount = $order->total_price;
             $order->save();
 
             return redirect()->back()->with('success', 'Order marked as completed successfully.');
@@ -179,6 +180,7 @@ class StaffController extends Controller
 
         if ($order && $order->status !== 'completed') {
             $order->status = 'completed';
+            $order->amount = $order->total_price;
             $order->save();
 
             return redirect()->back()->with('success', 'Order marked as completed successfully.');

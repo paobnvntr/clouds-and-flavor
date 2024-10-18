@@ -178,6 +178,7 @@ class POSController extends Controller
                     'payment_method' => $request->payment_method,
                     'total_price' => $totalPrice,
                     'status' => 'completed',
+                    'amount' => $totalPrice,
                 ]);
             } else {
                 $order = PosOrder::create([
