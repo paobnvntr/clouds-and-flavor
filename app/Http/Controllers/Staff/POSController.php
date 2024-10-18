@@ -150,7 +150,6 @@ class POSController extends Controller
         // Validate the incoming request data
         $request->validate([
             'customer_name' => 'required|string',
-            'table_number' => 'required|integer',
             'payment_method' => 'required|string',
         ]);
 
@@ -172,13 +171,22 @@ class POSController extends Controller
 
         try {
             // Insert the order using the PosOrder model
-            $order = PosOrder::create([
-                'customer_name' => $request->customer_name,
-                'table_number' => $request->table_number,
-                'staff_id' => $request->user()->id,
-                'payment_method' => $request->payment_method,
-                'total_price' => $totalPrice,
-            ]);
+            if ($request->payment_method == 'Cash') {
+                $order = POSOrder::create([
+                    'customer_name' => $request->customer_name,
+                    'staff_id' => $request->user()->id,
+                    'payment_method' => $request->payment_method,
+                    'total_price' => $totalPrice,
+                    'status' => 'completed',
+                ]);
+            } else {
+                $order = PosOrder::create([
+                    'customer_name' => $request->customer_name,
+                    'staff_id' => $request->user()->id,
+                    'payment_method' => $request->payment_method,
+                    'total_price' => $totalPrice,
+                ]);
+            }
 
             // Insert each cart item into pos_order_items using the PosOrderItem model
             foreach ($cartItems as $item) {
