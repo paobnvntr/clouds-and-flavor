@@ -25,6 +25,10 @@
                             <div class="alert alert-success">
                                 {{ session('success') }}
                             </div>
+                        @elseif (session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
                         @endif
 
                         <div class="table-responsive shadow-sm bg-white p-3 rounded">
@@ -155,9 +159,16 @@
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <button type="button" class="btn btn-primary"
-                                                            onclick="printInvoice({{ $order->id }})">Print
-                                                            Invoice</button>
+                                                        @if ($order->status === 'pending')
+                                                            <form action="{{ route('staff.orders.complete', $order->id) }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="order_id"
+                                                                    value="{{ $order->id }}">
+                                                                <button type="submit" class="btn btn-success">Complete
+                                                                    Order</button>
+                                                            </form>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>

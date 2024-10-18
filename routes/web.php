@@ -67,8 +67,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/pos/pending-order', 'posPendingOrder')->name('admin.orders.pos.pending');
         Route::get('admin/pos/completed-order', 'posCompletedOrder')->name('admin.orders.pos.completed');
 
-        Route::put('admin/orders/{id}/online-complete', 'OnlinecompleteOrder')->name('admin.orders.online-complete');
-        Route::put('admin/orders/{id}/complete', 'completeOrder')->name('admin.orders.complete');
+        Route::post('admin/orders/{id}/online-complete', 'OnlinecompleteOrder')->name('admin.orders.online-complete');
+        Route::post('admin/orders/complete', 'completeOrder')->name('admin.orders.complete');
+        Route::post('admin/pos/complete', 'completePosOrder')->name('admin.orders.pos-complete');
     });
 
     Route::prefix('admin')->group(function () {

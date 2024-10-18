@@ -95,14 +95,14 @@ class StaffController extends Controller
                     $this->sendSmsNotification($phoneNumber, $order->id, $order->user_id);
                 } catch (\Exception $e) {
                     // Handle any error from SMS sending
-                    return response()->json(['success' => true, 'message' => 'Order completed, but SMS could not be sent.']);
+                    return redirect()->back()->with('error', 'Order completed, but SMS could not be sent.');
                 }
             }
 
-            return response()->json(['success' => true, 'message' => 'Order completed and SMS sent successfully!']);
+            return redirect()->back()->with('success', 'Order completed and SMS sent successfully!');
         }
 
-        return response()->json(['success' => false, 'message' => 'Order not found or already completed.']);
+        return redirect()->back()->with('error', 'Order not found or already completed.');
     }
 
     protected function formatPhoneNumber($phone_number)

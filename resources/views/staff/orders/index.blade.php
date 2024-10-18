@@ -156,10 +156,11 @@
 
                                                     <div class="modal-footer">
                                                         @if ($order->status === 'pending')
-                                                            <form action="{{ route('staff.orders.online-complete', $order->id) }}"
+                                                            <form action="{{ route('staff.orders.complete', $order->id) }}"
                                                                 method="POST">
                                                                 @csrf
-                                                                @method('PUT')
+                                                                <input type="hidden" name="order_id"
+                                                                    value="{{ $order->id }}">
                                                                 <button type="submit" class="btn btn-success">Complete
                                                                     Order</button>
                                                             </form>

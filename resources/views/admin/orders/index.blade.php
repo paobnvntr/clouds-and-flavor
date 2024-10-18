@@ -26,6 +26,10 @@
                             <div class="alert alert-success">
                                 {{ session('success') }}
                             </div>
+                        @elseif (session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
                         @endif
 
                         <div class="table-responsive shadow-sm bg-white p-3 rounded">
@@ -156,10 +160,11 @@
 
                                                     <div class="modal-footer">
                                                         @if ($order->status === 'pending')
-                                                            <form action="{{ route('admin.orders.online-complete', $order->id) }}"
+                                                            <form action="{{ route('admin.orders.complete', $order->id) }}"
                                                                 method="POST">
                                                                 @csrf
-                                                                @method('PUT')
+                                                                <input type="hidden" name="order_id"
+                                                                    value="{{ $order->id }}">
                                                                 <button type="submit" class="btn btn-success">Complete
                                                                     Order</button>
                                                             </form>
