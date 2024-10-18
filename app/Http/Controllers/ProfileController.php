@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Validation\Rules;
+use Illuminate\Validation\Rule;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -41,8 +44,26 @@ class ProfileController extends Controller
 
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        // Validate the request fields
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                'regex:/^.+@.+\..+$/i',
+                Rule::unique(User::class)->ignore($request->user()->id), // Exclude current user from unique check
+            ],
+            'address' => ['required', 'string', 'max:255'],
+            'phone_number' => ['required', 'digits:11'],
+        ]);
 
+        // Update the user's profile
+        $request->user()->update($request->validated());
+
+        // If email is changed, reset the email verification timestamp
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
@@ -50,6 +71,19 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('success', 'Profile updated successfully.');
+    }
+
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $request->user()->update([
+            'password' => bcrypt($request->password),
+        ]);
+
+        return Redirect::route('profile.edit')->with('success', 'Password changed successfully.');
     }
 
     public function destroy(Request $request): RedirectResponse
