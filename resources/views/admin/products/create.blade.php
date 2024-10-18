@@ -64,7 +64,7 @@
                                 <div class="mb-3">
                                     <label for="description" class="form-label">Description <span
                                             class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="description" name="description"
+                                    <textarea class="form-control" id="description" name="description" rows="5"
                                         required></textarea>
                                 </div>
 
