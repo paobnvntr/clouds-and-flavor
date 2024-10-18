@@ -65,7 +65,7 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $category = Category::findOrFail($id);
