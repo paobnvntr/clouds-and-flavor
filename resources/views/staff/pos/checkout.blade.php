@@ -27,7 +27,7 @@
                             <div>
                                 {{ $cartItem->product->product_name }}
                                 @if ($cartItem->product->on_sale)
-                                    <span class="badge bg-warning text-dark ms-2">On Sale</span>
+                                    <span class="badge bg-danger text-dark ms-2">On Sale</span>
                                 @endif
                             </div>
                             <span>Quantity: {{ $cartItem->quantity }}</span>
@@ -39,7 +39,7 @@
                     @endforelse
                 </ul>
 
-                <div class="mt-3">
+                <div class="mt-3 d-flex justify-content-end text-success">
                     <strong>Total: ₱<span id="order-total">{{ number_format($cartTotal, 2) }}</span></strong>
                 </div>
             </div>
@@ -52,28 +52,31 @@
                         <label for="customer_name" class="form-label">Customer Name</label>
                         <input type="text" class="form-control" id="customer_name" name="customer_name" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="table_number" class="form-label">Table Number</label>
-                        <input type="number" class="form-control" id="table_number" name="table_number" required>
-                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Payment Method</label><br>
-                        <input type="radio" id="payment_cash" name="payment_method" value="cash"
+                        <input type="radio" id="payment_cash" name="payment_method" value="Cash"
                             onchange="handlePaymentMethodChange()">
                         <label for="payment_cash">Cash</label><br>
-                        <input type="radio" id="payment_gcash" name="payment_method" value="gcash"
+                        <input type="radio" id="payment_gcash" name="payment_method" value="GCash"
                             onchange="handlePaymentMethodChange()">
                         <label for="payment_gcash">GCash</label><br>
-                        <input type="radio" id="payment_paymaya" name="payment_method" value="paymaya"
+                        <input type="radio" id="payment_paymaya" name="payment_method" value="PayMaya"
                             onchange="handlePaymentMethodChange()">
                         <label for="payment_paymaya">PayMaya</label>
                     </div>
+
                     <div class="mb-3">
                         <label for="amount" class="form-label">Amount</label>
                         <input type="number" class="form-control" id="amount" name="amount" disabled>
-                        <div id="amount-error" class="text-danger" style="display: none;">Amount is required when paying
-                            with cash.</div>
+                        <small id="amount-error" class="text-danger d-none">Invalid amount.</small>
                     </div>
+
+                    <div class="mb-3" id="changeField" style="display: none;">
+                        <label for="change" class="form-label">Change</label>
+                        <input type="number" class="form-control" id="change" name="change" readonly>
+                    </div>
+
                     <button type="submit" class="btn btn-success">Place Order</button>
                     <a href="{{ route('staff.pos.index') }}" class="btn btn-secondary">Back</a>
                 </form>
@@ -96,18 +99,18 @@
         function handlePaymentMethodChange() {
             const cashInput = document.getElementById('amount');
             const cashCheckbox = document.getElementById('payment_cash');
+            const changeField = document.getElementById('changeField');
             const gcashCheckbox = document.getElementById('payment_gcash');
             const paymayaCheckbox = document.getElementById('payment_paymaya');
-            const amountError = document.getElementById('amount-error');
 
             if (cashCheckbox.checked) {
                 cashInput.disabled = false; // Enable amount input for cash
                 cashInput.required = true; // Make the amount field required
-                amountError.style.display = "block"; // Show error message for cash
+                changeField.style.display = "block"; // Show change field
             } else {
                 cashInput.disabled = true; // Disable amount input
                 cashInput.required = false; // Make the amount field not required
-                amountError.style.display = "none"; // Hide error message
+                changeField.style.display = "none"; // Hide change field
             }
 
             // Disable input if GCash or PayMaya is selected
@@ -118,19 +121,40 @@
             }
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const cashInput = document.getElementById('amount');
+            const changeInput = document.getElementById('change');
+
+            cashInput.addEventListener('input', function() {
+                const total = parseFloat({{ $cartTotal }});
+                const amount = parseFloat(cashInput.value);
+
+                if (amount >= total) {
+                    changeInput.value = (amount - total).toFixed(2);
+                } else {
+                    changeInput.value = '';
+                }
+            });
+        });
+
         // AJAX Form Submission
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('checkout-form');
 
             form.addEventListener('submit', function(event) {
                 const cashCheckbox = document.getElementById('payment_cash');
+                const total = parseFloat({{ $cartTotal }});
                 const amountInput = document.getElementById('amount');
+                const amountError = document.getElementById('amount-error');
 
                 // Show error if cash is selected and amount is not filled
-                if (cashCheckbox.checked && amountInput.value === '') {
-                    event.preventDefault(); // Prevent the form from submitting
-                    alert('Amount is required when paying with cash.'); // Show alert
-                    return; // Exit the function
+                if (cashCheckbox.checked && (amountInput.value === '' || parseFloat(amountInput.value) < total)) {
+                    event.preventDefault();
+                    amountError.classList.remove('d-none'); // Show the error message
+                    return;
+                } else {
+
+                    amountError.classList.add('d-none'); // Hide the error message
                 }
 
                 event.preventDefault(); // Prevent the default form submission
