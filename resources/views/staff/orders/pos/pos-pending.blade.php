@@ -126,18 +126,13 @@
 
                                                     <div class="modal-footer">
                                                         @if ($order->status === 'pending')
-                                                            <form action="{{ route('admin.orders.complete', $order->id) }}"
+                                                            <form action="{{ route('staff.orders.pos-complete', $order->id) }}"
                                                                 method="POST">
                                                                 @csrf
-                                                                @method('PUT')
+                                                                <input type="hidden" name="order_id" value="{{ $order->id }}">
                                                                 <button type="submit" class="btn btn-success">Complete
                                                                     Order</button>
                                                             </form>
-                                                        @endif
-                                                        @if ($order->status === 'completed')
-                                                            <button type="button" class="btn btn-primary"
-                                                                onclick="printInvoice({{ $order->id }})">Print
-                                                                Invoice</button>
                                                         @endif
                                                     </div>
                                                 </div>
