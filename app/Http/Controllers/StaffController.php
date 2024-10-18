@@ -81,24 +81,32 @@ class StaffController extends Controller
         $order = Order::find($request->order_id);
 
         if ($order && $order->status !== 'completed') {
+            // Mark the order as completed
             $order->status = 'completed';
             $order->save();
 
+            // Get the phone number from the 'phone_number' field in the orders table
             $phoneNumber = $order->phone_number;
 
             if ($phoneNumber) {
                 try {
                     $this->sendSmsNotification($phoneNumber, $order->id, $order->user_id);
                 } catch (\Exception $e) {
-                    // Handle any error from SMS sending
-                    return response()->json(['success' => true, 'message' => 'Order completed, but SMS could not be sent.']);
+                    // Log the error for further investigation
+                    Log::error('Error sending SMS: ' . $e->getMessage());
+
+                    // Show a specific error message for debugging
+                    return redirect()->back()->with('error', 'Order completed, but SMS could not be sent. Please check logs.');
                 }
+            } else {
+                // No phone number was available
+                return redirect()->back()->with('error', 'Order completed, but no phone number available for SMS.');
             }
 
             return redirect()->back()->with('success', 'Order completed and SMS sent successfully!');
         }
 
-        return response()->json(['success' => false, 'message' => 'Order not found or already completed.']);
+        return redirect()->back()->with('error', 'Order not found or already completed.');
     }
 
     protected function formatPhoneNumber($phone_number)
@@ -114,28 +122,45 @@ class StaffController extends Controller
 
     protected function sendSmsNotification($phoneNumber, $orderId, $userId)
     {
+        // Get user information
         $user = User::find($userId);
 
         if ($user && $user->phone_number) {
+            // Twilio credentials from .env
             $sid = env('TWILIO_SID');
             $token = env('TWILIO_AUTH_TOKEN');
             $twilio_number = env('TWILIO_PHONE_NUMBER');
+
+            Log::info('Twilio SID: ' . $sid);
+            Log::info('Twilio Token: ' . $token ? 'Token found' : 'No Token found');
+
             $client = new Client($sid, $token);
 
+            // Ensure phone number is in E.164 format
             $formattedNumber = $this->formatPhoneNumber($user->phone_number);
+
+            // Compose the SMS message
             $message = "Hi {$user->name}, your order has been successfully completed. Thank you for ordering!";
 
             try {
+                // Send the SMS
                 $client->messages->create(
-                    $formattedNumber,
+                    $formattedNumber, // User's formatted phone number
                     [
                         'from' => $twilio_number,
                         'body' => $message
                     ]
                 );
             } catch (\Exception $e) {
-                Log::error("Failed to send SMS: " . $e->getMessage());
+                // Log any exceptions during SMS sending
+                Log::error("Failed to send SMS to {$formattedNumber}: " . $e->getMessage());
+
+                // Re-throw exception to be handled in the completeOrder method
+                throw $e;
             }
+        } else {
+            // Log missing user information or phone number
+            Log::error("User or phone number not found for User ID: {$userId}");
         }
     }
 
