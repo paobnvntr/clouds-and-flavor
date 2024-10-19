@@ -29,7 +29,7 @@
 
             <div class="col-lg-9">
                 <div class="row">
-                    <div class="hero__search col-8">
+                    <div class="hero__search col-lg-8 col-md-12">
                         <div class="hero__search__form col-12">
                             <form action="{{ route('user.products.index') }}" method="GET">
                                 <input type="text" name="search" placeholder="Search products" />
@@ -109,7 +109,7 @@
                         <thead>
                             <tr>
                                 <th class="shoping__product">Products</th>
-                                <th>Add-ons</th>
+                                <th>Additional</th>
                                 <th>Price</th>
                                 <th>Quantity</th>
                                 <th>Total</th>
@@ -240,6 +240,49 @@
     </div>
 </section>
 <!-- Shoping Cart Section End -->
+
+<style>
+    @media screen and (max-width: 768px) {
+        .hero-normal {
+            padding-bottom: 0 !important;
+        }
+
+        .product {
+            padding-top: 30px !important;
+        }
+
+        table th,
+        table td {
+            padding: 12px 10px;
+            /* Increase padding */
+        }
+
+        /* Optionally, make the table scrollable for very small screens */
+        .shoping__table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        /* Adjust column width and make them more spacious */
+        .shoping__product {
+            width: 35%;
+            /* Make products column larger */
+        }
+
+        .shoping__product~th,
+        .shoping__product~td {
+            width: auto;
+            /* Spread other columns evenly */
+        }
+
+        /* If needed, center the text */
+        table th,
+        table td {
+            text-align: center;
+        }
+    }
+</style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>

@@ -34,7 +34,7 @@
 
             <div class="col-lg-9">
                 <div class="row">
-                    <div class="hero__search col-8">
+                    <div class="hero__search col-lg-8 col-md-12">
                         <div class="hero__search__form col-12">
                             <form action="{{ url('/landing-page-shop') }}" method="GET">
                                 <input type="text" name="search" placeholder="Search products" />
@@ -44,7 +44,7 @@
                     </div>
 
                     @if (Auth::check() && Auth::user()->role == '0')
-                        <div class="header__cart col-4">
+                        <div class="header__cart col-lg-4 col-md-6">
                             <ul>
                                 <li>
                                     <a href="{{ url('/my-cart') }}">
@@ -56,7 +56,7 @@
                             <div class="header__cart__price">Total: <span>₱ {{ number_format($totalPrice, 2) }}</span></div>
                         </div>
                     @else
-                        <div class="header__cart col-4">
+                        <div class="header__cart col-lg-4 col-md-6">
                             <ul>
                                 <li>
                                     <a href="{{ url('/my-cart') }}">
@@ -77,7 +77,7 @@
 <section class="breadcrumb-section set-bg" data-setbg="{{ asset('assets/img/deviceseries.jpg') }}">
     <div class="container">
         <div class="row">
-            <div class="col-lg-12 text-center">  
+            <div class="col-lg-12 text-center">
                 <div class="breadcrumb__text">
                     <h2>Shop</h2>
                     <div class="breadcrumb__option">
@@ -128,7 +128,7 @@
                     <div class="row">
                         <div class="product__discount__slider owl-carousel">
                             @foreach ($discountedProducts as $product)
-                                <div class="col-lg-4">
+                                <div class="col-lg-4 col-md-6">
                                     <div class="product__discount__item">
                                         <div class="product__discount__item__pic set-bg"
                                             data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
@@ -181,7 +181,7 @@
 
                     <div class="row">
                         @foreach ($products as $product)
-                            <div class="col-lg-4 col-md-6 col-sm-6">
+                            <div class="col-lg-4 col-md-6">
                                 <div class="product__item">
                                     <div class="product__item__pic set-bg"
                                         data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
@@ -209,7 +209,7 @@
                             </div>
                         @endforeach
                     </div>
-                    
+
                     <div class="d-flex align-items-center justify-content-between">
                         <p class="mb-0">Showing {{ $products->firstItem() }} to {{ $products->lastItem() }} of
                             {{ $products->total() }} results
@@ -238,4 +238,16 @@
         </div>
     </div>
 </section>
+
+<style>
+    @media screen and (max-width: 768px) {
+        .hero-normal {
+            padding-bottom: 0 !important;
+        }
+
+        .product {
+            padding-top: 30px !important;
+        }
+    }
+</style>
 @endsection

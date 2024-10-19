@@ -110,7 +110,7 @@
 <div class="humberger__menu__wrapper">
     <div class="humberger__menu__logo">
         <a href="dashboard"><img src="{{ asset('assets/img/CNF.jpg') }}" alt=""
-                style="width: 80px; height: auto;" /></a>
+                style="width: 70px; height: auto;" /></a>
     </div>
 
     @if (Auth::check() && Auth::user()->role == '0')
@@ -164,11 +164,11 @@
     <div id="mobile-menu-wrap"></div>
     <div class="header__top__right__social">
         <a href="https://www.facebook.com/profile.php?id=100078434664934" target="_blank"><i class="fa fa-facebook"
-                style="margin-right: 2px;"></i> Facebook Page</a>
+                style="margin-right: 2px;"></i> - Facebook Page</a>
     </div>
     <div class="humberger__menu__contact">
         <ul>
-            <li><i class="fa fa-envelope"></i> cloudsnflavor@gmail.com</li>
+            <li><i class="fa fa-envelope"></i> - cloudsnflavor@gmail.com</li>
         </ul>
     </div>
 </div>

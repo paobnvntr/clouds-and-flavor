@@ -56,6 +56,22 @@ class WelcomeController extends Controller
     public function shop(Request $request)
     {
         $categories = Category::where('status', 0)->get();
+        $cartItems = Cart::where('user_id', Auth::id())->count();
+        $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
+
+        $subtotal = $carts->sum(function ($cart) {
+            $productPrice = $cart->product->on_sale ? $cart->product->sale_price : $cart->product->price;
+            return round($productPrice * $cart->quantity, 2);
+        });
+
+        $addonsTotal = $carts->sum(function ($cart) {
+            return $cart->addOns->sum(function ($addOn) use ($cart) {
+                return round($addOn->price * $cart->quantity, 2);
+            });
+        });
+
+        $totalPrice = round($subtotal + $addonsTotal, 2);
+
         $query = $request->input('search');
         $categoryId = $request->input('category_id');
         $discountedProducts = Product::where('on_sale', 1)->get();
@@ -72,7 +88,7 @@ class WelcomeController extends Controller
 
         $products = $productsQuery->paginate(9);
 
-        return view('shop', compact('products', 'categories', 'latestProducts', 'discountedProducts'));
+        return view('shop', compact('products', 'categories', 'latestProducts', 'discountedProducts', 'cartItems', 'totalPrice'));
     }
 
     public function contact()

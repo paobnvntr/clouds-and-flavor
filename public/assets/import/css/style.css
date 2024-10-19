@@ -436,6 +436,12 @@ ol {
 	height: auto;
 }
 
+@media (max-width: 991px) {
+	.header__logo {
+		width: 125px;
+	}
+}
+
 .header__logo a {
 	display: inline-block;
 }
@@ -595,13 +601,14 @@ ol {
 
 .hero.hero-normal .hero__categories {
 	position: relative;
+	padding-top: 10px;
 }
 
 .hero.hero-normal .hero__categories ul {
 	display: none;
 	position: absolute;
 	left: 0;
-	top: 46px;
+	top: 56px;
 	width: 100%;
 	z-index: 9;
 	background: #ffffff;
@@ -3170,6 +3177,10 @@ ol {
 
 	.humberger__menu__logo a {
 		display: inline-block;
+	}
+
+	.humberger__menu__logo a img {
+		width: 150px;
 	}
 
 	.humberger__menu__contact {

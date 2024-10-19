@@ -3,7 +3,7 @@
 @section('title', 'Clouds N Flavor | Home')
 
 @section('content')
-<section class="hero">
+<section class="hero" id="dashboard-header">
     <div class="container">
         <div class="row">
             <div class="col-lg-3">
@@ -26,7 +26,7 @@
 
             <div class="col-lg-9">
                 <div class="row">
-                    <div class="hero__search col-8">
+                    <div class="hero__search col-lg-8 col-md-12">
                         <div class="hero__search__form col-12">
                             <form action="{{ url('/landing-page-shop') }}" method="GET">
                                 <input type="text" name="search" placeholder="Search products" />
@@ -36,7 +36,7 @@
                     </div>
 
                     @if (Auth::check() && Auth::user()->role == '0')
-                        <div class="header__cart col-4">
+                        <div class="header__cart col-lg-4 col-md-6">
                             <ul>
                                 <li>
                                     <a href="{{ url('/my-cart') }}">
@@ -48,7 +48,7 @@
                             <div class="header__cart__price">Total: <span>₱ {{ number_format($totalPrice, 2) }}</span></div>
                         </div>
                     @else
-                        <div class="header__cart col-4">
+                        <div class="header__cart col-lg-4 col-md-6">
                             <ul>
                                 <li>
                                     <a href="{{ url('/my-cart') }}">
@@ -137,18 +137,19 @@
                     style="background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
                     <h3 style="font-size: 28px; font-weight: 700; color: #333;">WELCOME TO CLOUDS AND FLAVOR!</h3>
                     <p style="font-size: 16px; color: #555; margin-top: 20px;">
-                        At Clouds and Flavor, we are passionate about providing high-quality vaping products and accessories to our
+                        At Clouds and Flavor, we are passionate about providing high-quality vaping products and
+                        accessories to our
                         community. <br>
                         Our mission is to offer a safe, enjoyable, and informative experience for both
                         newcomers and seasoned vapers.
                     </p>
                     <p style="font-size: 16px; color: #555;">
                         With a wide selection of e-liquids, devices, and expert advice, we are here to help you find the
-                        perfect fit. <br> 
+                        perfect fit. <br>
                         Join us on your vaping journey and explore the latest trends and innovations in the
                         industry!
                     </p>
-                   @if (Auth::check() && Auth::user()->role == '0')
+                    @if (Auth::check() && Auth::user()->role == '0')
                         <a href="{{ url('/products') }}" class="primary-btn">EXPLORE PRODUCTS</a>
                     @else
                         <a href="{{ url('/landing-page-shop') }}" class="primary-btn">EXPLORE PRODUCTS</a>
@@ -159,56 +160,66 @@
     </div>
 </section>
 
+<script>
+    $(document).ready(function() {
+        if (window.matchMedia("(max-width: 768px)").matches) {
+            $('#dashboard-header').addClass('hero-normal');
+        }
+    });
+</script>
+
 <style>
-    .hero__categories {
-        height: 515px;
-        overflow-y: auto;
-        padding: 10px;
-        position: relative;
-    }
+    @media screen and (min-width: 768px) {
+        .hero__categories {
+            height: 515px;
+            overflow-y: auto;
+            padding: 10px;
+            position: relative;
+        }
 
-    .category-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
+        .category-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
-    .category-list li {
-        padding: 5px 0;
-    }
+        .category-list li {
+            padding: 5px 0;
+        }
 
-    .hero__categories::-webkit-scrollbar {
-        width: 8px;
-    }
+        .hero__categories::-webkit-scrollbar {
+            width: 8px;
+        }
 
-    .hero__categories::-webkit-scrollbar-thumb {
-        background-color: #888;
-        border-radius: 10px;
-    }
+        .hero__categories::-webkit-scrollbar-thumb {
+            background-color: #888;
+            border-radius: 10px;
+        }
 
-    .hero__categories::-webkit-scrollbar-thumb:hover {
-        background-color: #555;
-    }
+        .hero__categories::-webkit-scrollbar-thumb:hover {
+            background-color: #555;
+        }
 
-    .hero__item {
-        position: relative;
-        background-size: cover;
-        background-position: center;
-    }
+        .hero__item {
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
 
-    .hero__overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1;
-    }
+        .hero__overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
 
-    .hero__text {
-        position: relative;
-        z-index: 2;
+        .hero__text {
+            position: relative;
+            z-index: 2;
+        }
     }
 </style>
 @endsection

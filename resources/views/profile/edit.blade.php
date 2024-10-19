@@ -29,7 +29,7 @@
 
             <div class="col-lg-9">
                 <div class="row">
-                    <div class="hero__search col-8">
+                    <div class="hero__search col-lg-8 col-md-12">
                         <div class="hero__search__form col-12">
                             <form action="{{ route('user.products.index') }}" method="GET">
                                 <input type="text" name="search" placeholder="Search products" />
@@ -38,7 +38,7 @@
                         </div>
                     </div>
 
-                    <div class="header__cart col-4">
+                    <div class="header__cart col-lg-4 col-md-6">
                         <ul>
                             <li>
                                 <a href="{{ url('/my-cart') }}">

@@ -29,7 +29,7 @@
 
             <div class="col-lg-9">
                 <div class="row">
-                    <div class="hero__search col-8">
+                    <div class="hero__search col-lg-8 col-md-12">
                         <div class="hero__search__form col-12">
                             <form action="{{ route('user.products.index') }}" method="GET">
                                 <input type="text" name="search" placeholder="Search products" />
@@ -38,7 +38,7 @@
                         </div>
                     </div>
 
-                    <div class="header__cart col-4">
+                    <div class="header__cart col-lg-4 col-lg-6">
                         <ul>
                             <li>
                                 <a href="{{ url('/my-cart') }}">
@@ -89,43 +89,45 @@
     <div class="app-content">
         <div class="container-fluid">
             <div class="row">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Date & Time</th>
-                            <th>Total Items</th>
-                            <th>Total Price</th>
-                            <th>Payment Method</th>
-                            <th>Delivery Option</th>
-                            <th>Status</th>
-                            <th>Payment Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($orders as $order)
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
                             <tr>
-                                <td>{{ $order->created_at }}</td>
-                                <td>{{ $order->orderItems->sum('quantity') }}</td> <!-- Total quantity of all items -->
-                                <td>₱{{ number_format($order->total_price, 2) }}</td>
-                                <td>{{ $order->payment_method }}</td>
-                                <td>{{ ucfirst($order->delivery_option) }}</td>
-                                <td>{{ $order->status }}</td>
-                                <td>{{ ucfirst($order->payment_status) }}</td>
-                                <td>
-                                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#orderModal"
-                                        data-order="{{ json_encode($order) }}">View</button>
-                                    @if ($order->payment_status == 'unpaid')
-                                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#paymentModal"
-                                            data-order-id="{{ $order->id }}"
-                                            data-payment-method="{{ $order->payment_method }}">Pay</button>
-                                    @else
-                                    @endif
-                                </td>
+                                <th>Date & Time</th>
+                                <th>Total Items</th>
+                                <th>Total Price</th>
+                                <th>Payment Method</th>
+                                <th>Delivery Option</th>
+                                <th>Status</th>
+                                <th>Payment Status</th>
+                                <th>Action</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach ($orders as $order)
+                                <tr>
+                                    <td>{{ $order->created_at }}</td>
+                                    <td>{{ $order->orderItems->sum('quantity') }}</td> <!-- Total quantity of all items -->
+                                    <td>₱{{ number_format($order->total_price, 2) }}</td>
+                                    <td>{{ $order->payment_method }}</td>
+                                    <td>{{ ucfirst($order->delivery_option) }}</td>
+                                    <td>{{ $order->status }}</td>
+                                    <td>{{ ucfirst($order->payment_status) }}</td>
+                                    <td>
+                                        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#orderModal"
+                                            data-order="{{ json_encode($order) }}">View</button>
+                                        @if ($order->payment_status == 'unpaid')
+                                            <button class="btn btn-success" data-bs-toggle="modal"
+                                                data-bs-target="#paymentModal" data-order-id="{{ $order->id }}"
+                                                data-payment-method="{{ $order->payment_method }}">Pay</button>
+                                        @else
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -242,6 +244,53 @@
         </div>
     </div>
 </div>
+
+<style>
+    @media screen and (max-width: 768px) {
+        .hero-normal {
+            padding-bottom: 0 !important;
+        }
+
+        .product {
+            padding-top: 30px !important;
+        }
+
+        table th,
+        table td {
+            padding: 12px 10px;
+            /* Increase padding */
+        }
+
+        /* Optionally, make the table scrollable for very small screens */
+        .shoping__table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        /* Adjust column width and make them more spacious */
+        .shoping__product {
+            width: 35%;
+            /* Make products column larger */
+        }
+
+        .shoping__product~th,
+        .shoping__product~td {
+            width: auto;
+            /* Spread other columns evenly */
+        }
+
+        /* If needed, center the text */
+        table th,
+        table td {
+            text-align: center;
+        }
+        
+        .btn-success {
+            margin-top: 10px;
+        }
+    }
+</style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
