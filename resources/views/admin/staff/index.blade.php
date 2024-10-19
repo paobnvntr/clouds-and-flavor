@@ -87,6 +87,14 @@
     </div>
 </main>
 
+<style>
+    @media screen and (max-width: 768px) {
+        .btn-danger {
+            margin-top: 10px;
+        }
+    }
+</style>
+
 <script>
     $(document).ready(function () {
         $('#staffTable').DataTable({

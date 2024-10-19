@@ -14,19 +14,15 @@ class AdminController extends Controller
 {
     public function index()
     {
-        $totalUsers = User::where('role', 0)->count();
-        $pendingOrdersCount = Order::where('status', 'pending')->count();
+        $totalUsers = User::whereIn('role', [0, 1])->count();
+        $pendingOrdersCount = Order::where('status', 'pending')->where('payment_status', 'paid')->count();
         $pendingPOSOrdersCount = POSOrder::where('status', 'pending')->count();
-        $totalEarningsFromOrders = Order::where('status', 'completed')->sum('total_price');
-        $totalEarningsFromAddOns = DB::table('orders_add_on')
-            ->join('orders', 'orders_add_on.order_id', '=', 'orders.id')
-            ->join('add_ons', 'orders_add_on.add_on_id', '=', 'add_ons.id') // Join to get the add-on price
-            ->where('orders.status', 'completed')
-            ->sum(DB::raw('add_ons.price * orders_add_on.quantity'));
+        $totalEarningsFromOrders = Order::where('status', 'completed')->where('payment_status', 'paid')->sum('total_price');
+        $totalEarningsFromPOSOrders = POSOrder::where('status', 'completed')->sum('total_price');
 
-        $totalEarnings = $totalEarningsFromOrders + $totalEarningsFromAddOns;
+        $totalEarnings = $totalEarningsFromOrders + $totalEarningsFromPOSOrders;
         $formattedEarnings = number_format($totalEarnings, 2);
-        $totalOrders = Order::where('status', 'completed')->count();
+        $totalOrders = Order::where('status', 'completed')->where('payment_status', 'paid')->count();
         $totalPOSOrders = POSOrder::where('status', 'completed')->count();
 
         return view('admin.dashboard', compact('pendingOrdersCount', 'totalPOSOrders', 'formattedEarnings', 'pendingPOSOrdersCount', 'totalUsers', 'totalOrders'));

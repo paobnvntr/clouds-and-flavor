@@ -1,8 +1,8 @@
 <footer class="app-footer"> 
-    <div class="float-end d-none d-sm-inline">Anything you want</div>
+    <div class="float-end d-none d-sm-inline">Admin</div>
     <strong>
-        Copyright &copy; 2024 &nbsp;
-        <a class="text-decoration-none">Clouds N Flavor</a>.
+        Copyright &copy; 2024 |
+        Clouds N Flavor.
     </strong>
     All rights reserved.
 

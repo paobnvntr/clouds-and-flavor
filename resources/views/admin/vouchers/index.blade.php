@@ -94,6 +94,14 @@
     </div>
 </main>
 
+<style>
+    @media screen and (max-width: 768px) {
+        .btn-danger {
+            margin-top: 10px;
+        }
+    }
+</style>
+
 <script>
     new DataTable('#vouchersTable', {
         lengthMenu: [5, 10, 20, 50, 100],
