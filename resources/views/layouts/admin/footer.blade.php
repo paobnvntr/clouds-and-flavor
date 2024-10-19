@@ -1,8 +1,9 @@
-<footer class="py-4 bg-light mt-auto">
+<footer class="app-footer"> 
+    <div class="float-end d-none d-sm-inline">Anything you want</div>
+    <strong>
+        Copyright &copy; 2024 &nbsp;
+        <a class="text-decoration-none">Clouds N Flavor</a>.
+    </strong>
+    All rights reserved.
 
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-end small">
-            <div class="text-muted">Copyright &copy; Clouds N Flavor</div>
-        </div>
-    </div>
-</footer>
+</footer> 

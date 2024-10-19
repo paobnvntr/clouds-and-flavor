@@ -3,86 +3,88 @@
 @section('title', 'Order Checkout')
 
 @section('content')
-    <div class="container my-2">
-        <h2 class="mb-4">Order Checkout</h2>
+    <main class="app-main">
+        <div class="container my-2">
+            <h2 class="mb-4">Order Checkout</h2>
 
-        <!-- Flash Message Area -->
-        <div id="flash-message">
-            @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-            @if (session('error'))
-                <div class="alert alert-danger">
-                    {{ session('error') }}
-                </div>
-            @endif
-        </div>
-
-        <div class="row">
-            <div class="col-lg-8">
-                <h4>Order Summary</h4>
-                <ul class="list-group" id="order-items">
-                    @forelse ($cartItems as $cartItem)
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                {{ $cartItem->product->product_name }}
-                                @if ($cartItem->product->on_sale)
-                                    <span class="badge bg-danger text-dark ms-2">On Sale</span>
-                                @endif
-                            </div>
-                            <span>Quantity: {{ $cartItem->quantity }}</span>
-                            <span
-                                class="item-price">₱{{ number_format(($cartItem->product->on_sale ? $cartItem->product->sale_price : $cartItem->product->price) * $cartItem->quantity, 2) }}</span>
-                        </li>
-                    @empty
-                        <li class="list-group-item text-center">The Cart is empty</li>
-                    @endforelse
-                </ul>
-
-                <div class="mt-3 d-flex justify-content-end text-success">
-                    <strong>Total: ₱<span id="order-total">{{ number_format($cartTotal, 2) }}</span></strong>
-                </div>
+            <!-- Flash Message Area -->
+            <div id="flash-message">
+                @if (session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
             </div>
 
-            <div class="col-lg-4">
-                <h4>Customer Information</h4>
-                <form action="{{ route('staff.pos.placeOrder') }}" method="POST" id="checkout-form">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="customer_name" class="form-label">Customer Name</label>
-                        <input type="text" class="form-control" id="customer_name" name="customer_name" required>
-                    </div>
+            <div class="row">
+                <div class="col-lg-8">
+                    <h4>Order Summary</h4>
+                    <ul class="list-group" id="order-items">
+                        @forelse ($cartItems as $cartItem)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    {{ $cartItem->product->product_name }}
+                                    @if ($cartItem->product->on_sale)
+                                        <span class="badge bg-danger text-dark ms-2">On Sale</span>
+                                    @endif
+                                </div>
+                                <span>Quantity: {{ $cartItem->quantity }}</span>
+                                <span
+                                    class="item-price">₱{{ number_format(($cartItem->product->on_sale ? $cartItem->product->sale_price : $cartItem->product->price) * $cartItem->quantity, 2) }}</span>
+                            </li>
+                        @empty
+                            <li class="list-group-item text-center">The Cart is empty</li>
+                        @endforelse
+                    </ul>
 
-                    <div class="mb-3">
-                        <label class="form-label">Payment Method</label><br>
-                        <input type="radio" id="payment_cash" name="payment_method" value="Cash"
-                            onchange="handlePaymentMethodChange()">
-                        <label for="payment_cash">Cash</label><br>
-                        <input type="radio" id="payment_gcash" name="payment_method" value="GCash"
-                            onchange="handlePaymentMethodChange()">
-                        <label for="payment_gcash">GCash</label><br>
-                        <input type="radio" id="payment_paymaya" name="payment_method" value="PayMaya"
-                            onchange="handlePaymentMethodChange()">
-                        <label for="payment_paymaya">PayMaya</label>
+                    <div class="mt-3 d-flex justify-content-end text-success">
+                        <strong>Total: ₱<span id="order-total">{{ number_format($cartTotal, 2) }}</span></strong>
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="amount" name="amount" disabled>
-                        <small id="amount-error" class="text-danger d-none">Invalid amount.</small>
-                    </div>
+                <div class="col-lg-4">
+                    <h4>Customer Information</h4>
+                    <form action="{{ route('staff.pos.placeOrder') }}" method="POST" id="checkout-form">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="customer_name" class="form-label">Customer Name</label>
+                            <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                        </div>
 
-                    <div class="mb-3" id="changeField" style="display: none;">
-                        <label for="change" class="form-label">Change</label>
-                        <input type="number" class="form-control" id="change" name="change" readonly>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method</label><br>
+                            <input type="radio" id="payment_cash" name="payment_method" value="Cash"
+                                onchange="handlePaymentMethodChange()">
+                            <label for="payment_cash">Cash</label><br>
+                            <input type="radio" id="payment_gcash" name="payment_method" value="GCash"
+                                onchange="handlePaymentMethodChange()">
+                            <label for="payment_gcash">GCash</label><br>
+                            <input type="radio" id="payment_paymaya" name="payment_method" value="PayMaya"
+                                onchange="handlePaymentMethodChange()">
+                            <label for="payment_paymaya">PayMaya</label>
+                        </div>
 
-                    <button type="submit" class="btn btn-success">Place Order</button>
-                    <a href="{{ route('staff.pos.index') }}" class="btn btn-secondary">Back</a>
-                </form>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="amount" name="amount" disabled>
+                            <small id="amount-error" class="text-danger d-none">Invalid amount.</small>
+                        </div>
+
+                        <div class="mb-3" id="changeField" style="display: none;">
+                            <label for="change" class="form-label">Change</label>
+                            <input type="number" class="form-control" id="change" name="change" readonly>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Place Order</button>
+                        <a href="{{ route('staff.pos.index') }}" class="btn btn-secondary">Back</a>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
         // Function to hide alert after 5 seconds
@@ -148,7 +150,8 @@
                 const amountError = document.getElementById('amount-error');
 
                 // Show error if cash is selected and amount is not filled
-                if (cashCheckbox.checked && (amountInput.value === '' || parseFloat(amountInput.value) < total)) {
+                if (cashCheckbox.checked && (amountInput.value === '' || parseFloat(amountInput.value) <
+                        total)) {
                     event.preventDefault();
                     amountError.classList.remove('d-none'); // Show the error message
                     return;

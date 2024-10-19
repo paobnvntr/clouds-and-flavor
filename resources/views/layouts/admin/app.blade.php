@@ -46,7 +46,7 @@
 
         @include('layouts.admin.footer')
     </div>
-
+    
     
     
     <!-- Bootstrap JS (Bundle with Popper.js included) -->
