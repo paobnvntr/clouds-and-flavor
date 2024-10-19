@@ -44,7 +44,7 @@
 
                     <div class="row d-flex flex-wrap" id="product-list">
                         @foreach ($products as $product)
-                            <div class="col-lg-4 col-md-6 col-sm-12 mb-4 product-item"
+                            <div class="col-lg-4 col-6 mb-4 product-item"
                                 data-category-id="{{ $product->category_id }}">
                                 <div class="product-card text-center border rounded shadow-sm p-3 d-flex flex-column"
                                     style="height: 100%;">
