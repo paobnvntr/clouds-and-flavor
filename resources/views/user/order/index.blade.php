@@ -38,7 +38,7 @@
                         </div>
                     </div>
 
-                    <div class="header__cart col-lg-4 col-lg-6">
+                    <div class="header__cart col-lg-4 col-md-6">
                         <ul>
                             <li>
                                 <a href="{{ url('/my-cart') }}">
