@@ -1,6 +1,6 @@
 @extends('layouts.staff.app')
 
-@section('title', 'staff | Online Orders')
+@section('title', 'Staff | Online Orders')
 
 @section('content')
 
@@ -38,6 +38,7 @@
                                         <th>Total Price</th>
                                         <th>Status</th>
                                         <th>Payment Method</th>
+                                        <th>Delivery Opt</th>
                                         <th>Date & Time</th>
                                         <th>Action</th>
                                     </tr>
@@ -51,6 +52,7 @@
                                             <td>₱{{ number_format($order->total_price, 2) }}</td>
                                             <td>{{ $order->status }}</td>
                                             <td>{{ $order->payment_method ?? 'N/A' }}</td>
+                                            <td>{{ $order->delivery_option ?? 'N/A' }}</td>
                                             <td>{{ $order->created_at->format('Y-m-d H:i:s') }}</td>
                                             <td>
                                                 <button class="btn btn-info" data-bs-toggle="modal"
@@ -99,8 +101,12 @@
                                                         </div>
 
                                                         <div class="row mb-3">
-                                                            <div class="col-sm-12">
+                                                            <div class="col-sm-6">
                                                                 <p><strong>Address:</strong> {{ $order->address ?? 'N/A' }}
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <p><strong>Delivery Option:</strong> {{ $order->delivery_option ?? 'N/A' }}
                                                                 </p>
                                                             </div>
                                                         </div>
