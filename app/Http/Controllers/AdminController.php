@@ -14,7 +14,7 @@ class AdminController extends Controller
 {
     public function index()
     {
-        $totalUsers = User::whereIn('role', [0, 1])->count();
+        $totalUsers = User::whereIn('role', [0])->count();
         $pendingOrdersCount = Order::where('status', 'pending')->where('payment_status', 'paid')->count();
         $pendingPOSOrdersCount = POSOrder::where('status', 'pending')->count();
         $totalEarningsFromOrders = Order::where('status', 'completed')->where('payment_status', 'paid')->sum('total_price');
