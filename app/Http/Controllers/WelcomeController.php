@@ -56,6 +56,34 @@ class WelcomeController extends Controller
     public function shop(Request $request)
     {
         $categories = Category::where('status', 0)->get();
+        $query = $request->input('search');
+        $categoryId = $request->input('category_id');
+
+        // Filter discounted products (on_sale = 1) and check if stock is greater than 0
+        $discountedProducts = Product::where('on_sale', 1)
+            ->where('stock', '>', 0)
+            ->get();
+
+        $latestProducts = Product::orderBy('created_at', 'desc')
+            ->where('stock', '>', 0)
+            ->take(6)
+            ->get();
+
+        $productsQuery = Product::query();
+
+        if ($categoryId) {
+            $productsQuery->where('category_id', $categoryId);
+        }
+
+        if ($query) {
+            $productsQuery->where('product_name', 'LIKE', "%{$query}%");
+        }
+
+        // Filter products where stock is greater than 0 and status is 0
+        $products = $productsQuery->where('status', 0)
+            ->where('stock', '>', 0)
+            ->paginate(6);
+
         $cartItems = Cart::where('user_id', Auth::id())->count();
         $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
 
@@ -72,23 +100,7 @@ class WelcomeController extends Controller
 
         $totalPrice = round($subtotal + $addonsTotal, 2);
 
-        $query = $request->input('search');
-        $categoryId = $request->input('category_id');
-        $discountedProducts = Product::where('on_sale', 1)->get();
-        $latestProducts = Product::orderBy('created_at', 'desc')->take(6)->get();
-        $productsQuery = Product::query()->where('status', 0);
-
-        if ($query) {
-            $productsQuery->where('product_name', 'LIKE', "%{$query}%");
-        }
-
-        if ($categoryId) {
-            $productsQuery->where('category_id', $categoryId);
-        }
-
-        $products = $productsQuery->paginate(9);
-
-        return view('shop', compact('products', 'categories', 'latestProducts', 'discountedProducts', 'cartItems', 'totalPrice'));
+        return view('user.products.index', compact('products', 'categories', 'cartItems', 'latestProducts', 'discountedProducts', 'totalPrice'));
     }
 
     public function contact()
