@@ -206,9 +206,12 @@ class CartController extends Controller
                 'grandTotal' => number_format($totals['grandTotal'], 2),
             ]);
         } else {
+            session()->flash('error', 'You have exceeded the available stock for this product.');
+
             return response()->json(['success' => false, 'message' => 'Not enough stock available.']);
         }
     }
+
 
     public function getTotals()
     {
@@ -292,7 +295,6 @@ class CartController extends Controller
 
         $totalBeforeDiscount = round($subtotal + $addonsTotal, 2);
         $appliedVoucher = session('applied_voucher');
-        ;
 
         $discount = 0;
         if ($appliedVoucher) {

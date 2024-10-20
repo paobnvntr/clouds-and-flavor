@@ -17,8 +17,17 @@ class ProductController extends Controller
         $categories = Category::where('status', 0)->get();
         $query = $request->input('search');
         $categoryId = $request->input('category_id');
-        $discountedProducts = Product::where('on_sale', 1)->get();
-        $latestProducts = Product::orderBy('created_at', 'desc')->take(6)->get();
+
+        // Filter discounted products (on_sale = 1) and check if stock is greater than 0
+        $discountedProducts = Product::where('on_sale', 1)
+            ->where('stock', '>', 0)
+            ->get();
+
+        $latestProducts = Product::orderBy('created_at', 'desc')
+            ->where('stock', '>', 0)
+            ->take(6)
+            ->get();
+
         $productsQuery = Product::query();
 
         if ($categoryId) {
@@ -29,7 +38,11 @@ class ProductController extends Controller
             $productsQuery->where('product_name', 'LIKE', "%{$query}%");
         }
 
-        $products = $productsQuery->where('status', 0)->paginate(6);
+        // Filter products where stock is greater than 0 and status is 0
+        $products = $productsQuery->where('status', 0)
+            ->where('stock', '>', 0)
+            ->paginate(6);
+
         $cartItems = Cart::where('user_id', Auth::id())->count();
         $carts = Cart::where('user_id', Auth::id())->with(['product', 'addOns'])->get();
 
@@ -48,6 +61,8 @@ class ProductController extends Controller
 
         return view('user.products.index', compact('products', 'categories', 'cartItems', 'latestProducts', 'discountedProducts', 'totalPrice'));
     }
+
+
 
     public function productsByCategory($categoryId)
     {
