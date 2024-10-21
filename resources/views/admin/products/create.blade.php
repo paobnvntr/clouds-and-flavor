@@ -67,6 +67,23 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <label for="addons" class="form-label">Select Add-ons</label>
+                                    <select class="form-control @error('addons') is-invalid @enderror" id="addons" name="addons[]" multiple>
+                                        @foreach ($addons as $addOn)
+                                            <option value="{{ $addOn->id }}">
+                                                {{ $addOn->name }} - ₱{{ $addOn->price }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('addons')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                    <small class="form-text text-muted">Hold down Ctrl (Windows) or Command (Mac) to select multiple options.</small>
+                                </div>
+
+                                <div class="mb-3">
                                     <label for="price" class="form-label">Price <span
                                             class="text-danger">*</span></label>
                                     <input type="number" step="0.01"

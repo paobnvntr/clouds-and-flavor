@@ -159,12 +159,12 @@
 
                                 @if (isset($totals['addons']) && $totals['addons'] > 0)
                                     <div class="checkout__order__subtotal">Add-ons Total
-                                        <span>₱ {{ number_format((float) $totals['addons'], 2) }}</span>
+                                        <span>₱ {{ $totals['addons'] }}</span>
                                     </div>
                                 @endif
 
                                 <div class="checkout__order__discount">Discount
-                                    <span>- ₱ {{ number_format((float) $totals['discount'], 2) }}</span>
+                                    <span>- ₱ {{ $totals['discount'] }}</span>
                                 </div>
 
                                 <div class="checkout__order__total">Total

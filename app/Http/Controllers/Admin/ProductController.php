@@ -20,8 +20,9 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::where('status', 0)->get();
+        $addons = AddOn::all();
 
-        return view('admin.products.create', compact('categories'));
+        return view('admin.products.create', compact('categories', 'addons'));
     }
 
     public function store(Request $request)
@@ -34,6 +35,8 @@ class ProductController extends Controller
             'status' => 'required|in:0,1',
             'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'addons' => 'array', 
+            'addons.*' => 'exists:add_ons,id',
         ]);
 
         $product = new Product();
@@ -54,6 +57,12 @@ class ProductController extends Controller
         }
 
         $product->save();
+
+        if ($request->has('addons')) {
+            $product->addOns()->sync($request->addons);
+        } else {
+            $product->addOns()->sync([]);
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
     }

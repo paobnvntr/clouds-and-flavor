@@ -89,7 +89,7 @@
                                         @foreach ($addons as $addOn)
                                             <option value="{{ $addOn->id }}" 
                                                 {{ in_array($addOn->id, $product->addOns->pluck('id')->toArray()) ? 'selected' : '' }}>
-                                                {{ $addOn->name }} - ${{ $addOn->price }}
+                                                {{ $addOn->name }} - ₱{{ $addOn->price }}
                                             </option>
                                         @endforeach
                                     </select>

@@ -71,8 +71,8 @@
                                         </td>
                                         <td class="text-center">
                                             <span
-                                                class="badge {{ $product->stock == 0 ? 'bg-danger' : 'bg-success' }} status-badge">
-                                                {{ $product->stock == 0 ? 'Unavailable' : 'Available' }}
+                                                class="badge {{ $product->stock == 0 || $product->status == 1 ? 'bg-danger' : 'bg-success' }} status-badge">
+                                                {{ $product->stock == 0 || $product->status == 1 ? 'Unavailable' : 'Available' }}
                                             </span>
                                         </td>
                                         <td class="text-center">
