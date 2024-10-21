@@ -8,12 +8,14 @@ use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderAddOn;
 use App\Models\OrderItem;
+use App\Models\User;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Twilio\Rest\Client;
 
 class OrderController extends Controller
 {
@@ -48,20 +50,100 @@ class OrderController extends Controller
         $order = Order::find($request->order_id);
 
         if ($order && $order->payment_status == 'unpaid') {
+            // Update the order payment status and reference number
             $order->payment_status = 'paid';
             $order->reference_number = $request->reference_number;
 
+            // Check and update delivery option if present
             if ($request->has('delivery_option')) {
                 $order->delivery_option = $request->delivery_option;
             }
 
             $order->save();
 
+            // Get the user's phone number from the order
+            $userId = $order->user_id;
+            $phoneNumber = User::find($userId)->phone_number;
+
+            // Send SMS notification if phone number exists
+            if ($phoneNumber) {
+                try {
+                    $this->sendSmsNotification($phoneNumber, $order->id, $userId, $order->total_price);
+                } catch (\Exception $e) {
+                    // Log the error for further investigation
+                    Log::error('Error sending SMS: ' . $e->getMessage());
+                }
+            } else {
+                // Log if no phone number is available
+                Log::error('No phone number available for User ID: ' . $userId);
+            }
+
             return response()->json(['success' => true]);
         }
 
         return response()->json(['success' => false]);
     }
+
+
+
+    protected function formatPhoneNumber($phone_number)
+    {
+        // Remove any non-numeric characters
+        $number = preg_replace('/\D/', '', $phone_number);
+
+        // Check if it already starts with a country code (e.g., +63 for Philippines)
+        if (substr($number, 0, 2) !== '63') {
+            // Assuming it's a local number, add the country code for the Philippines (+63)
+            $number = '63' . ltrim($phone_number, '0'); // Remove leading 0 and add country code
+        }
+
+        return '+' . $number;
+    }
+
+    protected function sendSmsNotification($phoneNumber, $orderId, $userId, $totalPrice)
+    {
+        // Get user information
+        $user = User::find($userId);
+
+        if ($user && $user->phone_number) {
+            // Twilio credentials from .env
+            $sid = env('TWILIO_SID');
+            $token = env('TWILIO_AUTH_TOKEN');
+            $twilio_number = env('TWILIO_PHONE_NUMBER');
+
+            Log::info('Twilio SID: ' . $sid);
+            Log::info('Twilio Token: ' . $token ? 'Token found' : 'No Token found');
+
+            $client = new Client($sid, $token);
+
+            // Ensure phone number is in E.164 format
+            $formattedNumber = $this->formatPhoneNumber($user->phone_number);
+
+            // Compose the SMS message with the total price
+            $message = "Hi {$user->name}, your order has been successfully paid. The total amount is {$totalPrice}. Thank you for ordering!";
+
+            try {
+                // Send the SMS
+                $client->messages->create(
+                    $formattedNumber, // User's formatted phone number
+                    [
+                        'from' => $twilio_number,
+                        'body' => $message
+                    ]
+                );
+            } catch (\Exception $e) {
+                // Log any exceptions during SMS sending
+                Log::error("Failed to send SMS to {$formattedNumber}: " . $e->getMessage());
+
+                // Re-throw exception to be handled in the completeOrder method
+                throw $e;
+            }
+        } else {
+            // Log missing user information or phone number
+            Log::error("User or phone number not found for User ID: {$userId}");
+        }
+    }
+
 
     private function calculateDiscount($total, $voucher)
     {

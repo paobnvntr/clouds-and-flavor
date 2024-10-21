@@ -62,7 +62,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('admin/all-order', 'index')->name('admin.orders.index');
         Route::get('admin/pending-order', 'pendingOrder')->name('admin.orders.pending');
         Route::get('admin/completed-order', 'completedOrder')->name('admin.orders.completed');
-    
+
         Route::get('admin/pos/all-order', 'posAllOrder')->name('admin.orders.pos.index');
         Route::get('admin/pos/pending-order', 'posPendingOrder')->name('admin.orders.pos.pending');
         Route::get('admin/pos/completed-order', 'posCompletedOrder')->name('admin.orders.pos.completed');
@@ -70,6 +70,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::post('admin/orders/{id}/online-complete', 'OnlinecompleteOrder')->name('admin.orders.online-complete');
         Route::post('admin/orders/complete', 'completeOrder')->name('admin.orders.complete');
         Route::post('admin/pos/complete', 'completePosOrder')->name('admin.orders.pos-complete');
+
+        Route::post('/orders/to-deliver/{id}', 'toDeliver')->name('admin.orders.to-deliver');
+        Route::post('/orders/delivered/{id}', 'delivered')->name('admin.orders.delivered');
+
+        Route::post('/orders/ready-for-pickup/{id}', 'readyForPickup')->name('admin.orders.ready-for-pickup');
+        Route::post('/orders/completed-pickup/{id}', 'completePickup')->name('admin.orders.completed');
     });
 
     Route::prefix('admin')->group(function () {
@@ -94,7 +100,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::delete('admin/staff/delete/{id}', 'staffDestroy')->name('admin.staff.destroy');
 
         Route::get('admin/total-earnings', 'showTotalEarnings')->name('admin.total_earnings');
-    
+
         Route::get('admin/contact-us', 'contact')->name('admin.contact.index');
         Route::delete('/admin/messages/{id}', 'destroy')->name('admin.messages.destroy');
     });
@@ -107,9 +113,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::patch('admin/vouchers/{id}', 'update')->name('admin.vouchers.update');
         Route::delete('admin/vouchers/delete/{id}', 'destroy')->name('admin.vouchers.destroy');
     });
-    
-
-
 });
 
 //Group Staff routes role = 1
@@ -145,6 +148,11 @@ Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
     Route::post('/staff/orders/complete/{id}', [StaffController::class, 'dORpComplete'])->name('staff.orders.dORpcomplete');
     Route::put('/staff/orders/{id}/online-complete', [StaffController::class, 'OnlinecompleteOrder'])->name('staff.orders.online-complete');
 
+    Route::post('/orders/to-deliver/{id}', [StaffController::class,'toDeliver'])->name('staff.orders.to-deliver');
+    Route::post('/orders/delivered/{id}', [StaffController::class,'delivered'])->name('staff.orders.delivered');
+
+    Route::post('/orders/ready-for-pickup/{id}', [StaffController::class,'readyForPickup'])->name('staff.orders.ready-for-pickup');
+    Route::post('/orders/completed-pickup/{id}', [StaffController::class,'completePickup'])->name('staff.orders.completed');
 });
 
 //Group User routes role = 0

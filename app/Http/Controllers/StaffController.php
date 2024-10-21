@@ -116,7 +116,7 @@ class StaffController extends Controller
         return '+' . $number;
     }
 
-    protected function sendSmsNotification($phoneNumber, $orderId, $userId)
+    protected function sendSmsNotification($phoneNumber, $orderId, $userId, $message)
     {
         // Get user information
         $user = User::find($userId);
@@ -128,37 +128,121 @@ class StaffController extends Controller
             $twilio_number = env('TWILIO_PHONE_NUMBER');
 
             Log::info('Twilio SID: ' . $sid);
-            Log::info('Twilio Token: ' . $token ? 'Token found' : 'No Token found');
+            Log::info('Twilio Token: ' . ($token ? 'Token found' : 'No Token found'));
 
             $client = new Client($sid, $token);
 
             // Ensure phone number is in E.164 format
             $formattedNumber = $this->formatPhoneNumber($user->phone_number);
 
-            // Compose the SMS message
-            $message = "Hi {$user->name}, your order has been successfully completed. Thank you for ordering!";
-
+            // Try to send the SMS
             try {
-                // Send the SMS
                 $client->messages->create(
-                    $formattedNumber, // User's formatted phone number
+                    $formattedNumber,
                     [
                         'from' => $twilio_number,
-                        'body' => $message
+                        'body' => "Hi {$user->name}, {$message} Thank you for ordering!"
                     ]
                 );
             } catch (\Exception $e) {
-                // Log any exceptions during SMS sending
                 Log::error("Failed to send SMS to {$formattedNumber}: " . $e->getMessage());
-
-                // Re-throw exception to be handled in the completeOrder method
                 throw $e;
             }
         } else {
-            // Log missing user information or phone number
             Log::error("User or phone number not found for User ID: {$userId}");
         }
     }
+
+
+    public function toDeliver(Request $request)
+    {
+        $order = Order::find($request->order_id);
+
+        if ($order && $order->status === 'pending') {
+            // Send SMS notification for "To Deliver" status
+            $phoneNumber = $order->phone_number;
+            if ($phoneNumber) {
+                try {
+                    $this->sendSmsNotification($phoneNumber, $order->id, $order->user_id, "Your order is on the way!");
+                } catch (\Exception $e) {
+                    Log::error('Error sending SMS: ' . $e->getMessage());
+                }
+            }
+            return redirect()->back()->with('success', 'SMS sent: Order is on the way.');
+        }
+
+        return redirect()->back()->with('error', 'Order not found or already processed.');
+    }
+
+    public function delivered(Request $request)
+    {
+        $order = Order::find($request->order_id);
+
+        if ($order && $order->status === 'pending') {
+            // Mark the order as completed
+            $order->status = 'completed';
+            $order->save();
+
+            // Send SMS notification for "Delivered"
+            $phoneNumber = $order->phone_number;
+            if ($phoneNumber) {
+                try {
+                    $this->sendSmsNotification($phoneNumber, $order->id, $order->user_id, "Your order has been successfully delivered.");
+                } catch (\Exception $e) {
+                    Log::error('Error sending SMS: ' . $e->getMessage());
+                }
+            }
+            return redirect()->back()->with('success', 'Order completed and SMS sent successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Order not found or already processed.');
+    }
+
+    public function readyForPickup(Request $request)
+    {
+        $order = Order::find($request->order_id);
+
+        if ($order && $order->status === 'pending') {
+            // Send SMS notification for "Ready for Pick-Up"
+            $phoneNumber = $order->phone_number;
+            if ($phoneNumber) {
+                try {
+                    $this->sendSmsNotification($phoneNumber, $order->id, $order->user_id, "Your order is ready for pick-up.");
+                } catch (\Exception $e) {
+                    Log::error('Error sending SMS: ' . $e->getMessage());
+                }
+            }
+            return redirect()->back()->with('success', 'Order is ready for pick-up and SMS sent.');
+        }
+
+        return redirect()->back()->with('error', 'Order not found or already processed.');
+    }
+
+    public function completePickup(Request $request)
+    {
+        $order = Order::find($request->order_id);
+
+        if ($order && $order->status === 'pending') {
+            // Mark the order as completed
+            $order->status = 'completed';
+            $order->save();
+
+            // Send SMS notification for "Order Picked Up"
+            $phoneNumber = $order->phone_number;
+            if ($phoneNumber) {
+                try {
+                    $this->sendSmsNotification($phoneNumber, $order->id, $order->user_id, "Your order has been picked up successfully.");
+                } catch (\Exception $e) {
+                    Log::error('Error sending SMS: ' . $e->getMessage());
+                }
+            }
+            return redirect()->back()->with('success', 'Order picked up and SMS sent successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Order not found or already processed.');
+    }
+
+
 
     // private function sendSmsNotification($phoneNumber, $orderId)
     // {

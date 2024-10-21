@@ -110,7 +110,8 @@
                                                                 </p>
                                                             </div>
                                                             <div class="col-sm-6">
-                                                                <p><strong>Delivery Option:</strong> {{ $order->delivery_option ?? 'N/A' }}
+                                                                <p><strong>Delivery Option:</strong>
+                                                                    {{ $order->delivery_option ?? 'N/A' }}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -166,21 +167,54 @@
 
                                                     <div class="modal-footer">
                                                         @if ($order->status === 'pending')
-                                                            <form action="{{ route('admin.orders.complete', $order->id) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="order_id"
-                                                                    value="{{ $order->id }}">
-                                                                <button type="submit" class="btn btn-success">Complete
-                                                                    Order</button>
-                                                            </form>
-                                                        @endif
-                                                        @if ($order->status === 'completed')
+                                                            @if ($order->delivery_option === 'to-deliver')
+                                                                <form
+                                                                    action="{{ route('admin.orders.to-deliver', $order->id) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="order_id"
+                                                                        value="{{ $order->id }}">
+                                                                    <button type="submit" class="btn btn-warning">To
+                                                                        Deliver</button>
+                                                                </form>
+
+                                                                <form
+                                                                    action="{{ route('admin.orders.delivered', $order->id) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="order_id"
+                                                                        value="{{ $order->id }}">
+                                                                    <button type="submit"
+                                                                        class="btn btn-success">Delivered</button>
+                                                                </form>
+                                                            @elseif ($order->delivery_option === 'pick-up')
+                                                                <form
+                                                                    action="{{ route('admin.orders.ready-for-pickup', $order->id) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="order_id"
+                                                                        value="{{ $order->id }}">
+                                                                    <button type="submit" class="btn btn-warning">Ready for
+                                                                        Pick-Up</button>
+                                                                </form>
+
+                                                                <form
+                                                                    action="{{ route('admin.orders.completed', $order->id) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="order_id"
+                                                                        value="{{ $order->id }}">
+                                                                    <button type="submit" class="btn btn-success">Picked
+                                                                        Up</button>
+                                                                </form>
+                                                            @endif
+                                                        @elseif ($order->status === 'completed')
                                                             <button type="button" class="btn btn-primary"
                                                                 onclick="printInvoice({{ $order->id }})">Print
                                                                 Invoice</button>
                                                         @endif
                                                     </div>
+
                                                 </div>
                                             </div>
                                         </div>
