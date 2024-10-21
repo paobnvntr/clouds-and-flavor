@@ -78,10 +78,10 @@ class ProductController extends Controller
         if ($selectedCategory) {
             $newProducts = Product::where('category', $selectedCategory)
                 ->orderBy('created_at', 'desc')
-                ->take(8)
+                ->take(4)
                 ->get();
         } else {
-            $newProducts = Product::orderBy('created_at', 'desc')->take(8)->get();
+            $newProducts = Product::orderBy('created_at', 'desc')->take(4)->get();
         }
 
         $discountedProducts = Product::where('on_sale', 1)->get();

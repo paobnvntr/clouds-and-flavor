@@ -28,16 +28,16 @@ class WelcomeController extends Controller
         });
 
         $totalPrice = round($subtotal + $addonsTotal, 2);
-        $latestProducts = Product::orderBy('created_at', 'desc')->take(6)->get();
+        $latestProducts = Product::orderBy('created_at', 'desc')->take(4)->get();
         $selectedCategory = $request->input('category');
 
         if ($selectedCategory) {
             $newProducts = Product::where('category', $selectedCategory)
                 ->orderBy('created_at', 'desc')
-                ->take(8)
+                ->take(4)
                 ->get();
         } else {
-            $newProducts = Product::orderBy('created_at', 'desc')->take(8)->get();
+            $newProducts = Product::orderBy('created_at', 'desc')->take(4)->get();
         }
 
         $discountedProducts = Product::where('on_sale', 1)->get();
@@ -48,7 +48,9 @@ class WelcomeController extends Controller
             $productsQuery->where('product_name', 'LIKE', "%{$query}%");
         }
 
-        $products = $productsQuery->where('status', 0)->paginate(6);
+        $products = $productsQuery->where('status', 0)
+            ->where('stock', '>', 0)
+            ->paginate(6);
 
         return view('dashboard', compact('products', 'newProducts', 'categories', 'latestProducts', 'discountedProducts', 'selectedCategory'));
     }

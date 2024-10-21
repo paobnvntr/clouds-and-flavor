@@ -157,11 +157,6 @@ Route::middleware(['auth', 'verified', 'role:staff'])->group(function () {
 
 //Group User routes role = 0
 Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
-    // Route for User Dashboard
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
     // User/ProductController
     Route::controller(UserProductController::class)->group(function () {
         Route::get('/products', 'index')->name('user.products.index');

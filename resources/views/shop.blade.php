@@ -128,6 +128,60 @@
                     <div class="row">
                         <div class="product__discount__slider owl-carousel">
                             @foreach ($discountedProducts as $product)
+                                                        <div class="col-lg-4 col-md-6">
+                                                            <div class="product__discount__item">
+                                                                <div class="product__discount__item__pic set-bg"
+                                                                    data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
+                                                                    @php
+                                                                        $discountPercentage = round(
+                                                                            (($product->price - $product->sale_price) / $product->price) *
+                                                                            100,
+                                                                        );
+                                                                    @endphp
+                                                                    <div class="product__discount__percent">-{{ $discountPercentage }}%</div>
+                                                                    <ul class="product__item__pic__hover">
+                                                                        <li>
+                                                                            <form action="{{ route('user.cart.add-to-cart') }}" method="POST">
+                                                                                @csrf
+                                                                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                                                                <input type="hidden" name="price"
+                                                                                    value="{{ $product->sale_price }}">
+                                                                                <button type="submit" class="add-to-cart">
+                                                                                    <i class="fa fa-shopping-cart"></i>
+                                                                                </button>
+                                                                            </form>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                                <div class="product__discount__item__text">
+                                                                    <h5><a href="#">{{ $product->product_name }}</a></h5>
+                                                                    <div class="product__item__price">
+                                                                        ₱{{ number_format($product->sale_price, 2) }}
+                                                                        <span>₱{{ number_format($product->price, 2) }}</span>
+                                                                    </div>
+                                                                    <p><strong>Stock:<span
+                                                                                id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
+                                                                    </p>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product__filter">
+                    <div class="section-title">
+                        <h4>All
+                            {{ request('category_id') ? $categories->firstWhere('id', request('category_id'))->name : 'Products' }}
+                            {{ request('search') ? ' - Search Results for "' . request('search') . '"' : '' }}
+                        </h4>
+                    </div>
+
+                    <div class="row">
+                        @foreach ($products as $product)
+                            @if($product->on_sale == 1)
                                 <div class="col-lg-4 col-md-6">
                                     <div class="product__discount__item">
                                         <div class="product__discount__item__pic set-bg"
@@ -144,8 +198,7 @@
                                                     <form action="{{ route('user.cart.add-to-cart') }}" method="POST">
                                                         @csrf
                                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                                        <input type="hidden" name="price"
-                                                            value="{{ $product->sale_price }}">
+                                                        <input type="hidden" name="price" value="{{ $product->sale_price }}">
                                                         <button type="submit" class="add-to-cart">
                                                             <i class="fa fa-shopping-cart"></i>
                                                         </button>
@@ -166,47 +219,34 @@
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product__filter">
-                    <div class="section-title">
-                        <h4>All
-                            {{ request('category_id') ? $categories->firstWhere('id', request('category_id'))->name : 'Products' }}
-                            {{ request('search') ? ' - Search Results for "' . request('search') . '"' : '' }}
-                        </h4>
-                    </div>
-
-                    <div class="row">
-                        @foreach ($products as $product)
-                            <div class="col-lg-4 col-md-6">
-                                <div class="product__item">
-                                    <div class="product__item__pic set-bg"
-                                        data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
-                                        <ul class="product__item__pic__hover">
-                                            <li>
-                                                <form action="{{ route('user.cart.add-to-cart') }}" method="POST"
-                                                    id="add-to-cart-form-{{ $product->id }}">
-                                                    @csrf
-                                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                                    <input type="hidden" name="price" value="{{ $product->price }}">
-                                                    <button type="submit" class="add-to-cart"><i
-                                                            class="fa fa-shopping-cart"></i></button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="product__item__text">
-                                        <h6><a href="#">{{ $product->product_name }}</a></h6>
-                                        <h5>₱{{ number_format($product->price, 2) }}</h5>
-                                        <p><strong>Stock:<span
-                                                    id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
-                                        </p>
+                            @else
+                                <div class="col-lg-4 col-md-6">
+                                    <div class="product__item">
+                                        <div class="product__item__pic set-bg"
+                                            data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
+                                            <ul class="product__item__pic__hover">
+                                                <li>
+                                                    <form action="{{ route('user.cart.add-to-cart') }}" method="POST"
+                                                        id="add-to-cart-form-{{ $product->id }}">
+                                                        @csrf
+                                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                                        <input type="hidden" name="price" value="{{ $product->price }}">
+                                                        <button type="submit" class="add-to-cart"><i
+                                                                class="fa fa-shopping-cart"></i></button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="product__item__text">
+                                            <h6><a href="#">{{ $product->product_name }}</a></h6>
+                                            <h5>₱{{ number_format($product->price, 2) }}</h5>
+                                            <p><strong>Stock:<span
+                                                        id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                         @endforeach
                     </div>
 

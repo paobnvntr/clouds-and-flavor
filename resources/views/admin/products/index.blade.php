@@ -80,7 +80,7 @@
                                                 <!-- Check if there are associated add-ons -->
                                                 @foreach ($product->addOns as $addOn)
                                                     <div>
-                                                        {{ $addOn->name }} - ₱{{ number_format($addOn->price, 2, '.', ',') }}
+                                                        {{ $addOn->name }}
                                                     </div>
                                                 @endforeach
                                             @else
@@ -90,14 +90,14 @@
                                         <td class="text-center">{{ $product->created_at->format('m-d-Y') }}</td>
                                         <td class="text-center">
                                             <a href="{{ route('admin.products.edit', $product->id) }}"
-                                                class="btn btn-warning btn-sm">
+                                                class="btn btn-warning btn-sm mb-2">
                                                 Edit
                                             </a>
                                             <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST"
                                                 class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                <button type="submit" class="btn btn-danger btn-sm mb-2"
                                                     onclick="return confirm('Are you sure you want to delete this product?')">
                                                     Delete
                                                 </button>
