@@ -141,7 +141,7 @@
                                                                     <div class="product__discount__percent">-{{ $discountPercentage }}%</div>
                                                                     <ul class="product__item__pic__hover">
                                                                         <li>
-                                                                            <form action="{{ route('user.cart.add-to-cart') }}" method="POST">
+                                                                            <form action="{{ route('user.products.product-details', $product->id) }}" method="GET">
                                                                                 @csrf
                                                                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                                                                 <input type="hidden" name="price"
@@ -154,7 +154,7 @@
                                                                     </ul>
                                                                 </div>
                                                                 <div class="product__discount__item__text">
-                                                                    <h5><a href="#">{{ $product->product_name }}</a></h5>
+                                                                    <h5><a href="{{ route('user.products.product-details', $product->id) }}">{{ $product->product_name }}</a></h5>
                                                                     <div class="product__item__price">
                                                                         ₱{{ number_format($product->sale_price, 2) }}
                                                                         <span>₱{{ number_format($product->price, 2) }}</span>
@@ -195,7 +195,7 @@
                                             <div class="product__discount__percent">-{{ $discountPercentage }}%</div>
                                             <ul class="product__item__pic__hover">
                                                 <li>
-                                                    <form action="{{ route('user.cart.add-to-cart') }}" method="POST">
+                                                    <form action="{{ route('user.products.product-details', $product->id) }}" method="GET">
                                                         @csrf
                                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                                                         <input type="hidden" name="price" value="{{ $product->sale_price }}">
@@ -207,7 +207,7 @@
                                             </ul>
                                         </div>
                                         <div class="product__discount__item__text">
-                                            <h5><a href="#">{{ $product->product_name }}</a></h5>
+                                            <h5><a href="{{ route('user.products.product-details', $product->id) }}">{{ $product->product_name }}</a></h5>
                                             <div class="product__item__price">
                                                 ₱{{ number_format($product->sale_price, 2) }}
                                                 <span>₱{{ number_format($product->price, 2) }}</span>
@@ -226,7 +226,7 @@
                                             data-setbg="{{ asset('/' . ($product->image ?? 'unknown.jpg')) }}">
                                             <ul class="product__item__pic__hover">
                                                 <li>
-                                                    <form action="{{ route('user.cart.add-to-cart') }}" method="POST"
+                                                    <form action="{{ route('user.products.product-details', $product->id) }}" method="GET"
                                                         id="add-to-cart-form-{{ $product->id }}">
                                                         @csrf
                                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -238,7 +238,7 @@
                                             </ul>
                                         </div>
                                         <div class="product__item__text">
-                                            <h6><a href="#">{{ $product->product_name }}</a></h6>
+                                            <h6><a href="{{ route('user.products.product-details', $product->id) }}">{{ $product->product_name }}</a></h6>
                                             <h5>₱{{ number_format($product->price, 2) }}</h5>
                                             <p><strong>Stock:<span
                                                         id="stock-{{ $product->id }}">{{ $product->stock }}</span></strong>

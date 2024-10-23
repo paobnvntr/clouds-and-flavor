@@ -170,6 +170,8 @@
                                                         <input type="text" name="quantity" class="quantity"
                                                             data-product-id="{{ $cart->id }}"
                                                             value="{{ $cart->quantity }}" min="1">
+                                                        <!-- hidden input for stock -->
+                                                        <input type="hidden" class="stock" data-stock="{{ $cart->product->stock }}">
                                                         <button class="inc qtybtn" style="border: none;">+</button>
                                                     </div>
                                                 </div>
@@ -323,10 +325,12 @@
                 let newVal = $(this).hasClass('inc') ? currentVal + 1 : (currentVal > 1 ? currentVal - 1 :
                     1);
 
-                let stock = $(this).closest('tr').find('.stock').data(
-                'stock'); 
+                let stock = parseInt($input.siblings('.stock').data('stock'));
 
-                if (stock > 0) {
+                // show stock current val and new val
+                console.log(stock, currentVal, newVal);
+
+                if (stock > 0 && newVal <= stock) {
                     $input.val(newVal).trigger('change');
 
                     let price = $(this).closest('tr').find('.price').text();

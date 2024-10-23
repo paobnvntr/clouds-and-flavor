@@ -71,8 +71,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::post('admin/orders/complete', 'completeOrder')->name('admin.orders.complete');
         Route::post('admin/pos/complete', 'completePosOrder')->name('admin.orders.pos-complete');
 
-        Route::post('/orders/to-deliver/{id}', 'toDeliver')->name('admin.orders.to-deliver');
-        Route::post('/orders/delivered/{id}', 'delivered')->name('admin.orders.delivered');
+        Route::post('/admin-orders/to-deliver/{id}', 'toDeliver')->name('admin.orders.to-deliver');
+        Route::post('/admin-orders/delivered/{id}', 'delivered')->name('admin.orders.delivered');
 
         Route::post('/orders/ready-for-pickup/{id}', 'readyForPickup')->name('admin.orders.ready-for-pickup');
         Route::post('/orders/completed-pickup/{id}', 'completePickup')->name('admin.orders.completed');
